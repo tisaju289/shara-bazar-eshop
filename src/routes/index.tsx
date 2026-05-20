@@ -455,10 +455,105 @@ function Index() {
                   <span className="text-muted-foreground">মোট</span>
                   <span className="font-extrabold text-lg">৳{cartTotal}</span>
                 </div>
-                <button className="w-full h-12 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)]">চেকআউট করুন</button>
+                <button
+                  onClick={() => { setCartOpen(false); openCheckout(cart); }}
+                  className="w-full h-12 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)]"
+                >
+                  চেকআউট করুন
+                </button>
               </div>
             )}
           </aside>
+        </div>
+      )}
+
+      {/* Checkout modal */}
+      {checkoutOpen && (
+        <div className="fixed inset-0 z-[60] grid place-items-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => !placing && setCheckoutOpen(false)} />
+          <div className="relative bg-background rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            {orderDone ? (
+              <div className="p-8 text-center space-y-4">
+                <div className="mx-auto size-16 rounded-full grid place-items-center" style={{ background: "var(--gradient-hero)" }}>
+                  <CheckCircle2 className="size-9 text-white" />
+                </div>
+                <h3 className="text-2xl font-extrabold text-[var(--leaf-deep)]">ধন্যবাদ! 🎉</h3>
+                <p className="text-sm text-muted-foreground">আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
+                <button onClick={() => setCheckoutOpen(false)} className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold">বন্ধ করুন</button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <span className="font-bold text-lg">চেকআউট</span>
+                  <button onClick={() => !placing && setCheckoutOpen(false)}><X /></button>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="bg-secondary/50 rounded-2xl p-3 space-y-2">
+                    {Object.entries(checkoutItems).map(([id, q]) => {
+                      const p = products.find((x) => x.id === id);
+                      if (!p) return null;
+                      return (
+                        <div key={id} className="flex justify-between text-sm">
+                          <span className="truncate pr-2">{p.name_bn} × {q}</span>
+                          <span className="font-semibold whitespace-nowrap">৳{p.price * q}</span>
+                        </div>
+                      );
+                    })}
+                    <div className="flex justify-between pt-2 border-t border-border font-bold">
+                      <span>মোট</span>
+                      <span className="text-[var(--leaf-deep)]">৳{checkoutTotal}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold">নাম</label>
+                    <input
+                      value={orderForm.name}
+                      onChange={(e) => setOrderForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder="আপনার নাম"
+                      className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold">ফোন নম্বর</label>
+                    <input
+                      value={orderForm.phone}
+                      onChange={(e) => setOrderForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="01XXXXXXXXX"
+                      type="tel"
+                      className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold">ঠিকানা</label>
+                    <textarea
+                      value={orderForm.address}
+                      onChange={(e) => setOrderForm((f) => ({ ...f, address: e.target.value }))}
+                      placeholder="পূর্ণ ঠিকানা লিখুন"
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 bg-secondary/50 rounded-2xl p-3">
+                    <div className="size-5 rounded-full bg-primary grid place-items-center">
+                      <div className="size-2 rounded-full bg-primary-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold">ক্যাশ অন ডেলিভারি</div>
+                      <div className="text-[11px] text-muted-foreground">পণ্য পেয়ে টাকা পরিশোধ করুন</div>
+                    </div>
+                  </div>
+                  {orderError && <p className="text-sm text-[var(--chili)]">{orderError}</p>}
+                  <button
+                    onClick={placeOrder}
+                    disabled={placing || Object.keys(checkoutItems).length === 0}
+                    className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                  >
+                    {placing ? <><Loader2 className="size-4 animate-spin" /> অর্ডার হচ্ছে...</> : `অর্ডার নিশ্চিত করুন · ৳${checkoutTotal}`}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 
