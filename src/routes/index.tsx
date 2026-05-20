@@ -419,12 +419,12 @@ function Index() {
       {cartOpen && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50" onClick={() => setCartOpen(false)} />
-          <aside className="absolute right-0 top-0 bottom-0 w-full sm:w-96 bg-background flex flex-col shadow-2xl">
+          <aside className="absolute right-0 top-1 bottom-0 w-full sm:w-96 bg-background flex flex-col shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <span className="font-bold text-lg">আপনার কার্ট ({cartCount})</span>
               <button onClick={() => setCartOpen(false)}><X /></button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4 space-y-3">
               {cartCount === 0 && <p className="text-center text-muted-foreground mt-10 text-sm">আপনার কার্ট খালি 🛒</p>}
               {Object.entries(cart).map(([id, q]) => {
                 const p = products.find((x) => x.id === id);
@@ -450,7 +450,7 @@ function Index() {
               })}
             </div>
             {cartCount > 0 && (
-              <div className="p-4 border-t border-border space-y-3">
+              <div className="p-4 pb-20 md:pb-4 border-t border-border space-y-3 bg-background">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">মোট</span>
                   <span className="font-extrabold text-lg">৳{cartTotal}</span>
