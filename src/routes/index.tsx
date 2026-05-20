@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, Menu, X, Plus, Minus,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
+  Home, LayoutGrid, Percent, User,
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
