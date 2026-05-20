@@ -387,6 +387,10 @@ function Index() {
             <Home className="size-5" />
             <span className="text-[10px] font-medium">হোম</span>
           </button>
+          <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); const el = document.getElementById("mobile-search"); if (el) el.focus(); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+            <Search className="size-5" />
+            <span className="text-[10px] font-medium">সার্চ</span>
+          </button>
           <button onClick={() => { const el = document.getElementById("categories"); if (el) el.scrollIntoView({ behavior: "smooth" }); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
             <LayoutGrid className="size-5" />
             <span className="text-[10px] font-medium">ক্যাটাগরি</span>
@@ -394,13 +398,9 @@ function Index() {
           <button onClick={() => setCartOpen(true)} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px] relative">
             <ShoppingCart className="size-5" />
             {cartCount > 0 && (
-              <span className="absolute top-0 right-1 size-4 rounded-full bg-[var(--chili)] text-white text-[9px] grid place-items-center font-bold">{cartCount}</span>
+              <span className="absolute top-1 right-0.5 size-4 rounded-full bg-[var(--chili)] text-white text-[9px] grid place-items-center font-bold">{cartCount}</span>
             )}
             <span className="text-[10px] font-medium">কার্ট</span>
-          </button>
-          <button onClick={() => { const el = document.getElementById("offer"); if (el) el.scrollIntoView({ behavior: "smooth" }); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
-            <Percent className="size-5" />
-            <span className="text-[10px] font-medium">অফার</span>
           </button>
         </div>
       </nav>
