@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, X, Plus, Minus,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
-  Home, LayoutGrid,
+  Home, LayoutGrid, CheckCircle2,
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +56,12 @@ function Index() {
   const [activeCat, setActiveCat] = useState<string | "all">("all");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
+  const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "" });
+  const [placing, setPlacing] = useState(false);
+  const [orderDone, setOrderDone] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   const add = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
   const sub = (id: string) =>
@@ -64,6 +70,54 @@ function Index() {
       const { [id]: _, ...rest } = c;
       return n > 0 ? { ...c, [id]: n } : rest;
     });
+
+  const openCheckout = (items: Record<string, number>) => {
+    setCheckoutItems(items);
+    setOrderDone(false);
+    setOrderError(null);
+    setCheckoutOpen(true);
+  };
+
+  const checkoutTotal = useMemo(
+    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    [checkoutItems, products],
+  );
+
+  const placeOrder = async () => {
+    setOrderError(null);
+    if (!orderForm.name.trim() || !orderForm.phone.trim() || !orderForm.address.trim()) {
+      setOrderError("সব তথ্য পূরণ করুন");
+      return;
+    }
+    setPlacing(true);
+    const items = Object.entries(checkoutItems).map(([id, q]) => {
+      const p = products.find((x) => x.id === id);
+      return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
+    });
+    const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
+      .from("orders")
+      .insert({
+        customer_name: orderForm.name.trim(),
+        phone: orderForm.phone.trim(),
+        address: orderForm.address.trim(),
+        items,
+        total: checkoutTotal,
+        payment_method: "cod",
+      });
+    setPlacing(false);
+    if (error) {
+      setOrderError(error.message);
+      return;
+    }
+    // clear ordered items from main cart
+    setCart((c) => {
+      const next = { ...c };
+      for (const id of Object.keys(checkoutItems)) delete next[id];
+      return next;
+    });
+    setOrderForm({ name: "", phone: "", address: "" });
+    setOrderDone(true);
+  };
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotal = useMemo(
