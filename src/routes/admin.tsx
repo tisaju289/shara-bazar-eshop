@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { Leaf, LayoutDashboard, Package, Tags, LogOut, Loader2, Menu, X } from "lucide-react";
+import { Leaf, LayoutDashboard, Package, Tags, LogOut, Loader2, Menu, Globe } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/admin")({
@@ -97,10 +97,18 @@ function AdminLayout() {
         </div>
       )}
       <main className="flex-1 min-w-0">
-        <header className="md:hidden sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border px-4 h-14 flex items-center justify-between">
-          <button onClick={() => setOpen(true)}><Menu /></button>
-          <span className="font-bold">অ্যাডমিন</span>
-          <Link to="/" className="text-xs text-muted-foreground">সাইট</Link>
+        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden" onClick={() => setOpen(true)}><Menu /></button>
+            <span className="font-bold md:hidden">অ্যাডমিন</span>
+          </div>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-[var(--shadow-soft)] hover:opacity-90 transition"
+          >
+            <Globe className="size-4" />
+            সাইট দেখুন
+          </Link>
         </header>
         <div className="p-4 md:p-8">
           <Outlet />
