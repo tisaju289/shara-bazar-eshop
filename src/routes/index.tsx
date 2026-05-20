@@ -145,20 +145,6 @@ function Index() {
         </div>
       </div>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-background p-5 flex flex-col gap-4 shadow-xl">
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-lg">মেনু</span>
-              <button onClick={() => setMobileOpen(false)}><X /></button>
-            </div>
-            {["হোম", "দোকান", "ক্যাটাগরি", "অফার", "আমার অর্ডার", "সাহায্য"].map((m) => (
-              <a key={m} href="#" className="py-2 border-b border-border text-sm">{m}</a>
-            ))}
-          </aside>
-        </div>
-      )}
 
       {/* Hero */}
       <section className="relative overflow-hidden">
