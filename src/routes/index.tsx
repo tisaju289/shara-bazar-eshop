@@ -127,6 +127,8 @@ function Index() {
             <div className="relative">
               <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="খুঁজুন: ইলিশ, আম, মিনিকেট চাল..."
                 className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none transition placeholder:text-muted-foreground"
               />
