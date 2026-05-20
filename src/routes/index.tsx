@@ -258,9 +258,7 @@ function Index() {
 
           <div className="relative order-1 md:order-2">
             <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
-            <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border">
-              <img src={hero?.image_url || heroImg} alt="hero" className="w-full h-auto" />
-            </div>
+            <HeroSlider images={(hero?.images ?? []).filter(Boolean)} fallback={hero?.image_url || heroImg} />
           </div>
         </div>
       </section>
