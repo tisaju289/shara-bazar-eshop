@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Search, ShoppingCart, MapPin, Phone, Menu, X, Plus, Minus,
+  Search, ShoppingCart, MapPin, Phone, X, Plus, Minus,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
-  Home, LayoutGrid, Percent, User,
+  Home, LayoutGrid, Percent,
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
