@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { Leaf, LayoutDashboard, Package, Tags, LogOut, Loader2, Menu, Globe } from "lucide-react";
+import { Leaf, LayoutDashboard, Package, Tags, Settings, LogOut, Loader2, Menu, Globe } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/admin")({
@@ -50,6 +50,7 @@ function AdminLayout() {
     { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
     { to: "/admin/products", label: "পণ্য", icon: Package },
     { to: "/admin/categories", label: "ক্যাটাগরি", icon: Tags },
+    { to: "/admin/settings", label: "সাইট সেটিংস", icon: Settings },
   ];
 
   const SidebarBody = () => (
