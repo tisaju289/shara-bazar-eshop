@@ -54,6 +54,8 @@ function Index() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [cartOpen, setCartOpen] = useState(false);
   const [activeCat, setActiveCat] = useState<string | "all">("all");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const add = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
   const sub = (id: string) =>
@@ -69,7 +71,12 @@ function Index() {
     [cart, products],
   );
 
-  const filtered = activeCat === "all" ? products : products.filter((p) => p.category_id === activeCat);
+  const filtered = products.filter((p) => {
+    const matchesCat = activeCat === "all" || p.category_id === activeCat;
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q || p.name_bn.toLowerCase().includes(q);
+    return matchesCat && matchesSearch;
+  });
   const catCounts = useMemo(() => {
     const m: Record<string, number> = {};
     for (const p of products) if (p.category_id) m[p.category_id] = (m[p.category_id] ?? 0) + 1;
@@ -120,6 +127,8 @@ function Index() {
             <div className="relative">
               <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="খুঁজুন: ইলিশ, আম, মিনিকেট চাল..."
                 className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none transition placeholder:text-muted-foreground"
               />
@@ -136,13 +145,26 @@ function Index() {
         </div>
       </header>
 
-      {/* Mobile top search bar */}
-      <div className="md:hidden sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border px-4 py-3">
-        <div className="relative">
-          <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input id="mobile-search" placeholder="খুঁজুন তাজা পণ্য..." className="w-full h-11 pl-12 pr-4 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+      {/* Mobile search bar (toggleable) */}
+      {searchOpen && (
+        <div className="md:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
+          <div className="relative">
+            <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="খুঁজুন তাজা পণ্য..."
+              className="w-full h-11 pl-12 pr-10 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+
 
 
       {/* Hero */}
@@ -387,7 +409,7 @@ function Index() {
             <Home className="size-5" />
             <span className="text-[10px] font-medium">হোম</span>
           </button>
-          <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); const el = document.getElementById("mobile-search"); if (el) el.focus(); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+          <button onClick={() => { setSearchOpen((s) => !s); window.scrollTo({ top: 1, behavior: "smooth" }); }} className={`flex flex-col items-center gap-0.5 p-2 hover:text-primary transition min-w-[64px] ${searchOpen ? "text-primary" : "text-muted-foreground"}`}>
             <Search className="size-5" />
             <span className="text-[10px] font-medium">সার্চ</span>
           </button>
