@@ -224,9 +224,9 @@ function Index() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="space-y-6 order-2 md:order-1">
+          <div className="space-y-6 order-2 md:order-1 text-center md:text-left">
             {hero?.badge_bn && (
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border mx-auto md:mx-0">
                 <Leaf className="size-3.5" /> {hero.badge_bn}
               </span>
             )}
@@ -237,8 +237,8 @@ function Index() {
               </span>{" "}
               {hero?.title_suffix_bn}
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-lg">{hero?.subtitle_bn}</p>
-            <div className="flex flex-wrap gap-3">
+            <p className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto md:mx-0">{hero?.subtitle_bn}</p>
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
                 {hero?.cta_primary_bn} <ChevronRight className="size-4" />
               </a>
@@ -247,7 +247,7 @@ function Index() {
               </a>
             </div>
             {features.length > 0 && (
-              <div className="flex flex-wrap gap-6 pt-4 text-sm">
+              <div className="flex flex-wrap gap-6 pt-4 text-sm justify-center md:justify-start">
                 {features.map((f, i) => {
                   const Icon = ICONS[f.icon] ?? Leaf;
                   return <div key={i} className="flex items-center gap-2"><Icon className="size-5 text-primary" /> {f.text_bn}</div>;
@@ -268,8 +268,8 @@ function Index() {
       {/* Categories */}
       <section id="categories" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-6">
-            <div>
+          <div className="flex items-end justify-between mb-6 md:justify-start">
+            <div className="text-center md:text-left w-full md:w-auto">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
               <p className="text-muted-foreground text-sm mt-1">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
             </div>
@@ -295,11 +295,11 @@ function Index() {
           <div className="container mx-auto px-4">
             <div className="rounded-3xl p-6 md:p-10 relative overflow-hidden text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
               <div className="absolute -right-10 -top-10 size-48 rounded-full bg-white/10 blur-2xl" />
-              <div className="relative max-w-xl space-y-3">
+              <div className="relative max-w-xl space-y-3 text-center md:text-left mx-auto md:mx-0">
                 <span className="inline-block text-xs font-bold tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full">{offer.label_bn}</span>
                 <h3 className="text-2xl md:text-4xl font-extrabold leading-tight">{offer.title_bn}</h3>
                 <p className="text-primary-foreground/85 text-sm md:text-base">{offer.subtitle_bn} — <span className="font-bold tracking-wider">{offer.coupon_code}</span> · {offer.min_order_bn}</p>
-                <a href="#shop" className="inline-flex items-center gap-2 mt-2 h-11 px-6 rounded-full bg-white text-[var(--leaf-deep)] font-semibold">{offer.cta_bn} <ChevronRight className="size-4" /></a>
+                <a href="#shop" className="inline-flex items-center gap-2 mt-2 h-11 px-6 rounded-full bg-white text-[var(--leaf-deep)] font-semibold mx-auto md:mx-0">{offer.cta_bn} <ChevronRight className="size-4" /></a>
               </div>
             </div>
           </div>
@@ -309,8 +309,8 @@ function Index() {
       {/* Products */}
       <section id="shop" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-6">
-            <div>
+          <div className="flex items-end justify-between mb-6 md:justify-start">
+            <div className="text-center md:text-left w-full md:w-auto">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">আজকের তাজা পণ্য</h2>
               <p className="text-muted-foreground text-sm mt-1">সরাসরি কৃষক থেকে সংগ্রহ করা</p>
             </div>
@@ -385,9 +385,9 @@ function Index() {
 
       {/* Footer */}
       <footer className="bg-[var(--leaf-deep)] text-primary-foreground/90 pt-12 pb-20 md:pb-6 mt-8">
-        <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+        <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8 text-center md:text-left">
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-center md:justify-start">
               {brand?.logo_url ? (
                 <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white/10 p-1" />
               ) : (
@@ -405,9 +405,9 @@ function Index() {
           </div>
           <div>
             <h4 className="font-bold mb-3">যোগাযোগ</h4>
-            {footer?.phone && <p className="text-sm text-primary-foreground/75 flex items-center gap-2"><Phone className="size-4" /> {footer.phone}</p>}
+            {footer?.phone && <p className="text-sm text-primary-foreground/75 flex items-center gap-2 justify-center md:justify-start"><Phone className="size-4" /> {footer.phone}</p>}
             {footer?.email && <p className="text-sm text-primary-foreground/75 mt-2">✉ {footer.email}</p>}
-            {footer?.address_bn && <p className="text-sm text-primary-foreground/75 mt-2 flex items-center gap-2"><MapPin className="size-4" /> {footer.address_bn}</p>}
+            {footer?.address_bn && <p className="text-sm text-primary-foreground/75 mt-2 flex items-center gap-2 justify-center md:justify-start"><MapPin className="size-4" /> {footer.address_bn}</p>}
           </div>
         </div>
         <div className="container mx-auto px-4 mt-10 pt-6 border-t border-white/10 text-xs text-primary-foreground/60 text-center">
