@@ -407,7 +407,7 @@ function Index() {
             <Home className="size-5" />
             <span className="text-[10px] font-medium">হোম</span>
           </button>
-          <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); const el = document.getElementById("mobile-search"); if (el) el.focus(); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+          <button onClick={() => { setSearchOpen((s) => !s); window.scrollTo({ top: 1, behavior: "smooth" }); }} className={`flex flex-col items-center gap-0.5 p-2 hover:text-primary transition min-w-[64px] ${searchOpen ? "text-primary" : "text-muted-foreground"}`}>
             <Search className="size-5" />
             <span className="text-[10px] font-medium">সার্চ</span>
           </button>
