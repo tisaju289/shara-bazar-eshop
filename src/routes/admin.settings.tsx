@@ -5,6 +5,7 @@ import { useSiteSettings, type SiteSettings } from "@/hooks/useSiteSettings";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageInput } from "@/components/ImageInput";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "সাইট সেটিংস — অ্যাডমিন" }] }),
@@ -107,8 +108,11 @@ function BrandTab({ v, on }: { v: SiteSettings["brand"]; on: (v: SiteSettings["b
     <div className="grid md:grid-cols-2 gap-4">
       <Field label="সাইটের নাম (বাংলা)"><input className={inputCls} value={v.name_bn} onChange={(e) => on({ ...v, name_bn: e.target.value })} /></Field>
       <Field label="ট্যাগলাইন"><input className={inputCls} value={v.tagline_bn} onChange={(e) => on({ ...v, tagline_bn: e.target.value })} /></Field>
-      <Field label="লোগো URL" hint="খালি রাখলে ডিফল্ট আইকন দেখাবে"><input className={inputCls} value={v.logo_url} onChange={(e) => on({ ...v, logo_url: e.target.value })} placeholder="https://..." /></Field>
-      {v.logo_url && <div className="flex items-end"><img src={v.logo_url} alt="logo" className="h-14 rounded-xl border border-border bg-white p-2" /></div>}
+      <div className="md:col-span-2">
+        <Field label="লোগো" hint="URL দিন অথবা ছবি ড্র্যাগ/আপলোড করুন">
+          <ImageInput value={v.logo_url} onChange={(url) => on({ ...v, logo_url: url })} folder="brand" />
+        </Field>
+      </div>
     </div>
   );
 }
@@ -119,8 +123,12 @@ function SeoTab({ v, on }: { v: SiteSettings["seo"]; on: (v: SiteSettings["seo"]
       <Field label="মেটা ডেসক্রিপশন" hint="১৬০ অক্ষরের মধ্যে রাখুন"><textarea className={areaCls} value={v.description} onChange={(e) => on({ ...v, description: e.target.value })} /></Field>
       <Field label="কীওয়ার্ডস" hint="কমা দিয়ে আলাদা করুন"><input className={inputCls} value={v.keywords} onChange={(e) => on({ ...v, keywords: e.target.value })} /></Field>
       <div className="grid md:grid-cols-2 gap-4">
-        <Field label="OG ইমেজ URL" hint="সোশ্যাল মিডিয়ায় শেয়ার ইমেজ"><input className={inputCls} value={v.og_image} onChange={(e) => on({ ...v, og_image: e.target.value })} placeholder="https://..." /></Field>
-        <Field label="ফেভিকন URL"><input className={inputCls} value={v.favicon_url} onChange={(e) => on({ ...v, favicon_url: e.target.value })} placeholder="https://..." /></Field>
+        <Field label="OG ইমেজ" hint="সোশ্যাল মিডিয়ায় শেয়ার ইমেজ">
+          <ImageInput value={v.og_image} onChange={(url) => on({ ...v, og_image: url })} folder="seo" />
+        </Field>
+        <Field label="ফেভিকন">
+          <ImageInput value={v.favicon_url} onChange={(url) => on({ ...v, favicon_url: url })} folder="seo" />
+        </Field>
       </div>
     </div>
   );
@@ -153,7 +161,9 @@ function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["her
         <Field label="প্রাইমারি বাটন"><input className={inputCls} value={v.cta_primary_bn} onChange={(e) => on({ ...v, cta_primary_bn: e.target.value })} /></Field>
         <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={v.cta_secondary_bn} onChange={(e) => on({ ...v, cta_secondary_bn: e.target.value })} /></Field>
       </div>
-      <Field label="হিরো ইমেজ URL" hint="খালি রাখলে ডিফল্ট ইমেজ দেখাবে"><input className={inputCls} value={v.image_url} onChange={(e) => on({ ...v, image_url: e.target.value })} placeholder="https://..." /></Field>
+      <Field label="হিরো ইমেজ" hint="খালি রাখলে ডিফল্ট ইমেজ দেখাবে">
+        <ImageInput value={v.image_url} onChange={(url) => on({ ...v, image_url: url })} folder="hero" />
+      </Field>
     </div>
   );
 }
