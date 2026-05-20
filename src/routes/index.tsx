@@ -303,7 +303,7 @@ function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[var(--leaf-deep)] text-primary-foreground/90 pt-12 pb-6 mt-8">
+      <footer className="bg-[var(--leaf-deep)] text-primary-foreground/90 pt-12 pb-20 md:pb-6 mt-8">
         <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
