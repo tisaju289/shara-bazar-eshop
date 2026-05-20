@@ -7,6 +7,7 @@ export type Topbar = { location_bn: string; phone: string; enabled: boolean };
 export type Hero = {
   badge_bn: string; title_bn: string; title_highlight_bn: string; title_suffix_bn: string;
   subtitle_bn: string; cta_primary_bn: string; cta_secondary_bn: string; image_url: string;
+  images?: string[];
 };
 export type Offer = {
   enabled: boolean; label_bn: string; title_bn: string; subtitle_bn: string;
@@ -31,7 +32,7 @@ const DEFAULTS: SiteSettings = {
   topbar: { location_bn: "", phone: "", enabled: true },
   hero: {
     badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "",
-    subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_secondary_bn: "দেখুন", image_url: "",
+    subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_secondary_bn: "দেখুন", image_url: "", images: [],
   },
   offer: { enabled: false, label_bn: "", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "" },
   features: [],

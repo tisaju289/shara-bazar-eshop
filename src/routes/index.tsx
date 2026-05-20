@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Search, ShoppingCart, MapPin, Phone, X, Plus, Minus,
+  Search, ShoppingCart, MapPin, Phone, X, Plus, Minus, ChevronLeft,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
   Home, LayoutGrid, CheckCircle2,
 } from "lucide-react";
@@ -13,6 +13,45 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 export const Route = createFileRoute("/")({
   component: Index,
 });
+
+function HeroSlider({ images, fallback }: { images: string[]; fallback: string }) {
+  const slides = images.length > 0 ? images : [fallback];
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % slides.length), 4000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+  const go = (n: number) => setIdx((n + slides.length) % slides.length);
+  return (
+    <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white">
+      <div className="relative aspect-[4/3] md:aspect-[5/4]">
+        {slides.map((src, i) => (
+          <img key={i} src={src} alt={`hero-${i}`}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
+        ))}
+      </div>
+      {slides.length > 1 && (
+        <>
+          <button type="button" onClick={() => go(idx - 1)} aria-label="prev"
+            className="absolute left-3 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white/80 hover:bg-white grid place-items-center shadow">
+            <ChevronLeft className="size-4" />
+          </button>
+          <button type="button" onClick={() => go(idx + 1)} aria-label="next"
+            className="absolute right-3 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white/80 hover:bg-white grid place-items-center shadow">
+            <ChevronRight className="size-4" />
+          </button>
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {slides.map((_, i) => (
+              <button key={i} onClick={() => go(i)} aria-label={`slide ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all ${i === idx ? "w-6 bg-white" : "w-1.5 bg-white/60"}`} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   truck: Truck, shield: ShieldCheck, clock: Clock, leaf: Leaf, star: Star,
@@ -258,9 +297,7 @@ function Index() {
 
           <div className="relative order-1 md:order-2">
             <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
-            <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border">
-              <img src={hero?.image_url || heroImg} alt="hero" className="w-full h-auto" />
-            </div>
+            <HeroSlider images={(hero?.images ?? []).filter(Boolean)} fallback={hero?.image_url || heroImg} />
           </div>
         </div>
       </section>
