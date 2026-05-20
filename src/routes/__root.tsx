@@ -9,6 +9,9 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { Toaster } from "@/components/ui/sonner";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useEffect } from "react";
 
 function NotFoundComponent() {
   return (
@@ -113,7 +116,34 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <DynamicHead />
       <Outlet />
+      <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
+}
+
+function DynamicHead() {
+  const { data } = useSiteSettings();
+  useEffect(() => {
+    if (!data) return;
+    if (data.seo.title) document.title = data.seo.title;
+    const setMeta = (sel: string, attr: string, name: string, content: string) => {
+      if (!content) return;
+      let el = document.head.querySelector(sel) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+      el.content = content;
+    };
+    setMeta('meta[name="description"]', "name", "description", data.seo.description);
+    setMeta('meta[name="keywords"]', "name", "keywords", data.seo.keywords);
+    setMeta('meta[property="og:title"]', "property", "og:title", data.seo.title);
+    setMeta('meta[property="og:description"]', "property", "og:description", data.seo.description);
+    if (data.seo.og_image) setMeta('meta[property="og:image"]', "property", "og:image", data.seo.og_image);
+    if (data.seo.favicon_url) {
+      let link = document.head.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+      if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+      link.href = data.seo.favicon_url;
+    }
+  }, [data]);
+  return null;
 }
