@@ -2,19 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { ImageInput } from "@/components/ImageInput";
 
 export const Route = createFileRoute("/admin/categories")({
   component: AdminCategories,
 });
 
-type Cat = { id: string; name_bn: string; slug: string; emoji: string; sort_order: number };
+type Cat = { id: string; name_bn: string; slug: string; emoji: string; sort_order: number; image_url: string | null };
 
 function AdminCategories() {
   const [items, setItems] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Cat | null>(null);
-  const [form, setForm] = useState({ name_bn: "", slug: "", emoji: "🛒", sort_order: 0 });
+  const [form, setForm] = useState({ name_bn: "", slug: "", emoji: "🛒", sort_order: 0, image_url: "" });
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -25,15 +26,16 @@ function AdminCategories() {
   };
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm({ name_bn: "", slug: "", emoji: "🛒", sort_order: items.length + 1 }); setOpen(true); };
-  const openEdit = (c: Cat) => { setEditing(c); setForm({ name_bn: c.name_bn, slug: c.slug, emoji: c.emoji, sort_order: c.sort_order }); setOpen(true); };
+  const openNew = () => { setEditing(null); setForm({ name_bn: "", slug: "", emoji: "🛒", sort_order: items.length + 1, image_url: "" }); setOpen(true); };
+  const openEdit = (c: Cat) => { setEditing(c); setForm({ name_bn: c.name_bn, slug: c.slug, emoji: c.emoji, sort_order: c.sort_order, image_url: c.image_url ?? "" }); setOpen(true); };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const payload = { ...form, image_url: form.image_url || null };
     const { error } = editing
-      ? await supabase.from("categories").update(form).eq("id", editing.id)
-      : await supabase.from("categories").insert(form);
+      ? await supabase.from("categories").update(payload).eq("id", editing.id)
+      : await supabase.from("categories").insert(payload);
     setSaving(false);
     if (error) return alert(error.message);
     setOpen(false); await load();
@@ -64,7 +66,9 @@ function AdminCategories() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((c) => (
             <div key={c.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:shadow-[var(--shadow-soft)] transition">
-              <div className="size-14 rounded-2xl grid place-items-center text-3xl" style={{ background: "var(--gradient-warm)" }}>{c.emoji}</div>
+              <div className="size-14 rounded-2xl grid place-items-center text-3xl overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                {c.image_url ? <img src={c.image_url} alt="" className="size-full object-cover" /> : c.emoji}
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold">{c.name_bn}</div>
                 <div className="text-xs text-muted-foreground truncate">/{c.slug} · order {c.sort_order}</div>
@@ -101,6 +105,10 @@ function AdminCategories() {
               <label className="block"><span className="text-sm font-medium block mb-1">Sort Order</span>
                 <input required type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
               </label>
+              <div>
+                <span className="text-sm font-medium block mb-1">ক্যাটাগরি ছবি (ঐচ্ছিক)</span>
+                <ImageInput value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} folder="categories" />
+              </div>
             </div>
             <div className="p-5 border-t border-border flex gap-2">
               <button type="button" onClick={() => setOpen(false)} className="flex-1 h-11 rounded-xl bg-secondary font-semibold">বাতিল</button>
