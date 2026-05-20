@@ -52,7 +52,6 @@ function Index() {
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [cart, setCart] = useState<Record<string, number>>({});
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [activeCat, setActiveCat] = useState<string | "all">("all");
 
