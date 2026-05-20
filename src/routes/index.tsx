@@ -143,13 +143,26 @@ function Index() {
         </div>
       </header>
 
-      {/* Mobile top search bar */}
-      <div className="md:hidden sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border px-4 py-3">
-        <div className="relative">
-          <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input id="mobile-search" placeholder="খুঁজুন তাজা পণ্য..." className="w-full h-11 pl-12 pr-4 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+      {/* Mobile search bar (toggleable) */}
+      {searchOpen && (
+        <div className="md:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
+          <div className="relative">
+            <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="খুঁজুন তাজা পণ্য..."
+              className="w-full h-11 pl-12 pr-10 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+
 
 
       {/* Hero */}
