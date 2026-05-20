@@ -351,22 +351,28 @@ function Index() {
                     <div className="p-3 md:p-4 space-y-2">
                       <div className="text-[11px] text-muted-foreground">{catName} · {p.unit}</div>
                       <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-                      <div className="flex items-end justify-between pt-1">
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
-                          {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
-                        </div>
+                      <div className="flex items-baseline gap-1.5 pt-1">
+                        <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
+                        {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-1">
                         {qty === 0 ? (
-                          <button onClick={() => add(p.id)} className="size-9 rounded-xl bg-primary text-primary-foreground grid place-items-center hover:opacity-90 shadow-[var(--shadow-soft)]" aria-label="Add">
-                            <Plus className="size-4" />
+                          <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
+                            <Plus className="size-3.5" /> কার্ট
                           </button>
                         ) : (
-                          <div className="flex items-center gap-1 bg-primary rounded-xl text-primary-foreground">
-                            <button onClick={() => sub(p.id)} className="size-9 grid place-items-center"><Minus className="size-4" /></button>
-                            <span className="text-sm font-bold w-5 text-center">{qty}</span>
-                            <button onClick={() => add(p.id)} className="size-9 grid place-items-center"><Plus className="size-4" /></button>
+                          <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
+                            <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
+                            <span className="text-xs font-bold">{qty}</span>
+                            <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
                           </div>
                         )}
+                        <button
+                          onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
+                          className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
+                        >
+                          এখনই কিনুন
+                        </button>
                       </div>
                     </div>
                   </article>
