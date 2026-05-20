@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon } from "lucide-react";
+import { ImageInput } from "@/components/ImageInput";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProducts,
@@ -185,7 +186,9 @@ function AdminProducts() {
                 <Field label="একক"><input required value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} className="input" /></Field>
                 <Field label="স্টক"><input required type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} className="input" /></Field>
               </div>
-              <Field label="ছবি URL"><input type="url" value={form.image_url ?? ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="input" placeholder="https://..." /></Field>
+              <Field label="পণ্যের ছবি">
+                <ImageInput value={form.image_url ?? ""} onChange={(url) => setForm({ ...form, image_url: url })} folder="products" />
+              </Field>
               <Field label="ট্যাগ (যেমন: সিজনাল, নতুন)"><input value={form.tag ?? ""} onChange={(e) => setForm({ ...form, tag: e.target.value })} className="input" /></Field>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="size-4 accent-[color:var(--primary)]" />
