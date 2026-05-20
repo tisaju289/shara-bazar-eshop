@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Search, ShoppingCart, MapPin, Phone, Menu, X, Plus, Minus,
+  Search, ShoppingCart, MapPin, Phone, X, Plus, Minus,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
+  Home, LayoutGrid, Percent,
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +52,6 @@ function Index() {
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [cart, setCart] = useState<Record<string, number>>({});
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [activeCat, setActiveCat] = useState<string | "all">("all");
 
@@ -99,12 +99,9 @@ function Index() {
         </div>
       )}
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
+      {/* Desktop Header */}
+      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
-          <button className="md:hidden p-2 -ml-2" onClick={() => setMobileOpen(true)} aria-label="Menu">
-            <Menu className="size-6" />
-          </button>
           <a href="/" className="flex items-center gap-2 shrink-0">
             {brand?.logo_url ? (
               <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
@@ -119,7 +116,7 @@ function Index() {
             </div>
           </a>
 
-          <div className="flex-1 max-w-2xl mx-auto hidden md:block">
+          <div className="flex-1 max-w-2xl mx-auto">
             <div className="relative">
               <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -137,29 +134,16 @@ function Index() {
             )}
           </button>
         </div>
-
-        <div className="md:hidden px-4 pb-3">
-          <div className="relative">
-            <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input placeholder="খুঁজুন তাজা পণ্য..." className="w-full h-11 pl-12 pr-4 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary" />
-          </div>
-        </div>
       </header>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-background p-5 flex flex-col gap-4 shadow-xl">
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-lg">মেনু</span>
-              <button onClick={() => setMobileOpen(false)}><X /></button>
-            </div>
-            {["হোম", "দোকান", "ক্যাটাগরি", "অফার", "আমার অর্ডার", "সাহায্য"].map((m) => (
-              <a key={m} href="#" className="py-2 border-b border-border text-sm">{m}</a>
-            ))}
-          </aside>
+      {/* Mobile top search bar */}
+      <div className="md:hidden sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border px-4 py-3">
+        <div className="relative">
+          <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input placeholder="খুঁজুন তাজা পণ্য..." className="w-full h-11 pl-12 pr-4 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary" />
         </div>
-      )}
+      </div>
+
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -318,7 +302,7 @@ function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[var(--leaf-deep)] text-primary-foreground/90 pt-12 pb-6 mt-8">
+      <footer className="bg-[var(--leaf-deep)] text-primary-foreground/90 pt-12 pb-20 md:pb-6 mt-8">
         <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -395,6 +379,31 @@ function Index() {
           </aside>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border pb-1">
+        <div className="flex items-center justify-around py-2">
+          <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setActiveCat("all"); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+            <Home className="size-5" />
+            <span className="text-[10px] font-medium">হোম</span>
+          </button>
+          <button onClick={() => { const el = document.getElementById("categories"); if (el) el.scrollIntoView({ behavior: "smooth" }); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+            <LayoutGrid className="size-5" />
+            <span className="text-[10px] font-medium">ক্যাটাগরি</span>
+          </button>
+          <button onClick={() => setCartOpen(true)} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px] relative">
+            <ShoppingCart className="size-5" />
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-1 size-4 rounded-full bg-[var(--chili)] text-white text-[9px] grid place-items-center font-bold">{cartCount}</span>
+            )}
+            <span className="text-[10px] font-medium">কার্ট</span>
+          </button>
+          <button onClick={() => { const el = document.getElementById("offer"); if (el) el.scrollIntoView({ behavior: "smooth" }); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+            <Percent className="size-5" />
+            <span className="text-[10px] font-medium">অফার</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
