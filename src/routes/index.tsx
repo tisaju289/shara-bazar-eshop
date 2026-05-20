@@ -100,12 +100,9 @@ function Index() {
         </div>
       )}
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
+      {/* Desktop Header */}
+      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
-          <button className="md:hidden p-2 -ml-2" onClick={() => setMobileOpen(true)} aria-label="Menu">
-            <Menu className="size-6" />
-          </button>
           <a href="/" className="flex items-center gap-2 shrink-0">
             {brand?.logo_url ? (
               <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
@@ -120,7 +117,7 @@ function Index() {
             </div>
           </a>
 
-          <div className="flex-1 max-w-2xl mx-auto hidden md:block">
+          <div className="flex-1 max-w-2xl mx-auto">
             <div className="relative">
               <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -138,14 +135,15 @@ function Index() {
             )}
           </button>
         </div>
-
-        <div className="md:hidden px-4 pb-3">
-          <div className="relative">
-            <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input placeholder="খুঁজুন তাজা পণ্য..." className="w-full h-11 pl-12 pr-4 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary" />
-          </div>
-        </div>
       </header>
+
+      {/* Mobile top search bar */}
+      <div className="md:hidden sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border px-4 py-3">
+        <div className="relative">
+          <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input placeholder="খুঁজুন তাজা পণ্য..." className="w-full h-11 pl-12 pr-4 rounded-full bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+      </div>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
