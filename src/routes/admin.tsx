@@ -96,7 +96,7 @@ function AdminLayout() {
           </aside>
         </div>
       )}
-      <main className="flex-1 min-w-1">
+      <main className="flex-1 min-w-0">
         <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button className="md:hidden" onClick={() => setOpen(true)}><Menu /></button>
