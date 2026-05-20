@@ -148,6 +148,8 @@ function TopbarTab({ v, on }: { v: SiteSettings["topbar"]; on: (v: SiteSettings[
   );
 }
 function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["hero"]) => void }) {
+  const images = v.images ?? [];
+  const setImages = (next: string[]) => on({ ...v, images: next });
   return (
     <div className="space-y-4">
       <Field label="ব্যাজ টেক্সট"><input className={inputCls} value={v.badge_bn} onChange={(e) => on({ ...v, badge_bn: e.target.value })} /></Field>
@@ -161,7 +163,36 @@ function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["her
         <Field label="প্রাইমারি বাটন"><input className={inputCls} value={v.cta_primary_bn} onChange={(e) => on({ ...v, cta_primary_bn: e.target.value })} /></Field>
         <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={v.cta_secondary_bn} onChange={(e) => on({ ...v, cta_secondary_bn: e.target.value })} /></Field>
       </div>
-      <Field label="হিরো ইমেজ" hint="খালি রাখলে ডিফল্ট ইমেজ দেখাবে">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">হিরো স্লাইডার ইমেজ</span>
+          <button type="button" onClick={() => setImages([...images, ""])}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-secondary text-xs font-semibold">
+            <Plus className="size-3.5" /> ইমেজ যোগ
+          </button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">একাধিক ইমেজ যোগ করলে হোম পেজে স্লাইডার হিসেবে দেখাবে। খালি থাকলে নিচের ডিফল্ট ইমেজ দেখাবে।</p>
+        {images.length === 0 && <p className="text-xs text-muted-foreground italic">কোনো স্লাইড নেই — "ইমেজ যোগ" চাপুন</p>}
+        <div className="grid md:grid-cols-2 gap-3">
+          {images.map((url, i) => (
+            <div key={i} className="rounded-2xl border border-border p-3 space-y-2 bg-secondary/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold">স্লাইড {i + 1}</span>
+                <div className="flex gap-1">
+                  <button type="button" disabled={i === 0} onClick={() => { const n = [...images]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; setImages(n); }}
+                    className="h-7 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
+                  <button type="button" disabled={i === images.length - 1} onClick={() => { const n = [...images]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; setImages(n); }}
+                    className="h-7 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
+                  <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))}
+                    className="size-7 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3.5" /></button>
+                </div>
+              </div>
+              <ImageInput value={url} onChange={(u) => { const n = [...images]; n[i] = u; setImages(n); }} folder="hero" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <Field label="ডিফল্ট হিরো ইমেজ (ফ্যালব্যাক)" hint="যখন স্লাইডারে কোনো ইমেজ থাকবে না, তখন এটি দেখাবে">
         <ImageInput value={v.image_url} onChange={(url) => on({ ...v, image_url: url })} folder="hero" />
       </Field>
     </div>
