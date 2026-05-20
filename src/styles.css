@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Baloo+Da+2:wght@500;600;700;800&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -63,25 +64,38 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 1rem;
+  --background: oklch(0.985 0.012 95);
+  --foreground: oklch(0.22 0.04 150);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.22 0.04 150);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --popover-foreground: oklch(0.22 0.04 150);
+  --primary: oklch(0.55 0.16 145);
+  --primary-foreground: oklch(0.985 0.01 100);
+  --primary-glow: oklch(0.72 0.18 140);
+  --secondary: oklch(0.95 0.04 90);
+  --secondary-foreground: oklch(0.28 0.06 150);
+  --muted: oklch(0.955 0.02 95);
+  --muted-foreground: oklch(0.5 0.03 130);
+  --accent: oklch(0.72 0.18 55);
+  --accent-foreground: oklch(0.2 0.05 50);
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.9 0.02 90);
+  --input: oklch(0.92 0.02 90);
+  --ring: oklch(0.55 0.16 145);
+  --leaf: oklch(0.55 0.16 145);
+  --leaf-deep: oklch(0.38 0.12 150);
+  --mango: oklch(0.78 0.18 75);
+  --chili: oklch(0.62 0.22 30);
+  --cream: oklch(0.97 0.03 85);
+  --gradient-hero: linear-gradient(135deg, oklch(0.55 0.16 145) 0%, oklch(0.72 0.18 140) 60%, oklch(0.78 0.18 75) 100%);
+  --gradient-warm: linear-gradient(180deg, oklch(0.97 0.03 85) 0%, oklch(0.93 0.05 80) 100%);
+  --shadow-soft: 0 8px 24px -8px oklch(0.38 0.12 150 / 0.18);
+  --shadow-pop: 0 20px 60px -20px oklch(0.38 0.12 150 / 0.35);
+  --font-bn: "Hind Siliguri", system-ui, sans-serif;
+  --font-display: "Baloo Da 2", "Hind Siliguri", system-ui, sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +154,12 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-bn);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }
