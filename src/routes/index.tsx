@@ -298,19 +298,14 @@ function Index() {
       {/* Categories */}
       <section id="categories" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center mb-6 gap-3">
-            <div className="text-center">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
-              <p className="text-muted-foreground text-sm mt-1">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
-            </div>
-            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
-              সব দেখুন <ChevronRight className="size-4" />
-            </Link>
+          <div className="flex flex-col items-center mb-6 gap-2 text-center">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
+            <p className="text-muted-foreground text-sm">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
           </div>
           <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-            {categories.slice(0, 8).map((c) => (
+            {categories.slice(0, 8).map((c, i) => (
               <Link key={c.id} to="/products"
-                className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-[calc(25%-0.75rem)] md:w-[calc(12.5%-0.875rem)] min-w-[80px]">
+                className={`group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-[calc(25%-0.75rem)] md:w-[calc(12.5%-0.875rem)] min-w-[80px] ${i >= 4 ? "hidden md:flex" : ""}`}>
                 <div className="size-12 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
                   {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
                 </div>
@@ -318,6 +313,11 @@ function Index() {
                 <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
               </Link>
             ))}
+          </div>
+          <div className="flex justify-center mt-6">
+            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+              সব দেখুন <ChevronRight className="size-4" />
+            </Link>
           </div>
         </div>
       </section>
