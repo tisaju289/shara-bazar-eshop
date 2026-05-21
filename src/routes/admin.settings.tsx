@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -20,6 +20,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "topbar", label: "টপ বার" },
   { key: "hero", label: "হিরো সেকশন" },
   { key: "sections", label: "সেকশন হেডিং" },
+  { key: "home_sections", label: "হোম সেকশন" },
   { key: "offer", label: "অফার ব্যানার" },
   { key: "features", label: "ফিচার" },
   { key: "footer", label: "ফুটার" },
@@ -77,6 +78,7 @@ function SettingsPage() {
         {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
         {tab === "hero" && <HeroTab v={draft.hero} on={(v) => update("hero", v)} />}
         {tab === "sections" && <SectionsTab v={draft.sections} on={(v) => update("sections", v)} />}
+        {tab === "home_sections" && <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />}
         {tab === "offer" && <OfferTab v={draft.offer} on={(v) => update("offer", v)} />}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
