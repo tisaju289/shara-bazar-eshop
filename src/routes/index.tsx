@@ -9,6 +9,7 @@ import {
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const Route = createFileRoute("/")({
   component: Index,
