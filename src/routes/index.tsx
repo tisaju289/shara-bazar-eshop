@@ -233,6 +233,11 @@ function Index() {
         </div>
       </header>
 
+      {/* Mobile site header (logo + search) */}
+      <div className="md:hidden">
+        <SiteHeader />
+      </div>
+
       {/* Mobile search bar (toggleable) */}
       {searchOpen && (
         <div className="md:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
