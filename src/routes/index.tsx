@@ -298,12 +298,12 @@ function Index() {
       {/* Categories */}
       <section id="categories" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-6 gap-3">
-            <div className="text-center ">
+          <div className="flex flex-col items-center mb-6 gap-3">
+            <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
               <p className="text-muted-foreground text-sm mt-1">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
             </div>
-            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 shrink-0">
+            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
               সব দেখুন <ChevronRight className="size-4" />
             </Link>
           </div>
