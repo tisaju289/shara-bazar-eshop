@@ -12,13 +12,14 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "offer" | "features" | "footer";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "topbar", label: "টপ বার" },
   { key: "hero", label: "হিরো সেকশন" },
+  { key: "sections", label: "সেকশন হেডিং" },
   { key: "offer", label: "অফার ব্যানার" },
   { key: "features", label: "ফিচার" },
   { key: "footer", label: "ফুটার" },
@@ -73,6 +74,7 @@ function SettingsPage() {
         {tab === "seo" && <SeoTab v={draft.seo} on={(v) => update("seo", v)} />}
         {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
         {tab === "hero" && <HeroTab v={draft.hero} on={(v) => update("hero", v)} />}
+        {tab === "sections" && <SectionsTab v={draft.sections} on={(v) => update("sections", v)} />}
         {tab === "offer" && <OfferTab v={draft.offer} on={(v) => update("offer", v)} />}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
@@ -211,6 +213,29 @@ function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["her
   );
 }
 function OfferTab({ v, on }: { v: SiteSettings["offer"]; on: (v: SiteSettings["offer"]) => void }) {
+  return _OfferTabImpl(v, on);
+}
+function SectionsTab({ v, on }: { v: SiteSettings["sections"]; on: (v: SiteSettings["sections"]) => void }) {
+  return (
+    <div className="space-y-5">
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ক্যাটাগরি সেকশন</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="টাইটেল"><input className={inputCls} value={v.categories_title_bn} onChange={(e) => on({ ...v, categories_title_bn: e.target.value })} /></Field>
+          <Field label="সাবটাইটেল"><input className={inputCls} value={v.categories_subtitle_bn} onChange={(e) => on({ ...v, categories_subtitle_bn: e.target.value })} /></Field>
+        </div>
+      </div>
+      <div className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">পণ্য সেকশন</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="টাইটেল"><input className={inputCls} value={v.products_title_bn} onChange={(e) => on({ ...v, products_title_bn: e.target.value })} /></Field>
+          <Field label="সাবটাইটেল"><input className={inputCls} value={v.products_subtitle_bn} onChange={(e) => on({ ...v, products_subtitle_bn: e.target.value })} /></Field>
+        </div>
+      </div>
+    </div>
+  );
+}
+function _OfferTabImpl(v: SiteSettings["offer"], on: (v: SiteSettings["offer"]) => void) {
   return (
     <div className="space-y-4">
       <label className="flex items-center gap-3 cursor-pointer">
