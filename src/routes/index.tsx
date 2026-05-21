@@ -384,10 +384,10 @@ function Index() {
                                 <Heart className="size-4" />
                               </button>
                             </div>
-                            <div className="p-3 md:p-4 space-y-2">
+                            <div className="p-3 md:p-4 space-y-2 text-center">
                               <div className="text-[11px] text-muted-foreground">{c.name_bn} · {p.unit}</div>
                               <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-                              <div className="flex items-baseline gap-1.5 pt-1">
+                              <div className="flex items-baseline justify-center gap-1.5 pt-1">
                                 <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
                                 {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
                               </div>
