@@ -5,6 +5,7 @@ import { Loader2, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { trackEvent } from "@/lib/tracking";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -58,6 +59,13 @@ function ProductsPage() {
   // Sync when URL ?cat= changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setActiveCat(cat ?? "all"); }, [cat]);
+
+  // Fire Search event when there is a query string
+  useEffect(() => {
+    if (q && q.trim()) {
+      trackEvent("Search", { search_string: q.trim() });
+    }
+  }, [q]);
 
   const filtered = products.filter((p) => {
     const catOk = activeCat === "all" || p.category_id === activeCat;
