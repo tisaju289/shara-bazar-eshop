@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search, ShoppingCart, MapPin, Phone, Leaf } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useEffect, useState } from "react";
 
 /**
  * Shared site header for non-home pages.
@@ -11,6 +12,14 @@ export function SiteHeader() {
   const { data: settings } = useSiteSettings();
   const brand = settings?.brand;
   const topbar = settings?.topbar;
+  const navigate = useNavigate();
+  const search = useRouterState({ select: (s) => s.location.search as { q?: string } });
+  const [q, setQ] = useState(search?.q ?? "");
+  useEffect(() => { setQ(search?.q ?? ""); }, [search?.q]);
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate({ to: "/products", search: { q: q.trim() || undefined } as any });
+  };
 
   return (
     <>
@@ -45,14 +54,19 @@ export function SiteHeader() {
             </div>
           </Link>
 
-          <Link to="/products" className="flex-1 max-w-2xl mx-auto">
+          <form onSubmit={submit} className="flex-1 max-w-2xl mx-auto">
             <div className="relative">
-              <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <div className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent flex items-center text-muted-foreground text-sm">
-                খুঁজুন: ইলিশ, আম, মিনিকেট চাল...
-              </div>
+              <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground hover:text-primary">
+                <Search className="size-5" />
+              </button>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="খুঁজুন: ইলিশ, আম, মিনিকেট চাল..."
+                className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none text-sm"
+              />
             </div>
-          </Link>
+          </form>
 
           <Link to="/" className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
             <ShoppingCart className="size-5" />
