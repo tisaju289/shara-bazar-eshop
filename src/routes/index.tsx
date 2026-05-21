@@ -309,14 +309,14 @@ function Index() {
           </div>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
             {categories.slice(0, 8).map((c) => (
-              <button key={c.id} onClick={() => setActiveCat(c.id)}
-                className={`group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border transition ${activeCat === c.id ? "border-primary shadow-[var(--shadow-soft)]" : "border-border hover:border-primary"}`}>
+              <Link key={c.id} to="/products"
+                className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition">
                 <div className="size-12 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
                   {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
                 </div>
                 <div className="text-[11px] md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
                 <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
