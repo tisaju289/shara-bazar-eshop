@@ -346,79 +346,93 @@ function Index() {
         </section>
       )}
 
-      {/* Products */}
+      {/* Products grouped by category */}
       <section id="shop" className="py-10 md:py-14">
-        <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-6 md:justify-start">
-            <div className="text-center md:text-left w-full md:w-auto">
+        <div className="container mx-auto px-4 space-y-10">
+          <div className="flex items-end justify-between mb-2">
+            <div className="text-center md:text-left">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">আজকের তাজা পণ্য</h2>
               <p className="text-muted-foreground text-sm mt-1">সরাসরি কৃষক থেকে সংগ্রহ করা</p>
-            </div>
-            <div className="hidden md:flex gap-2 flex-wrap">
-              <button onClick={() => setActiveCat("all")} className={`px-4 py-2 rounded-full text-sm font-medium border transition ${activeCat === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary"}`}>সব</button>
-              {categories.map((c) => (
-                <button key={c.id} onClick={() => setActiveCat(c.id)} className={`px-4 py-2 rounded-full text-sm font-medium border transition ${activeCat === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary"}`}>
-                  {c.name_bn}
-                </button>
-              ))}
             </div>
           </div>
 
           {prodLoading ? (
             <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
-          ) : filtered.length === 0 ? (
+          ) : products.length === 0 ? (
             <p className="text-center text-muted-foreground py-20">এখনো কোনো পণ্য নেই। অ্যাডমিন প্যানেল থেকে পণ্য যোগ করুন।</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-              {filtered.map((p) => {
-                const qty = cart[p.id] ?? 0;
-                const catName = categories.find((c) => c.id === p.category_id)?.name_bn ?? "";
+            <>
+              {categories.map((c) => {
+                const catProducts = products.filter((p) => p.category_id === c.id).slice(0, 2);
+                if (catProducts.length === 0) return null;
                 return (
-                  <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
-                    <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                      {p.image_url ? (
-                        <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
-                      ) : (
-                        <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
-                      )}
-                      {p.tag && (
-                        <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
-                      )}
-                      <button className="absolute top-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
-                        <Heart className="size-4" />
-                      </button>
+                  <div key={c.id}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg md:text-xl font-bold text-[var(--leaf-deep)]">{c.name_bn}</h3>
+                      <Link to="/products" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                        সব দেখুন <ChevronRight className="size-4" />
+                      </Link>
                     </div>
-                    <div className="p-3 md:p-4 space-y-2">
-                      <div className="text-[11px] text-muted-foreground">{catName} · {p.unit}</div>
-                      <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-                      <div className="flex items-baseline gap-1.5 pt-1">
-                        <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
-                        {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-1">
-                        {qty === 0 ? (
-                          <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
-                            <Plus className="size-3.5" /> কার্ট
-                          </button>
-                        ) : (
-                          <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
-                            <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
-                            <span className="text-xs font-bold">{qty}</span>
-                            <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
-                          </div>
-                        )}
-                        <button
-                          onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
-                          className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
-                        >
-                          এখনই কিনুন
-                        </button>
-                      </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                      {catProducts.map((p) => {
+                        const qty = cart[p.id] ?? 0;
+                        return (
+                          <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
+                            <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                              {p.image_url ? (
+                                <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
+                              ) : (
+                                <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
+                              )}
+                              {p.tag && (
+                                <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
+                              )}
+                              <button className="absolute top-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
+                                <Heart className="size-4" />
+                              </button>
+                            </div>
+                            <div className="p-3 md:p-4 space-y-2">
+                              <div className="text-[11px] text-muted-foreground">{c.name_bn} · {p.unit}</div>
+                              <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
+                              <div className="flex items-baseline gap-1.5 pt-1">
+                                <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
+                                {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 pt-1">
+                                {qty === 0 ? (
+                                  <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
+                                    <Plus className="size-3.5" /> কার্ট
+                                  </button>
+                                ) : (
+                                  <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
+                                    <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
+                                    <span className="text-xs font-bold">{qty}</span>
+                                    <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
+                                  className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
+                                >
+                                  এখনই কিনুন
+                                </button>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
-                  </article>
+                  </div>
                 );
               })}
-            </div>
+
+              {/* All products CTA */}
+              <div className="text-center pt-4">
+                <Link to="/products" className="inline-flex items-center gap-2 h-12 px-8 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
+                  সব পণ্য দেখুন <ChevronRight className="size-4" />
+                </Link>
+              </div>
+            </>
           )}
         </div>
       </section>
