@@ -255,10 +255,10 @@ function Index() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-8 md:gap-12 text-center">
-          <div className="space-y-6 max-w-2xl">
+        <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="space-y-6">
             {hero?.badge_bn && (
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border mx-auto">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
                 <Leaf className="size-3.5" /> {hero.badge_bn}
               </span>
             )}
@@ -269,8 +269,8 @@ function Index() {
               </span>{" "}
               {hero?.title_suffix_bn}
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto">{hero?.subtitle_bn}</p>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <p className="text-base md:text-lg text-muted-foreground max-w-lg">{hero?.subtitle_bn}</p>
+            <div className="flex flex-wrap gap-3">
               <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
                 {hero?.cta_primary_bn} <ChevronRight className="size-4" />
               </a>
@@ -279,7 +279,7 @@ function Index() {
               </a>
             </div>
             {features.length > 0 && (
-              <div className="flex flex-wrap gap-6 pt-4 text-sm justify-center">
+              <div className="flex flex-wrap gap-6 pt-4 text-sm">
                 {features.map((f, i) => {
                   const Icon = ICONS[f.icon] ?? Leaf;
                   return <div key={i} className="flex items-center gap-2"><Icon className="size-5 text-primary" /> {f.text_bn}</div>;
@@ -288,7 +288,7 @@ function Index() {
             )}
           </div>
 
-          <div className="relative w-full max-w-2xl">
+          <div className="relative">
             <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
             <HeroSlider images={(hero?.images ?? []).filter(Boolean)} fallback={hero?.image_url || heroImg} />
           </div>
