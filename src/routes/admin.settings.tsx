@@ -6,13 +6,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageInput } from "@/components/ImageInput";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "সাইট সেটিংস — অ্যাডমিন" }] }),
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -20,6 +21,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "topbar", label: "টপ বার" },
   { key: "hero", label: "হিরো সেকশন" },
   { key: "sections", label: "সেকশন হেডিং" },
+  { key: "home_sections", label: "হোম সেকশন" },
   { key: "offer", label: "অফার ব্যানার" },
   { key: "features", label: "ফিচার" },
   { key: "footer", label: "ফুটার" },
@@ -77,6 +79,7 @@ function SettingsPage() {
         {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
         {tab === "hero" && <HeroTab v={draft.hero} on={(v) => update("hero", v)} />}
         {tab === "sections" && <SectionsTab v={draft.sections} on={(v) => update("sections", v)} />}
+        {tab === "home_sections" && <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />}
         {tab === "offer" && <OfferTab v={draft.offer} on={(v) => update("offer", v)} />}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
@@ -90,6 +93,77 @@ function SettingsPage() {
             সেভ করুন
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeSectionsTab({ v, on }: { v: SiteSettings["home_sections"]; on: (v: SiteSettings["home_sections"]) => void }) {
+  const { data: cats = [] } = useQuery({
+    queryKey: ["categories", "admin-options"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("categories").select("id,name_bn").order("sort_order");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const setItem = (i: number, patch: Partial<SiteSettings["home_sections"][number]>) => {
+    on(v.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+  };
+  const addItem = () => {
+    on([
+      ...v,
+      { id: crypto.randomUUID(), title_bn: "নতুন সেকশন", subtitle_bn: "", category_id: "", limit: 8, enabled: true },
+    ]);
+  };
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= v.length) return;
+    const n = [...v];
+    [n[i], n[j]] = [n[j], n[i]];
+    on(n);
+  };
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">হোম পেজে আপনার ইচ্ছামতো সেকশন যোগ করুন — প্রতিটি সেকশনে নির্দিষ্ট ক্যাটাগরির পণ্য দেখাবে। চাইলে সেকশন বন্ধ/চালু করতে পারবেন।</p>
+        <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
+          <Plus className="size-4" /> সেকশন যোগ
+        </button>
+      </div>
+      {v.length === 0 && <p className="text-sm text-muted-foreground italic text-center py-6">কোনো সেকশন নেই — উপরের বাটনে চাপ দিন</p>}
+      <div className="space-y-4">
+        {v.map((s, i) => (
+          <div key={s.id} className="rounded-2xl border border-border p-4 space-y-3 bg-secondary/30">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-bold text-muted-foreground">সেকশন {i + 1}</span>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={s.enabled} onChange={(e) => setItem(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
+                  <span>সক্রিয়</span>
+                </label>
+                <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
+                <button type="button" disabled={i === v.length - 1} onClick={() => move(i, 1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
+                <button type="button" onClick={() => on(v.filter((_, j) => j !== i))} className="size-8 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3.5" /></button>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-3">
+              <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem(i, { title_bn: e.target.value })} /></Field>
+              <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem(i, { subtitle_bn: e.target.value })} /></Field>
+              <Field label="ক্যাটাগরি">
+                <select className={inputCls} value={s.category_id} onChange={(e) => setItem(i, { category_id: e.target.value })}>
+                  <option value="">— সব ক্যাটাগরি —</option>
+                  {cats.map((c: { id: string; name_bn: string }) => (
+                    <option key={c.id} value={c.id}>{c.name_bn}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="সর্বোচ্চ পণ্য সংখ্যা">
+                <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem(i, { limit: Math.max(1, Number(e.target.value) || 8) })} />
+              </Field>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -218,6 +218,7 @@ function Index() {
   const features = settings?.features ?? [];
   const footer = settings?.footer;
   const sections = settings?.sections;
+  const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -391,6 +392,65 @@ function Index() {
           </div>
         </section>
       )}
+
+      {/* Custom home sections (admin-configurable) */}
+      {homeSections.map((sec) => {
+        const items = (sec.category_id
+          ? products.filter((p) => p.category_id === sec.category_id)
+          : products
+        ).slice(0, sec.limit);
+        if (items.length === 0) return null;
+        return (
+          <section key={sec.id} className="py-8 md:py-12">
+            <div className="container mx-auto px-4 space-y-6">
+              <div className="flex flex-col items-center text-center">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                {sec.subtitle_bn && <p className="text-muted-foreground text-sm mt-1">{sec.subtitle_bn}</p>}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                {items.map((p) => {
+                  const qty = cart[p.id] ?? 0;
+                  return (
+                    <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
+                      <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
+                        ) : (
+                          <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
+                        )}
+                        {p.tag && <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>}
+                      </div>
+                      <div className="p-3 md:p-4 space-y-2 text-center">
+                        <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
+                        <div className="flex items-baseline justify-center gap-1.5 pt-1">
+                          <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
+                          {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          {qty === 0 ? (
+                            <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
+                              <Plus className="size-3.5" /> কার্ট
+                            </button>
+                          ) : (
+                            <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
+                              <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
+                              <span className="text-xs font-bold">{qty}</span>
+                              <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
+                            </div>
+                          )}
+                          <button onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })} className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]">
+                            এখনই কিনুন
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      })}
 
       {/* Products grouped by category */}
       <section id="shop" className="py-10 md:py-14">

@@ -26,6 +26,15 @@ export type Sections = {
 export type DeliveryOption = { label_bn: string; charge: number; enabled: boolean };
 export type Delivery = { enabled: boolean; options: DeliveryOption[] };
 
+export type HomeSection = {
+  id: string;
+  title_bn: string;
+  subtitle_bn: string;
+  category_id: string; // empty = all categories
+  limit: number;
+  enabled: boolean;
+};
+
 export type Tracking = {
   // Meta (Facebook) Pixel + Conversions API
   meta_pixel_id: string;
@@ -56,6 +65,7 @@ export type SiteSettings = {
   sections: Sections;
   tracking: Tracking;
   delivery: Delivery;
+  home_sections: HomeSection[];
 };
 
 const DEFAULTS: SiteSettings = {
@@ -96,6 +106,7 @@ const DEFAULTS: SiteSettings = {
       { label_bn: "ঢাকার বাইরে", charge: 120, enabled: true },
     ],
   },
+  home_sections: [],
 };
 
 export function useSiteSettings() {
