@@ -89,6 +89,19 @@ export function SiteHeader() {
             <span className="font-[family-name:var(--font-display)] font-extrabold text-base text-[var(--leaf-deep)]">{brand?.name_bn ?? "তাজা বাজার"}</span>
           </Link>
         </div>
+        <form onSubmit={submit} className="px-4 pb-2.5">
+          <div className="relative">
+            <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-8 grid place-items-center text-muted-foreground">
+              <Search className="size-4" />
+            </button>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="খুঁজুন তাজা পণ্য..."
+              className="w-full h-10 pl-10 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none text-sm"
+            />
+          </div>
+        </form>
       </header>
     </>
   );
