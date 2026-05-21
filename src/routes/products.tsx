@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronLeft, Plus, Minus, Loader2, ShoppingCart } from "lucide-react";
+import { Search, Loader2, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteHeader } from "@/components/SiteHeader";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -74,18 +76,11 @@ function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
-          <Link to="/" className="size-9 rounded-full grid place-items-center bg-secondary hover:bg-secondary/80 shrink-0">
-            <ChevronLeft className="size-5" />
-          </Link>
-          <h1 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">সব পণ্য</h1>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <section className="py-6 md:py-10">
+      <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4 space-y-6">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">সব পণ্য</h1>
           {/* Search */}
           <div className="max-w-xl mx-auto md:mx-1">
             <div className="relative">
@@ -153,6 +148,7 @@ function ProductsPage() {
           )}
         </div>
       </section>
+      <MobileBottomNav />
     </div>
   );
 }

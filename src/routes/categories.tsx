@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteHeader } from "@/components/SiteHeader";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const Route = createFileRoute("/categories")({
   head: () => ({
@@ -38,17 +39,11 @@ function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
-          <Link to="/" className="size-9 rounded-full grid place-items-center bg-secondary hover:bg-secondary/80">
-            <ChevronLeft className="size-5" />
-          </Link>
-          <h1 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">সব ক্যাটাগরি</h1>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <section className="py-6 md:py-10">
+      <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] mb-6">সব ক্যাটাগরি</h1>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
             {categories.map((c) => (
               <Link
@@ -70,6 +65,7 @@ function CategoriesPage() {
           )}
         </div>
       </section>
+      <MobileBottomNav />
     </div>
   );
 }
