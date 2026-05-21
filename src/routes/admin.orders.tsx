@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Phone, MapPin, Package, Trash2, ChevronDown } from "lucide-react";
+import { Loader2, Phone, MapPin, Trash2, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin/orders")({
   component: AdminOrders,
@@ -89,94 +89,109 @@ function AdminOrders() {
         ))}
       </div>
 
-      {loading ? (
-        <div className="grid place-items-center h-40">
-          <Loader2 className="size-6 animate-spin text-primary" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground">
-          কোনো অর্ডার নেই
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map((o) => {
-            const status = STATUSES.find((s) => s.value === o.status) ?? STATUSES[0];
-            const isOpen = expanded === o.id;
-            const items = Array.isArray(o.items) ? o.items : [];
-            return (
-              <div key={o.id} className="bg-card border border-border rounded-2xl overflow-hidden">
-                <div className="p-4 md:p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-lg">{o.customer_name}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${status.color}`}>{status.label}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                        <span className="inline-flex items-center gap-1"><Phone className="size-3" /> {o.phone}</span>
-                        <span className="inline-flex items-center gap-1"><MapPin className="size-3" /> {o.address}</span>
-                      </div>
-                      <div className="text-[10px] text-muted-foreground mt-1">
-                        {new Date(o.created_at).toLocaleString("bn-BD")} · {o.payment_method === "cod" ? "ক্যাশ অন ডেলিভারি" : o.payment_method}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-extrabold text-[var(--leaf-deep)]">৳{o.total}</div>
-                      <div className="text-[10px] text-muted-foreground">{items.length} টি পণ্য</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 mt-4">
-                    <select
-                      value={o.status}
-                      onChange={(e) => updateStatus(o.id, e.target.value)}
-                      className="h-9 px-3 rounded-lg border border-border bg-background text-sm font-medium"
-                    >
-                      {STATUSES.map((s) => (
-                        <option key={s.value} value={s.value}>{s.label}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => setExpanded(isOpen ? null : o.id)}
-                      className="h-9 px-3 rounded-lg border border-border bg-background text-sm font-medium inline-flex items-center gap-1"
-                    >
-                      <Package className="size-4" /> বিস্তারিত <ChevronDown className={`size-4 transition ${isOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    <a
-                      href={`tel:${o.phone}`}
-                      className="h-9 px-3 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium inline-flex items-center gap-1"
-                    >
-                      <Phone className="size-4" /> কল
-                    </a>
-                    <button
-                      onClick={() => removeOrder(o.id)}
-                      className="h-9 px-3 rounded-lg text-destructive border border-destructive/30 text-sm font-medium inline-flex items-center gap-1 ml-auto"
-                    >
-                      <Trash2 className="size-4" /> মুছুন
-                    </button>
-                  </div>
-                </div>
-
-                {isOpen && (
-                  <div className="border-t border-border bg-[var(--cream)]/40 p-4 md:p-5">
-                    <div className="space-y-2">
-                      {items.map((it, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-sm bg-card rounded-lg px-3 py-2 border border-border">
-                          <div>
-                            <div className="font-medium">{it.name_bn}</div>
-                            <div className="text-xs text-muted-foreground">{it.qty} × ৳{it.price}{it.unit ? ` · ${it.unit}` : ""}</div>
+      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center"><Loader2 className="size-6 animate-spin inline text-primary" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center text-muted-foreground text-sm">কোনো অর্ডার নেই</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/60 text-left">
+                <tr>
+                  <th className="p-3 font-semibold">ক্রেতা</th>
+                  <th className="p-3 font-semibold hidden md:table-cell">ফোন</th>
+                  <th className="p-3 font-semibold hidden lg:table-cell">ঠিকানা</th>
+                  <th className="p-3 font-semibold hidden sm:table-cell">পণ্য</th>
+                  <th className="p-3 font-semibold">মোট</th>
+                  <th className="p-3 font-semibold">স্ট্যাটাস</th>
+                  <th className="p-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((o) => {
+                  const status = STATUSES.find((s) => s.value === o.status) ?? STATUSES[0];
+                  const isOpen = expanded === o.id;
+                  const items = Array.isArray(o.items) ? o.items : [];
+                  return (
+                    <React.Fragment key={o.id}>
+                      <tr className="border-t border-border hover:bg-secondary/30">
+                        <td className="p-3">
+                          <div className="font-semibold">{o.customer_name}</div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                            {new Date(o.created_at).toLocaleString("bn-BD")}
                           </div>
-                          <div className="font-semibold">৳{it.qty * it.price}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+                        </td>
+                        <td className="p-3 text-muted-foreground hidden md:table-cell">
+                          <a href={`tel:${o.phone}`} className="inline-flex items-center gap-1 hover:text-primary">
+                            <Phone className="size-3" /> {o.phone}
+                          </a>
+                        </td>
+                        <td className="p-3 text-muted-foreground hidden lg:table-cell max-w-[220px]">
+                          <span className="inline-flex items-start gap-1"><MapPin className="size-3 mt-0.5 shrink-0" /> <span className="truncate">{o.address}</span></span>
+                        </td>
+                        <td className="p-3 hidden sm:table-cell">{items.length}</td>
+                        <td className="p-3 font-bold text-[var(--leaf-deep)]">৳{o.total}</td>
+                        <td className="p-3">
+                          <select
+                            value={o.status}
+                            onChange={(e) => updateStatus(o.id, e.target.value)}
+                            className={`h-8 px-2 rounded-md border text-xs font-medium ${status.color}`}
+                          >
+                            {STATUSES.map((s) => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() => setExpanded(isOpen ? null : o.id)}
+                              className="size-8 rounded-lg hover:bg-secondary grid place-items-center"
+                              title="বিস্তারিত"
+                            >
+                              <ChevronDown className={`size-4 transition ${isOpen ? "rotate-180" : ""}`} />
+                            </button>
+                            <button
+                              onClick={() => removeOrder(o.id)}
+                              className="size-8 rounded-lg hover:bg-destructive/10 text-destructive grid place-items-center"
+                              title="মুছুন"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      {isOpen && (
+                        <tr className="bg-[var(--cream)]/40">
+                          <td colSpan={7} className="p-4">
+                            <div className="md:hidden text-xs text-muted-foreground mb-3 space-y-1">
+                              <div className="inline-flex items-center gap-1"><Phone className="size-3" /> {o.phone}</div>
+                              <div className="flex items-start gap-1"><MapPin className="size-3 mt-0.5 shrink-0" /> {o.address}</div>
+                              <div>{o.payment_method === "cod" ? "ক্যাশ অন ডেলিভারি" : o.payment_method}</div>
+                            </div>
+                            <div className="space-y-2">
+                              {items.map((it, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm bg-card rounded-lg px-3 py-2 border border-border">
+                                  <div>
+                                    <div className="font-medium">{it.name_bn}</div>
+                                    <div className="text-xs text-muted-foreground">{it.qty} × ৳{it.price}{it.unit ? ` · ${it.unit}` : ""}</div>
+                                  </div>
+                                  <div className="font-semibold">৳{it.qty * it.price}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
