@@ -355,65 +355,90 @@ function Index() {
             <p className="text-center text-muted-foreground py-20">এখনো কোনো পণ্য নেই। অ্যাডমিন প্যানেল থেকে পণ্য যোগ করুন।</p>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                {(() => {
-                  const seen = new Set<string>();
-                  const picked: typeof products = [];
-                  for (const p of products) {
-                    const key = p.category_id ?? `__${p.id}`;
-                    if (seen.has(key)) continue;
-                    seen.add(key);
-                    picked.push(p);
-                    if (picked.length >= 4) break;
+              {(() => {
+                // Group products by category
+                const byCat: Record<string, typeof products> = {};
+                for (const p of products) {
+                  const cat = p.category_id ?? "__none";
+                  if (!byCat[cat]) byCat[cat] = [];
+                  byCat[cat].push(p);
+                }
+                const catIds = Object.keys(byCat);
+                // Build 4 rows of 4 products each from different categories
+                const rows: typeof products[] = [];
+                const usedPerCat: Record<string, number> = {};
+                for (let r = 0; r < 4; r++) {
+                  const row: typeof products = [];
+                  const usedInRow = new Set<string>();
+                  for (let c = 0; c < 4; c++) {
+                    // Find a category with remaining products not used in this row
+                    let picked: typeof products[0] | null = null;
+                    for (const cat of catIds) {
+                      if (usedInRow.has(cat)) continue;
+                      const idx = usedPerCat[cat] ?? 0;
+                      if (idx < byCat[cat].length) {
+                        picked = byCat[cat][idx];
+                        usedPerCat[cat] = idx + 1;
+                        usedInRow.add(cat);
+                        break;
+                      }
+                    }
+                    if (!picked) break;
+                    row.push(picked);
                   }
-                  return picked;
-                })().map((p) => {
-                  const qty = cart[p.id] ?? 0;
-                  return (
-                    <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
-                      <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                        {p.image_url ? (
-                          <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
-                        ) : (
-                          <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
-                        )}
-                        {p.tag && (
-                          <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
-                        )}
-                        <button className="absolute top-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
-                          <Heart className="size-4" />
-                        </button>
-                      </div>
-                      <div className="p-3 md:p-4 space-y-2 text-center">
-                        <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-                        <div className="flex items-baseline justify-center gap-1.5 pt-1">
-                          <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
-                          {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 pt-1">
-                          {qty === 0 ? (
-                            <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
-                              <Plus className="size-3.5" /> কার্ট
+                  if (row.length) rows.push(row);
+                }
+                return rows.map((row, ri) => (
+                  <div key={ri} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                    {row.map((p) => {
+                      const qty = cart[p.id] ?? 0;
+                      return (
+                        <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
+                          <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                            {p.image_url ? (
+                              <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
+                            ) : (
+                              <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
+                            )}
+                            {p.tag && (
+                              <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
+                            )}
+                            <button className="absolute top-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
+                              <Heart className="size-4" />
                             </button>
-                          ) : (
-                            <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
-                              <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
-                              <span className="text-xs font-bold">{qty}</span>
-                              <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
+                          </div>
+                          <div className="p-3 md:p-4 space-y-2 text-center">
+                            <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
+                            <div className="flex items-baseline justify-center gap-1.5 pt-1">
+                              <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
+                              {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
                             </div>
-                          )}
-                          <button
-                            onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
-                            className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
-                          >
-                            এখনই কিনুন
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+                            <div className="grid grid-cols-2 gap-2 pt-1">
+                              {qty === 0 ? (
+                                <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
+                                  <Plus className="size-3.5" /> কার্ট
+                                </button>
+                              ) : (
+                                <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
+                                  <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
+                                  <span className="text-xs font-bold">{qty}</span>
+                                  <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
+                                className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
+                              >
+                                এখনই কিনুন
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                ));
+              })()}
 
               {/* All products CTA */}
               <div className="text-center pt-6">
