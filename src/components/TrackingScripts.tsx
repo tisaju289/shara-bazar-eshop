@@ -106,11 +106,13 @@ fbq('init','${t.meta_pixel_id}');`,
 
   // PageView on route change (after the initial inject also runs once).
   useEffect(() => {
-    if (!initialized.current) return;
+    if (!t || !t.enabled) return;
     if (lastPath.current === path) return;
     lastPath.current = path;
-    trackPageView();
-  }, [path]);
+    // Small delay so async pixel scripts have a tick to initialize.
+    const id = window.setTimeout(() => trackPageView(), 50);
+    return () => window.clearTimeout(id);
+  }, [t, path]);
 
   return null;
 }

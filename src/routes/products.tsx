@@ -5,6 +5,7 @@ import { Loader2, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { trackEvent } from "@/lib/tracking";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -58,6 +59,13 @@ function ProductsPage() {
   // Sync when URL ?cat= changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setActiveCat(cat ?? "all"); }, [cat]);
+
+  // Fire Search event when there is a query string
+  useEffect(() => {
+    if (q && q.trim()) {
+      trackEvent("Search", { search_string: q.trim() });
+    }
+  }, [q]);
 
   const filtered = products.filter((p) => {
     const catOk = activeCat === "all" || p.category_id === activeCat;
@@ -151,7 +159,16 @@ function ProductsPage() {
 }
 
 function ProductCard({ product: p, categoryName }: { product: DBProduct; categoryName: string }) {
-  const [qty, setQty] = useState(1);
+  const handleAdd = () => {
+    trackEvent("AddToCart", {
+      value: p.price,
+      currency: "BDT",
+      content_ids: [p.id],
+      content_name: p.name_bn,
+      content_type: "product",
+      contents: [{ id: p.id, quantity: 1, item_price: p.price }],
+    });
+  };
   return (
     <article className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
       <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
@@ -171,7 +188,7 @@ function ProductCard({ product: p, categoryName }: { product: DBProduct; categor
           <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
           {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
         </div>
-        <button className="w-full h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)] gap-1">
+        <button onClick={handleAdd} className="w-full h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)] gap-1">
           <ShoppingCart className="size-3.5" /> কার্টে যোগ করুন
         </button>
       </div>
