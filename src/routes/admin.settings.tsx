@@ -284,3 +284,56 @@ function FooterTab({ v, on }: { v: SiteSettings["footer"]; on: (v: SiteSettings[
     </div>
   );
 }
+function TrackingTab({ v, on }: { v: SiteSettings["tracking"]; on: (v: SiteSettings["tracking"]) => void }) {
+  return (
+    <div className="space-y-6">
+      <label className="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" checked={v.enabled} onChange={(e) => on({ ...v, enabled: e.target.checked })} className="size-4 accent-primary" />
+        <span className="text-sm font-semibold">সব ট্র্যাকিং চালু করুন (মাস্টার সুইচ)</span>
+      </label>
+
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">Meta (Facebook) Pixel + Conversions API</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="Pixel ID" hint="যেমন: 1234567890"><input className={inputCls} value={v.meta_pixel_id} onChange={(e) => on({ ...v, meta_pixel_id: e.target.value.trim() })} /></Field>
+          <Field label="Test Event Code" hint="Events Manager → Test events"><input className={inputCls} value={v.meta_test_event_code} onChange={(e) => on({ ...v, meta_test_event_code: e.target.value.trim() })} /></Field>
+        </div>
+        <Field label="Conversions API Access Token" hint="Events Manager → Settings → Generate access token। সার্ভার থেকে CAPI ইভেন্ট পাঠাতে এটি লাগবে।">
+          <textarea className={areaCls} value={v.meta_capi_token} onChange={(e) => on({ ...v, meta_capi_token: e.target.value.trim() })} />
+        </Field>
+      </div>
+
+      <div className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">Google Analytics 4 / Google Ads</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="GA4 Measurement ID" hint="যেমন: G-XXXXXXX"><input className={inputCls} value={v.ga4_id} onChange={(e) => on({ ...v, ga4_id: e.target.value.trim() })} /></Field>
+          <Field label="Google Ads ID" hint="যেমন: AW-123456789"><input className={inputCls} value={v.google_ads_id} onChange={(e) => on({ ...v, google_ads_id: e.target.value.trim() })} /></Field>
+        </div>
+        <Field label="Google Ads Purchase Conversion Label" hint="ঐচ্ছিক"><input className={inputCls} value={v.google_ads_purchase_label} onChange={(e) => on({ ...v, google_ads_purchase_label: e.target.value.trim() })} /></Field>
+      </div>
+
+      <div className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">Google Tag Manager</h3>
+        <Field label="GTM Container ID" hint="যেমন: GTM-XXXXXX"><input className={inputCls} value={v.gtm_id} onChange={(e) => on({ ...v, gtm_id: e.target.value.trim() })} /></Field>
+      </div>
+
+      <div className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">TikTok Pixel</h3>
+        <Field label="TikTok Pixel ID"><input className={inputCls} value={v.tiktok_pixel_id} onChange={(e) => on({ ...v, tiktok_pixel_id: e.target.value.trim() })} /></Field>
+      </div>
+
+      <div className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">কাস্টম স্ক্রিপ্ট</h3>
+        <Field label="Head HTML" hint="<script>...</script> বা যেকোনো verification ট্যাগ"><textarea className={areaCls + " font-mono text-xs"} value={v.head_html} onChange={(e) => on({ ...v, head_html: e.target.value })} /></Field>
+        <Field label="Body HTML" hint="<noscript> পিক্সেল / চ্যাট উইজেট ইত্যাদি"><textarea className={areaCls + " font-mono text-xs"} value={v.body_html} onChange={(e) => on({ ...v, body_html: e.target.value })} /></Field>
+      </div>
+
+      <div className="rounded-2xl bg-secondary/60 p-4 text-xs text-muted-foreground space-y-1.5">
+        <p className="font-semibold text-foreground">কীভাবে কাজ করে:</p>
+        <p>• সেভ করার সাথে সাথে পুরো সাইটে স্ক্রিপ্ট অটো লোড হবে — কোনো রিডিপ্লয় লাগবে না।</p>
+        <p>• প্রতি পেজে <b>PageView</b>, কার্টে যোগে <b>AddToCart</b>, চেকআউট খুললে <b>InitiateCheckout</b>, অর্ডার সফলে <b>Purchase</b> ইভেন্ট ফায়ার হবে।</p>
+        <p>• Meta CAPI সার্ভার-সাইড থেকে duplicate <code>event_id</code> সহ ফায়ার হয় (iOS 14+ এ accuracy বাড়ায়)।</p>
+      </div>
+    </div>
+  );
+}
