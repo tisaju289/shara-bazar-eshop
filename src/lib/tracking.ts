@@ -82,7 +82,7 @@ export function trackEvent(name: EventName, data: EventPayload = {}) {
     if (window.fbq) {
       window.fbq("track", name, { ...data, currency, value }, { eventID: eventId });
     }
-  } catch (e) { console.warn("fbq error", e); }
+  } catch (e: unknown) { console.warn("fbq error", e); }
 
   // GA4 / Google Ads via gtag
   try {
@@ -106,7 +106,7 @@ export function trackEvent(name: EventName, data: EventPayload = {}) {
         })),
       });
     }
-  } catch (e) { console.warn("gtag error", e); }
+  } catch (e: unknown) { console.warn("gtag error", e); }
 
   // TikTok Pixel
   try {
@@ -114,13 +114,13 @@ export function trackEvent(name: EventName, data: EventPayload = {}) {
       const tt = TTQ_MAP[name] ?? name;
       window.ttq.track(tt, { value, currency, contents: data.contents });
     }
-  } catch (e) { console.warn("ttq error", e); }
+  } catch (e: unknown) { console.warn("ttq error", e); }
 
   // GTM dataLayer
   try {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: name, eventId, ...data, currency, value });
-  } catch (e) { console.warn("dataLayer error", e); }
+  } catch (e: unknown) { console.warn("dataLayer error", e); }
 
   // Meta CAPI (server-side) — fire for high-value events
   const CAPI_EVENTS: EventName[] = ["Purchase", "InitiateCheckout", "AddToCart", "Lead", "ViewContent"];
