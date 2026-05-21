@@ -356,7 +356,18 @@ function Index() {
           ) : (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                {products.map((p) => {
+                {(() => {
+                  const seen = new Set<string>();
+                  const picked: typeof products = [];
+                  for (const p of products) {
+                    const key = p.category_id ?? `__${p.id}`;
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    picked.push(p);
+                    if (picked.length >= 4) break;
+                  }
+                  return picked;
+                })().map((p) => {
                   const qty = cart[p.id] ?? 0;
                   return (
                     <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
