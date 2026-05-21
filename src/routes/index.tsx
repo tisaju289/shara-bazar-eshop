@@ -218,6 +218,7 @@ function Index() {
   const features = settings?.features ?? [];
   const footer = settings?.footer;
   const sections = settings?.sections;
+  const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
