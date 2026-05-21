@@ -10,6 +10,7 @@ import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
+import { trackEvent } from "@/lib/tracking";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -102,7 +103,20 @@ function Index() {
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
 
-  const add = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
+  const add = (id: string) => {
+    setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
+    const p = products.find((x) => x.id === id);
+    if (p) {
+      trackEvent("AddToCart", {
+        value: p.price,
+        currency: "BDT",
+        content_ids: [id],
+        content_name: p.name_bn,
+        content_type: "product",
+        contents: [{ id, quantity: 1, item_price: p.price }],
+      });
+    }
+  };
   const sub = (id: string) =>
     setCart((c) => {
       const n = (c[id] ?? 0) - 1;
@@ -115,6 +129,16 @@ function Index() {
     setOrderDone(false);
     setOrderError(null);
     setCheckoutOpen(true);
+    const ids = Object.keys(items);
+    const total = ids.reduce((s, id) => s + (products.find((p) => p.id === id)?.price ?? 0) * items[id], 0);
+    trackEvent("InitiateCheckout", {
+      value: total,
+      currency: "BDT",
+      content_ids: ids,
+      content_type: "product",
+      num_items: Object.values(items).reduce((a, b) => a + b, 0),
+      contents: ids.map((id) => ({ id, quantity: items[id], item_price: products.find((p) => p.id === id)?.price })),
+    });
   };
 
   const checkoutTotal = useMemo(
@@ -156,6 +180,18 @@ function Index() {
     });
     setOrderForm({ name: "", phone: "", address: "" });
     setOrderDone(true);
+    trackEvent("Purchase", {
+      value: checkoutTotal,
+      currency: "BDT",
+      content_ids: Object.keys(checkoutItems),
+      content_type: "product",
+      num_items: Object.values(checkoutItems).reduce((a, b) => a + b, 0),
+      contents: Object.entries(checkoutItems).map(([id, q]) => ({
+        id, quantity: q, item_price: products.find((p) => p.id === id)?.price,
+      })),
+      phone: orderForm.phone.trim(),
+      external_id: orderForm.phone.trim(),
+    });
   };
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);

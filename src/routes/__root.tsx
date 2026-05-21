@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { TrackingScripts } from "@/components/TrackingScripts";
 import { useEffect } from "react";
 
 function NotFoundComponent() {
@@ -117,6 +118,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <DynamicHead />
+      <TrackingScripts />
       <Outlet />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>

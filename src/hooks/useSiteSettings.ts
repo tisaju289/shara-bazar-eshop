@@ -23,6 +23,25 @@ export type Sections = {
   products_subtitle_bn: string;
 };
 
+export type Tracking = {
+  // Meta (Facebook) Pixel + Conversions API
+  meta_pixel_id: string;
+  meta_capi_token: string;       // server-side access token (stored in DB; admin-only RLS)
+  meta_test_event_code: string;  // optional, for Events Manager testing
+  // Google
+  ga4_id: string;                // e.g. G-XXXXXXX
+  gtm_id: string;                // e.g. GTM-XXXX
+  google_ads_id: string;         // e.g. AW-123456789
+  google_ads_purchase_label: string; // conversion label for Purchase
+  // TikTok
+  tiktok_pixel_id: string;
+  // Custom raw snippets
+  head_html: string;
+  body_html: string;
+  // Master switch
+  enabled: boolean;
+};
+
 export type SiteSettings = {
   brand: Brand;
   seo: Seo;
@@ -32,6 +51,7 @@ export type SiteSettings = {
   features: Feature[];
   footer: Footer;
   sections: Sections;
+  tracking: Tracking;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -51,6 +71,19 @@ const DEFAULTS: SiteSettings = {
     categories_subtitle_bn: "যেটি দরকার, এক ক্লিকেই খুঁজে নিন",
     products_title_bn: "আজকের তাজা পণ্য",
     products_subtitle_bn: "সরাসরি কৃষক থেকে সংগ্রহ করা",
+  },
+  tracking: {
+    meta_pixel_id: "",
+    meta_capi_token: "",
+    meta_test_event_code: "",
+    ga4_id: "",
+    gtm_id: "",
+    google_ads_id: "",
+    google_ads_purchase_label: "",
+    tiktok_pixel_id: "",
+    head_html: "",
+    body_html: "",
+    enabled: true,
   },
 };
 
