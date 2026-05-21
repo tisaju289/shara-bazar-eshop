@@ -477,7 +477,7 @@ function ProductCard({
   sub: (id: string) => void;
   openCheckout: (items: Record<string, number>) => void;
 }) {
-  const qty = cart[p.id] ?? 2;
+  const qty = cart[p.id] ?? 0;
   return (
     <article className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
       <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
