@@ -360,7 +360,7 @@ function Index() {
                 if (catProducts.length === 0) return null;
                 return (
                   <div key={c.id}>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col items-center mb-4 gap-2">
                       <h3 className="text-lg md:text-xl font-bold text-[var(--leaf-deep)]">{c.name_bn}</h3>
                       <Link to="/products" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
                         সব দেখুন <ChevronRight className="size-4" />
