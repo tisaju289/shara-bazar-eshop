@@ -366,7 +366,7 @@ function Index() {
                         সব দেখুন <ChevronRight className="size-4" />
                       </Link>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                    <div className="grid grid-cols-2 gap-3 md:gap-5 max-w-3xl mx-auto">
                       {catProducts.map((p) => {
                         const qty = cart[p.id] ?? 0;
                         return (
