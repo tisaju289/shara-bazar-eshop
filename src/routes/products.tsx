@@ -13,7 +13,10 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    q: typeof s.q === "string" ? s.q : undefined,
+    cat: typeof s.cat === "string" ? s.cat : undefined,
+  }),
   component: ProductsPage,
 });
 
@@ -46,11 +49,15 @@ function useProducts() {
 }
 
 function ProductsPage() {
-  const { q } = Route.useSearch();
+  const { q, cat } = Route.useSearch();
   const { data: categories = [] } = useCategories();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
-  const [activeCat, setActiveCat] = useState<string | "all">("all");
+  const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
+
+  // Sync when URL ?cat= changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setActiveCat(cat ?? "all"); }, [cat]);
 
   const filtered = products.filter((p) => {
     const catOk = activeCat === "all" || p.category_id === activeCat;
