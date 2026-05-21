@@ -48,8 +48,8 @@ function CategoriesPage() {
             {categories.map((c) => (
               <Link
                 key={c.id}
-                to="/"
-                hash="categories"
+                to="/products"
+                search={{ cat: c.id }}
                 className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
               >
                 <div className="size-16 md:size-20 rounded-2xl grid place-items-center text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
