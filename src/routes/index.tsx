@@ -356,7 +356,7 @@ function Index() {
           ) : (
             <>
               {(() => {
-                // Group products by category
+                // Interleave products by category so same-category items are spread apart
                 const byCat: Record<string, typeof products> = {};
                 for (const p of products) {
                   const cat = p.category_id ?? "__none";
@@ -364,33 +364,23 @@ function Index() {
                   byCat[cat].push(p);
                 }
                 const catIds = Object.keys(byCat);
-                // Build 4 rows of 4 products each from different categories
-                const rows: typeof products[] = [];
-                const usedPerCat: Record<string, number> = {};
-                for (let r = 0; r < 4; r++) {
-                  const row: typeof products = [];
-                  const usedInRow = new Set<string>();
-                  for (let c = 0; c < 4; c++) {
-                    // Find a category with remaining products not used in this row
-                    let picked: typeof products[0] | null = null;
-                    for (const cat of catIds) {
-                      if (usedInRow.has(cat)) continue;
-                      const idx = usedPerCat[cat] ?? 0;
-                      if (idx < byCat[cat].length) {
-                        picked = byCat[cat][idx];
-                        usedPerCat[cat] = idx + 1;
-                        usedInRow.add(cat);
-                        break;
-                      }
+                const mixed: typeof products = [];
+                let pos = 1;
+                let hasMore = true;
+                while (hasMore) {
+                  hasMore = false;
+                  for (const cat of catIds) {
+                    const idx = pos - 1;
+                    if (idx < byCat[cat].length) {
+                      mixed.push(byCat[cat][idx]);
+                      hasMore = true;
                     }
-                    if (!picked) break;
-                    row.push(picked);
                   }
-                  if (row.length) rows.push(row);
+                  pos++;
                 }
-                return rows.map((row, ri) => (
-                  <div key={ri} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                    {row.map((p) => {
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                    {mixed.map((p) => {
                       const qty = cart[p.id] ?? 0;
                       return (
                         <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
@@ -437,7 +427,7 @@ function Index() {
                       );
                     })}
                   </div>
-                ));
+                );
               })()}
 
               {/* All products CTA */}
