@@ -9,6 +9,7 @@ import {
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -231,6 +232,11 @@ function Index() {
           </button>
         </div>
       </header>
+
+      {/* Mobile site header (logo + search) */}
+      <div className="md:hidden">
+        <SiteHeader />
+      </div>
 
       {/* Mobile search bar (toggleable) */}
       {searchOpen && (
