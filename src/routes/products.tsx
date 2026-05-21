@@ -13,6 +13,7 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : undefined }),
   component: ProductsPage,
 });
 
@@ -45,13 +46,16 @@ function useProducts() {
 }
 
 function ProductsPage() {
+  const { q } = Route.useSearch();
   const { data: categories = [] } = useCategories();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">("all");
 
   const filtered = products.filter((p) => {
-    return activeCat === "all" || p.category_id === activeCat;
+    const catOk = activeCat === "all" || p.category_id === activeCat;
+    const qOk = !q || p.name_bn.toLowerCase().includes(q.toLowerCase());
+    return catOk && qOk;
   });
 
   const grouped = useMemo(() => {
@@ -76,7 +80,9 @@ function ProductsPage() {
 
       <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4 space-y-6">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] text-center">সব পণ্য</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] text-center">
+            {q ? `"${q}" এর ফলাফল` : "সব পণ্য"}
+          </h1>
 
           {/* Category tabs */}
           <div className="flex gap-2 flex-wrap justify-center">
