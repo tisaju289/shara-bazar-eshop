@@ -307,11 +307,11 @@ function Index() {
             <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sections?.categories_title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
             <p className="text-muted-foreground text-sm">{sections?.categories_subtitle_bn || "যেটি দরকার, এক ক্লিকেই খুঁজে নিন"}</p>
           </div>
-          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+          <div className="grid grid-cols-4 md:flex md:flex-wrap md:justify-center gap-2 md:gap-4">
             {categories.slice(0, 8).map((c, i) => (
               <Link key={c.id} to="/products"
-                className={`group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-[calc(25%-0.75rem)] md:w-[calc(12.5%-0.875rem)] min-w-[80px] ${i >= 4 ? "hidden md:flex" : ""}`}>
-                <div className="size-12 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                className={`group flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-full md:w-[calc(12.5%-0.875rem)] md:min-w-[80px] ${i >= 4 ? "hidden md:flex" : ""}`}>
+                <div className="size-11 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
                   {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
                 </div>
                 <div className="text-[11px] md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
