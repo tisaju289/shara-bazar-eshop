@@ -310,6 +310,7 @@ function Index() {
           <div className="grid grid-cols-4 md:flex md:flex-wrap md:justify-center gap-2 md:gap-4">
             {categories.slice(0, 8).map((c, i) => (
               <Link key={c.id} to="/products"
+                search={{ cat: c.id }}
                 className={`group flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-full md:w-[calc(12.5%-0.875rem)] md:min-w-[80px] ${i >= 4 ? "hidden md:flex" : ""}`}>
                 <div className="size-11 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
                   {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
