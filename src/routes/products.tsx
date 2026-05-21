@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Loader2, ShoppingCart } from "lucide-react";
+import { Loader2, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
@@ -49,13 +49,9 @@ function ProductsPage() {
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">("all");
-  const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = products.filter((p) => {
-    const matchesCat = activeCat === "all" || p.category_id === activeCat;
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch = !q || p.name_bn.toLowerCase().includes(q);
-    return matchesCat && matchesSearch;
+    return activeCat === "all" || p.category_id === activeCat;
   });
 
   const grouped = useMemo(() => {
@@ -80,22 +76,10 @@ function ProductsPage() {
 
       <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4 space-y-6">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">সব পণ্য</h1>
-          {/* Search */}
-          <div className="max-w-xl mx-auto md:mx-1">
-            <div className="relative">
-              <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="পণ্য খুঁজুন..."
-                className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none transition placeholder:text-muted-foreground"
-              />
-            </div>
-          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] text-center">সব পণ্য</h1>
 
           {/* Category tabs */}
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap justify-center">
             <button
               onClick={() => setActiveCat("all")}
               className={`px-4 py-2 rounded-full text-sm font-medium border transition ${activeCat === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary"}`}
@@ -125,8 +109,8 @@ function ProductsPage() {
                   const items = grouped[catId] ?? [];
                   return (
                     <div key={catId}>
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{cat?.name_bn ?? "অন্যান্য"}</h2>
+                      <div className="flex items-center justify-center mb-4">
+                        <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] text-center">{cat?.name_bn ?? "অন্যান্য"}</h2>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                         {items.map((p) => (
@@ -167,10 +151,10 @@ function ProductCard({ product: p, categoryName }: { product: DBProduct; categor
           <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
         )}
       </div>
-      <div className="p-3 md:p-4 space-y-2">
+      <div className="p-3 md:p-4 space-y-2 text-center">
         <div className="text-[11px] text-muted-foreground">{categoryName} · {p.unit}</div>
         <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-        <div className="flex items-baseline gap-1.5 pt-1">
+        <div className="flex items-baseline gap-1.5 pt-1 justify-center">
           <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
           {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
         </div>

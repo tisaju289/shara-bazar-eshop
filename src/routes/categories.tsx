@@ -43,7 +43,7 @@ function CategoriesPage() {
 
       <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] mb-6">সব ক্যাটাগরি</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] mb-6 text-center">সব ক্যাটাগরি</h1>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
             {categories.map((c) => (
               <Link
