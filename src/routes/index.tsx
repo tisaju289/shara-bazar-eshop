@@ -607,7 +607,7 @@ function Index() {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border pb-1">
         <div className="flex items-center justify-around py-2">
-          <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setActiveCat("all"); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+          <button onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
             <Home className="size-5" />
             <span className="text-[10px] font-medium">হোম</span>
           </button>
