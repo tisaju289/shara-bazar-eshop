@@ -30,7 +30,7 @@ const STATUSES = [
 function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<string>("pending");
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const load = async () => {
@@ -72,12 +72,6 @@ function AdminOrders() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setFilter("all")}
-          className={`h-9 px-4 rounded-full text-sm font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"}`}
-        >
-          সব ({orders.length})
-        </button>
         {STATUSES.map((s) => (
           <button
             key={s.value}
@@ -87,6 +81,12 @@ function AdminOrders() {
             {s.label} ({counts[s.value] ?? 0})
           </button>
         ))}
+        <button
+          onClick={() => setFilter("all")}
+          className={`h-9 px-4 rounded-full text-sm font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"}`}
+        >
+          সব ({orders.length})
+        </button>
       </div>
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
