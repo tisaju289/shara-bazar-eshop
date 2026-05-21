@@ -271,12 +271,16 @@ function Index() {
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-lg">{hero?.subtitle_bn}</p>
             <div className="flex flex-wrap gap-3">
-              <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
-                {hero?.cta_primary_bn} <ChevronRight className="size-4" />
-              </a>
-              <a href="#categories" className="h-12 px-6 rounded-full bg-secondary text-secondary-foreground font-semibold inline-flex items-center hover:bg-secondary/80">
-                {hero?.cta_secondary_bn}
-              </a>
+              {hero?.cta_primary_enabled !== false && (
+                <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
+                  {hero?.cta_primary_bn} <ChevronRight className="size-4" />
+                </a>
+              )}
+              {hero?.cta_secondary_enabled !== false && (
+                <a href="#categories" className="h-12 px-6 rounded-full bg-secondary text-secondary-foreground font-semibold inline-flex items-center hover:bg-secondary/80">
+                  {hero?.cta_secondary_bn}
+                </a>
+              )}
             </div>
             {features.length > 0 && (
               <div className="flex flex-wrap gap-6 pt-4 text-sm">

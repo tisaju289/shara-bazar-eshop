@@ -160,8 +160,20 @@ function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["her
       </div>
       <Field label="সাবটাইটেল"><textarea className={areaCls} value={v.subtitle_bn} onChange={(e) => on({ ...v, subtitle_bn: e.target.value })} /></Field>
       <div className="grid md:grid-cols-2 gap-4">
-        <Field label="প্রাইমারি বাটন"><input className={inputCls} value={v.cta_primary_bn} onChange={(e) => on({ ...v, cta_primary_bn: e.target.value })} /></Field>
-        <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={v.cta_secondary_bn} onChange={(e) => on({ ...v, cta_secondary_bn: e.target.value })} /></Field>
+        <div className="space-y-2">
+          <Field label="প্রাইমারি বাটন"><input className={inputCls} value={v.cta_primary_bn} onChange={(e) => on({ ...v, cta_primary_bn: e.target.value })} /></Field>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={v.cta_primary_enabled} onChange={(e) => on({ ...v, cta_primary_enabled: e.target.checked })} className="size-4 accent-primary" />
+            <span className="text-sm font-semibold">প্রাইমারি বাটন দেখান</span>
+          </label>
+        </div>
+        <div className="space-y-2">
+          <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={v.cta_secondary_bn} onChange={(e) => on({ ...v, cta_secondary_bn: e.target.value })} /></Field>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={v.cta_secondary_enabled} onChange={(e) => on({ ...v, cta_secondary_enabled: e.target.checked })} className="size-4 accent-primary" />
+            <span className="text-sm font-semibold">সেকেন্ডারি বাটন দেখান</span>
+          </label>
+        </div>
       </div>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
