@@ -23,6 +23,9 @@ export type Sections = {
   products_subtitle_bn: string;
 };
 
+export type DeliveryOption = { label_bn: string; charge: number; enabled: boolean };
+export type Delivery = { enabled: boolean; options: DeliveryOption[] };
+
 export type Tracking = {
   // Meta (Facebook) Pixel + Conversions API
   meta_pixel_id: string;
@@ -52,6 +55,7 @@ export type SiteSettings = {
   footer: Footer;
   sections: Sections;
   tracking: Tracking;
+  delivery: Delivery;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -84,6 +88,13 @@ const DEFAULTS: SiteSettings = {
     head_html: "",
     body_html: "",
     enabled: true,
+  },
+  delivery: {
+    enabled: true,
+    options: [
+      { label_bn: "ঢাকার ভিতরে", charge: 60, enabled: true },
+      { label_bn: "ঢাকার বাইরে", charge: 120, enabled: true },
+    ],
   },
 };
 

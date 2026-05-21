@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer" | "tracking";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -24,6 +24,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "features", label: "ফিচার" },
   { key: "footer", label: "ফুটার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
+  { key: "delivery", label: "ডেলিভারি চার্জ" },
 ];
 
 function SettingsPage() {
@@ -80,6 +81,7 @@ function SettingsPage() {
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
+        {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
 
         <div className="pt-3 flex justify-end">
           <button onClick={saveTab} disabled={saving}
@@ -333,6 +335,39 @@ function TrackingTab({ v, on }: { v: SiteSettings["tracking"]; on: (v: SiteSetti
         <p>• সেভ করার সাথে সাথে পুরো সাইটে স্ক্রিপ্ট অটো লোড হবে — কোনো রিডিপ্লয় লাগবে না।</p>
         <p>• প্রতি পেজে <b>PageView</b>, কার্টে যোগে <b>AddToCart</b>, চেকআউট খুললে <b>InitiateCheckout</b>, অর্ডার সফলে <b>Purchase</b> ইভেন্ট ফায়ার হবে।</p>
         <p>• Meta CAPI সার্ভার-সাইড থেকে duplicate <code>event_id</code> সহ ফায়ার হয় (iOS 14+ এ accuracy বাড়ায়)।</p>
+      </div>
+    </div>
+  );
+}
+
+function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSettings["delivery"]) => void }) {
+  const setOpt = (i: number, patch: Partial<SiteSettings["delivery"]["options"][number]>) => {
+    const next = v.options.map((o, idx) => (idx === i ? { ...o, ...patch } : o));
+    on({ ...v, options: next });
+  };
+  return (
+    <div className="space-y-6">
+      <label className="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" checked={v.enabled} onChange={(e) => on({ ...v, enabled: e.target.checked })} className="size-4 accent-primary" />
+        <span className="text-sm font-semibold">ডেলিভারি চার্জ অপশন চালু করুন</span>
+      </label>
+      <p className="text-xs text-muted-foreground">চেকআউট পপআপে এই অপশনগুলো রেডিও আকারে দেখানো হবে। কাস্টমার একটি বেছে নিতে পারবে এবং চার্জ মোট অর্ডারে যুক্ত হবে।</p>
+      <div className="space-y-4">
+        {v.options.map((o, i) => (
+          <div key={i} className="rounded-2xl border border-border p-4 space-y-3 bg-secondary/30">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-muted-foreground">অপশন {i + 1}</span>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" checked={o.enabled} onChange={(e) => setOpt(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
+                <span>সক্রিয়</span>
+              </label>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="লেবেল (বাংলা)"><input className={inputCls} value={o.label_bn} onChange={(e) => setOpt(i, { label_bn: e.target.value })} placeholder="যেমন: ঢাকার ভিতরে" /></Field>
+              <Field label="চার্জ (৳)"><input type="number" min={0} className={inputCls} value={o.charge} onChange={(e) => setOpt(i, { charge: Number(e.target.value) || 0 })} /></Field>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

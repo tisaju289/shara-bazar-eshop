@@ -8,6 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -53,6 +54,7 @@ function useProducts() {
 
 function ProductsPage() {
   const { q, cat } = Route.useSearch();
+  const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
@@ -67,6 +69,10 @@ function ProductsPage() {
   const [placing, setPlacing] = useState(false);
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const deliveryOptions = (settings?.delivery?.enabled ? settings?.delivery?.options ?? [] : []).filter((o) => o.enabled);
+  const [deliveryIdx, setDeliveryIdx] = useState(0);
+  const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
+  const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
 
   // Sync when URL ?cat= changes
   useEffect(() => { setActiveCat(cat ?? "all"); }, [cat]);
@@ -121,6 +127,7 @@ function ProductsPage() {
     () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
+  const grandTotal = checkoutTotal + deliveryCharge;
 
   const placeOrder = async () => {
     setOrderError(null);
@@ -140,7 +147,7 @@ function ProductsPage() {
         phone: orderForm.phone.trim(),
         address: orderForm.address.trim(),
         items,
-        total: checkoutTotal,
+        total: grandTotal,
         payment_method: "cod",
       });
     setPlacing(false);
@@ -156,7 +163,7 @@ function ProductsPage() {
     setOrderForm({ name: "", phone: "", address: "" });
     setOrderDone(true);
     trackEvent("Purchase", {
-      value: checkoutTotal,
+      value: grandTotal,
       currency: "BDT",
       content_ids: Object.keys(checkoutItems),
       content_type: "product",
@@ -376,11 +383,35 @@ function ProductsPage() {
                         </div>
                       );
                     })}
+                    <div className="flex justify-between pt-2 border-t border-border text-sm">
+                      <span className="text-muted-foreground">সাবটোটাল</span>
+                      <span className="font-semibold">৳{checkoutTotal}</span>
+                    </div>
+                    {deliveryOptions.length > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">ডেলিভারি{deliveryLabel ? ` (${deliveryLabel})` : ""}</span>
+                        <span className="font-semibold">৳{deliveryCharge}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between pt-2 border-t border-border font-bold">
                       <span>মোট</span>
-                      <span className="text-[var(--leaf-deep)]">৳{checkoutTotal}</span>
+                      <span className="text-[var(--leaf-deep)]">৳{grandTotal}</span>
                     </div>
                   </div>
+                  {deliveryOptions.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold">ডেলিভারি এলাকা</label>
+                      <div className="space-y-2">
+                        {deliveryOptions.map((o, i) => (
+                          <label key={i} className={`flex items-center gap-3 rounded-2xl border p-3 cursor-pointer transition ${deliveryIdx === i ? "border-primary bg-primary/5" : "border-border bg-secondary/40"}`}>
+                            <input type="radio" name="delivery-products" checked={deliveryIdx === i} onChange={() => setDeliveryIdx(i)} className="size-4 accent-primary" />
+                            <span className="flex-1 text-sm font-semibold">{o.label_bn}</span>
+                            <span className="text-sm font-bold text-[var(--leaf-deep)]">৳{o.charge}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <label className="text-xs font-semibold">নাম</label>
                     <input
@@ -425,7 +456,7 @@ function ProductsPage() {
                     disabled={placing || Object.keys(checkoutItems).length === 0}
                     className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] inline-flex items-center justify-center gap-2 disabled:opacity-60"
                   >
-                    {placing ? <><Loader2 className="size-4 animate-spin" /> অর্ডার হচ্ছে...</> : `অর্ডার নিশ্চিত করুন · ৳${checkoutTotal}`}
+                    {placing ? <><Loader2 className="size-4 animate-spin" /> অর্ডার হচ্ছে...</> : `অর্ডার নিশ্চিত করুন · ৳${grandTotal}`}
                   </button>
                 </div>
               </>
