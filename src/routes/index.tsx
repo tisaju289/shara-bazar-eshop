@@ -307,10 +307,10 @@ function Index() {
               সব দেখুন <ChevronRight className="size-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
             {categories.slice(0, 8).map((c) => (
               <Link key={c.id} to="/products"
-                className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition">
+                className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-[calc(25%-0.75rem)] md:w-[calc(12.5%-0.875rem)] min-w-[80px]">
                 <div className="size-12 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
                   {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
                 </div>
