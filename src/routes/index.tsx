@@ -257,7 +257,7 @@ function Index() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="space-y-6">
+          <div className="space-y-6 hidden md:block">
             {hero?.badge_bn && (
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
                 <Leaf className="size-3.5" /> {hero.badge_bn}
