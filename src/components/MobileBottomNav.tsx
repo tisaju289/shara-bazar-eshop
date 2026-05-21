@@ -1,7 +1,5 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Search, LayoutGrid, ShoppingCart } from "lucide-react";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "@tanstack/react-router";
+import { Home, LayoutGrid, ShoppingCart } from "lucide-react";
 
 /**
  * Shared mobile bottom nav for non-home pages.
