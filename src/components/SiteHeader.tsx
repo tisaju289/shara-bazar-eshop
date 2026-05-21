@@ -84,9 +84,9 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile compact header: centered logo */}
+      {/* Mobile compact header: logo + search */}
       <header className="md:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border">
-        <div className="px-4 py-2.5 flex items-center justify-center">
+        <div className="px-4 py-2.5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             {brand?.logo_url ? (
               <img src={brand.logo_url} alt={brand.name_bn} className="size-8 rounded-xl object-contain bg-white p-0.5 shadow-[var(--shadow-soft)]" />
@@ -97,8 +97,34 @@ export function SiteHeader() {
             )}
             <span className="font-[family-name:var(--font-display)] font-extrabold text-base text-[var(--leaf-deep)]">{brand?.name_bn ?? "তাজা বাজার"}</span>
           </Link>
+          <button type="button" onClick={() => setSearchOpen(true)} className="size-9 grid place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition" aria-label="search">
+            <Search className="size-5" />
+          </button>
         </div>
       </header>
+
+      {/* Mobile search dialog */}
+      <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <DialogContent className="top-[20%] translate-y-0 max-w-[92vw] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>সার্চ করুন</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={mobileSubmit}>
+            <div className="relative">
+              <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground">
+                <Search className="size-4" />
+              </button>
+              <input
+                autoFocus
+                value={mobileQ}
+                onChange={(e) => setMobileQ(e.target.value)}
+                placeholder="খুঁজুন তাজা পণ্য..."
+                className="w-full h-11 pl-10 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none text-sm"
+              />
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
