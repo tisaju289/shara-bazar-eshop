@@ -255,10 +255,10 @@ function Index() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="space-y-6 order-2 md:order-1 text-center ">
+        <div className="container mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-8 md:gap-12 text-center">
+          <div className="space-y-6 max-w-2xl">
             {hero?.badge_bn && (
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border mx-auto ">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border mx-auto">
                 <Leaf className="size-3.5" /> {hero.badge_bn}
               </span>
             )}
@@ -269,8 +269,8 @@ function Index() {
               </span>{" "}
               {hero?.title_suffix_bn}
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto ">{hero?.subtitle_bn}</p>
-            <div className="flex flex-wrap gap-3 justify-center ">
+            <p className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto">{hero?.subtitle_bn}</p>
+            <div className="flex flex-wrap gap-3 justify-center">
               <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
                 {hero?.cta_primary_bn} <ChevronRight className="size-4" />
               </a>
@@ -279,7 +279,7 @@ function Index() {
               </a>
             </div>
             {features.length > 0 && (
-              <div className="flex flex-wrap gap-6 pt-4 text-sm justify-center ">
+              <div className="flex flex-wrap gap-6 pt-4 text-sm justify-center">
                 {features.map((f, i) => {
                   const Icon = ICONS[f.icon] ?? Leaf;
                   return <div key={i} className="flex items-center gap-2"><Icon className="size-5 text-primary" /> {f.text_bn}</div>;
@@ -288,7 +288,7 @@ function Index() {
             )}
           </div>
 
-          <div className="relative order-1 md:order-2">
+          <div className="relative w-full max-w-2xl">
             <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
             <HeroSlider images={(hero?.images ?? []).filter(Boolean)} fallback={hero?.image_url || heroImg} />
           </div>
@@ -298,12 +298,12 @@ function Index() {
       {/* Categories */}
       <section id="categories" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-6 gap-3">
-            <div className="text-center ">
+          <div className="flex flex-col items-center mb-6 gap-3">
+            <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
               <p className="text-muted-foreground text-sm mt-1">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
             </div>
-            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 shrink-0">
+            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
               সব দেখুন <ChevronRight className="size-4" />
             </Link>
           </div>
@@ -342,8 +342,8 @@ function Index() {
       {/* Products grouped by category */}
       <section id="shop" className="py-10 md:py-14">
         <div className="container mx-auto px-4 space-y-10">
-          <div className="flex items-end justify-between mb-2">
-            <div className="text-center ">
+          <div className="flex flex-col items-center mb-2">
+            <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">আজকের তাজা পণ্য</h2>
               <p className="text-muted-foreground text-sm mt-1">সরাসরি কৃষক থেকে সংগ্রহ করা</p>
             </div>
@@ -360,7 +360,7 @@ function Index() {
                 if (catProducts.length === 0) return null;
                 return (
                   <div key={c.id}>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col items-center mb-4 gap-2">
                       <h3 className="text-lg md:text-xl font-bold text-[var(--leaf-deep)]">{c.name_bn}</h3>
                       <Link to="/products" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
                         সব দেখুন <ChevronRight className="size-4" />
@@ -384,10 +384,10 @@ function Index() {
                                 <Heart className="size-4" />
                               </button>
                             </div>
-                            <div className="p-3 md:p-4 space-y-2">
+                            <div className="p-3 md:p-4 space-y-2 text-center">
                               <div className="text-[11px] text-muted-foreground">{c.name_bn} · {p.unit}</div>
                               <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-                              <div className="flex items-baseline gap-1.5 pt-1">
+                              <div className="flex items-baseline justify-center gap-1.5 pt-1">
                                 <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
                                 {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
                               </div>
