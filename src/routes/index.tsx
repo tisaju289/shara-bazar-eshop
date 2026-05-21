@@ -175,6 +175,7 @@ function Index() {
   const offer = settings?.offer;
   const features = settings?.features ?? [];
   const footer = settings?.footer;
+  const sections = settings?.sections;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -303,8 +304,8 @@ function Index() {
       <section id="categories" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center mb-6 gap-2 text-center">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
-            <p className="text-muted-foreground text-sm">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sections?.categories_title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
+            <p className="text-muted-foreground text-sm">{sections?.categories_subtitle_bn || "যেটি দরকার, এক ক্লিকেই খুঁজে নিন"}</p>
           </div>
           <div className="flex flex-wrap justify-center gap-3 md:gap-4">
             {categories.slice(0, 8).map((c, i) => (
@@ -348,8 +349,8 @@ function Index() {
         <div className="container mx-auto px-4 space-y-10">
           <div className="flex flex-col items-center mb-2">
             <div className="text-center">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">আজকের তাজা পণ্য</h2>
-              <p className="text-muted-foreground text-sm mt-1">সরাসরি কৃষক থেকে সংগ্রহ করা</p>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sections?.products_title_bn || "আজকের তাজা পণ্য"}</h2>
+              <p className="text-muted-foreground text-sm mt-1">{sections?.products_subtitle_bn || "সরাসরি কৃষক থেকে সংগ্রহ করা"}</p>
             </div>
           </div>
 

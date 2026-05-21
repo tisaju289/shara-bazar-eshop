@@ -16,6 +16,12 @@ export type Offer = {
 };
 export type Feature = { icon: string; text_bn: string };
 export type Footer = { about_bn: string; phone: string; email: string; address_bn: string };
+export type Sections = {
+  categories_title_bn: string;
+  categories_subtitle_bn: string;
+  products_title_bn: string;
+  products_subtitle_bn: string;
+};
 
 export type SiteSettings = {
   brand: Brand;
@@ -25,6 +31,7 @@ export type SiteSettings = {
   offer: Offer;
   features: Feature[];
   footer: Footer;
+  sections: Sections;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -39,6 +46,12 @@ const DEFAULTS: SiteSettings = {
   offer: { enabled: false, label_bn: "", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "" },
   features: [],
   footer: { about_bn: "", phone: "", email: "", address_bn: "" },
+  sections: {
+    categories_title_bn: "জনপ্রিয় ক্যাটাগরি",
+    categories_subtitle_bn: "যেটি দরকার, এক ক্লিকেই খুঁজে নিন",
+    products_title_bn: "আজকের তাজা পণ্য",
+    products_subtitle_bn: "সরাসরি কৃষক থেকে সংগ্রহ করা",
+  },
 };
 
 export function useSiteSettings() {
