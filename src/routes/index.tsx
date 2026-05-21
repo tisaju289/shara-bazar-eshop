@@ -186,7 +186,7 @@ function Index() {
     setOrderForm({ name: "", phone: "", address: "" });
     setOrderDone(true);
     trackEvent("Purchase", {
-      value: checkoutTotal,
+      value: grandTotal,
       currency: "BDT",
       content_ids: Object.keys(checkoutItems),
       content_type: "product",
