@@ -192,8 +192,8 @@ function Index() {
         </div>
       )}
 
-      {/* Desktop Header */}
-      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
           <a href="/" className="flex items-center gap-2 shrink-0">
             {brand?.logo_url ? (
