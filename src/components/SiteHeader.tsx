@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search, ShoppingCart, MapPin, Phone, Leaf } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 /**
  * Shared site header for non-home pages.
