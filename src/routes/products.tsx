@@ -8,6 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -53,6 +54,7 @@ function useProducts() {
 
 function ProductsPage() {
   const { q, cat } = Route.useSearch();
+  const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
@@ -67,6 +69,10 @@ function ProductsPage() {
   const [placing, setPlacing] = useState(false);
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const deliveryOptions = (settings?.delivery?.enabled ? settings?.delivery?.options ?? [] : []).filter((o) => o.enabled);
+  const [deliveryIdx, setDeliveryIdx] = useState(0);
+  const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
+  const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
 
   // Sync when URL ?cat= changes
   useEffect(() => { setActiveCat(cat ?? "all"); }, [cat]);
@@ -121,6 +127,7 @@ function ProductsPage() {
     () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
+  const grandTotal = checkoutTotal + deliveryCharge;
 
   const placeOrder = async () => {
     setOrderError(null);
@@ -140,7 +147,7 @@ function ProductsPage() {
         phone: orderForm.phone.trim(),
         address: orderForm.address.trim(),
         items,
-        total: checkoutTotal,
+        total: grandTotal,
         payment_method: "cod",
       });
     setPlacing(false);
@@ -156,7 +163,7 @@ function ProductsPage() {
     setOrderForm({ name: "", phone: "", address: "" });
     setOrderDone(true);
     trackEvent("Purchase", {
-      value: checkoutTotal,
+      value: grandTotal,
       currency: "BDT",
       content_ids: Object.keys(checkoutItems),
       content_type: "product",
