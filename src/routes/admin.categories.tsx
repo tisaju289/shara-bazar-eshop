@@ -60,27 +60,48 @@ function AdminCategories() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="p-12 text-center"><Loader2 className="size-6 animate-spin inline text-primary" /></div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((c) => (
-            <div key={c.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:shadow-[var(--shadow-soft)] transition">
-              <div className="size-14 rounded-2xl grid place-items-center text-3xl overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                {c.image_url ? <img src={c.image_url} alt="" className="size-full object-cover" /> : c.emoji}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold">{c.name_bn}</div>
-                <div className="text-xs text-muted-foreground truncate">/{c.slug} · order {c.sort_order}</div>
-              </div>
-              <div className="flex gap-1">
-                <button onClick={() => openEdit(c)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Pencil className="size-4" /></button>
-                <button onClick={() => remove(c.id)} className="size-8 rounded-lg hover:bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center"><Loader2 className="size-6 animate-spin inline text-primary" /></div>
+        ) : items.length === 0 ? (
+          <div className="p-12 text-center text-muted-foreground text-sm">কোনো ক্যাটাগরি নেই।</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/60 text-left">
+                <tr>
+                  <th className="p-3 font-semibold">ক্যাটাগরি</th>
+                  <th className="p-3 font-semibold hidden md:table-cell">Slug</th>
+                  <th className="p-3 font-semibold hidden sm:table-cell">Sort</th>
+                  <th className="p-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((c) => (
+                  <tr key={c.id} className="border-t border-border hover:bg-secondary/30">
+                    <td className="p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-lg grid place-items-center text-2xl overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                          {c.image_url ? <img src={c.image_url} alt="" className="size-full object-cover" /> : c.emoji}
+                        </div>
+                        <div className="font-semibold">{c.name_bn}</div>
+                      </div>
+                    </td>
+                    <td className="p-3 text-muted-foreground hidden md:table-cell">/{c.slug}</td>
+                    <td className="p-3 hidden sm:table-cell">{c.sort_order}</td>
+                    <td className="p-3">
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => openEdit(c)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Pencil className="size-4" /></button>
+                        <button onClick={() => remove(c.id)} className="size-8 rounded-lg hover:bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4">
