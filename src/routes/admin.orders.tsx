@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Phone, MapPin, Package, Trash2, ChevronDown } from "lucide-react";
+import { Loader2, Phone, MapPin, Trash2, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin/orders")({
   component: AdminOrders,
