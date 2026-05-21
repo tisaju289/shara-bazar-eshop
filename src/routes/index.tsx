@@ -62,7 +62,7 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null;
 };
-type DBCategory = { id: string; name_bn: string; slug: string; emoji: string; sort_order: number; image_url: string | null };
+type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 function useCategories() {
   return useQuery({
