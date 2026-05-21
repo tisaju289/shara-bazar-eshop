@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -305,14 +305,17 @@ function Index() {
       {/* Categories */}
       <section id="categories" className="py-10 md:py-14">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-6 md:justify-start">
-            <div className="text-center md:text-left w-full md:w-auto">
+          <div className="flex items-end justify-between mb-6 gap-3">
+            <div className="text-center md:text-left">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ক্যাটাগরি</h2>
               <p className="text-muted-foreground text-sm mt-1">যেটি দরকার, এক ক্লিকেই খুঁজে নিন</p>
             </div>
+            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 shrink-0">
+              সব দেখুন <ChevronRight className="size-4" />
+            </Link>
           </div>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
-            {categories.map((c) => (
+            {categories.slice(0, 8).map((c) => (
               <button key={c.id} onClick={() => setActiveCat(c.id)}
                 className={`group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border transition ${activeCat === c.id ? "border-primary shadow-[var(--shadow-soft)]" : "border-border hover:border-primary"}`}>
                 <div className="size-12 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
