@@ -713,7 +713,7 @@ function Index() {
                     disabled={placing || Object.keys(checkoutItems).length === 0}
                     className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] inline-flex items-center justify-center gap-2 disabled:opacity-60"
                   >
-                    {placing ? <><Loader2 className="size-4 animate-spin" /> অর্ডার হচ্ছে...</> : `অর্ডার নিশ্চিত করুন · ৳${checkoutTotal}`}
+                    {placing ? <><Loader2 className="size-4 animate-spin" /> অর্ডার হচ্ছে...</> : `অর্ডার নিশ্চিত করুন · ৳${grandTotal}`}
                   </button>
                 </div>
               </>
