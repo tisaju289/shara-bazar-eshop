@@ -102,6 +102,10 @@ function Index() {
   const [placing, setPlacing] = useState(false);
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const deliveryOptions = (settings?.delivery?.enabled ? settings?.delivery?.options ?? [] : []).filter((o) => o.enabled);
+  const [deliveryIdx, setDeliveryIdx] = useState(0);
+  const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
+  const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
 
   const add = (id: string) => {
     setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
@@ -145,6 +149,7 @@ function Index() {
     () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
+  const grandTotal = checkoutTotal + deliveryCharge;
 
   const placeOrder = async () => {
     setOrderError(null);
@@ -164,7 +169,7 @@ function Index() {
         phone: orderForm.phone.trim(),
         address: orderForm.address.trim(),
         items,
-        total: checkoutTotal,
+        total: grandTotal,
         payment_method: "cod",
       });
     setPlacing(false);
