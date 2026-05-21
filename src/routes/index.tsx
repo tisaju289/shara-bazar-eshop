@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, X, Plus, Minus, ChevronLeft,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
-  Home, LayoutGrid, CheckCircle2,
+  Home, LayoutGrid, Package, CheckCircle2,
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
@@ -627,14 +627,14 @@ function Index() {
             <Home className="size-5" />
             <span className="text-[10px] font-medium">হোম</span>
           </button>
-          <button onClick={() => { setSearchOpen((s) => !s); window.scrollTo({ top: 1, behavior: "smooth" }); }} className={`flex flex-col items-center gap-0.5 p-2 hover:text-primary transition min-w-[64px] ${searchOpen ? "text-primary" : "text-muted-foreground"}`}>
-            <Search className="size-5" />
-            <span className="text-[10px] font-medium">সার্চ</span>
-          </button>
-          <button onClick={() => { const el = document.getElementById("categories"); if (el) el.scrollIntoView({ behavior: "smooth" }); }} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+          <Link to="/categories" className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
             <LayoutGrid className="size-5" />
             <span className="text-[10px] font-medium">ক্যাটাগরি</span>
-          </button>
+          </Link>
+          <Link to="/products" className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+            <Package className="size-5" />
+            <span className="text-[10px] font-medium">পণ্য</span>
+          </Link>
           <button onClick={() => setCartOpen(true)} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px] relative">
             <ShoppingCart className="size-5" />
             {cartCount > 0 && (
