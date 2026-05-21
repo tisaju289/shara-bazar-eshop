@@ -22,6 +22,14 @@ export function SiteHeader() {
     navigate({ to: "/products", search: { q: q.trim() || undefined } as any });
   };
 
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileQ, setMobileQ] = useState("");
+  const mobileSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchOpen(false);
+    navigate({ to: "/products", search: { q: mobileQ.trim() || undefined } as any });
+  };
+
   return (
     <>
       {/* Desktop top utility bar */}
