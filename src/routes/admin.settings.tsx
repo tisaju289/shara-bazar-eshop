@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer" | "tracking";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -24,6 +24,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "features", label: "ফিচার" },
   { key: "footer", label: "ফুটার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
+  { key: "delivery", label: "ডেলিভারি চার্জ" },
 ];
 
 function SettingsPage() {
@@ -80,6 +81,7 @@ function SettingsPage() {
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
+        {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
 
         <div className="pt-3 flex justify-end">
           <button onClick={saveTab} disabled={saving}
