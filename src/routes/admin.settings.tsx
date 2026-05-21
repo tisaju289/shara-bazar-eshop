@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageInput } from "@/components/ImageInput";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "সাইট সেটিংস — অ্যাডমিন" }] }),
