@@ -75,7 +75,7 @@ function ProductsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Link to="/" className="size-9 rounded-full grid place-items-center bg-secondary hover:bg-secondary/80 shrink-0">
             <ChevronLeft className="size-5" />
