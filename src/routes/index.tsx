@@ -342,8 +342,8 @@ function Index() {
       {/* Products grouped by category */}
       <section id="shop" className="py-10 md:py-14">
         <div className="container mx-auto px-4 space-y-10">
-          <div className="flex items-end justify-between mb-2">
-            <div className="text-center ">
+          <div className="flex flex-col items-center mb-2">
+            <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">আজকের তাজা পণ্য</h2>
               <p className="text-muted-foreground text-sm mt-1">সরাসরি কৃষক থেকে সংগ্রহ করা</p>
             </div>
