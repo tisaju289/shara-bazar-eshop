@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tan
 import { useAuth } from "@/hooks/useAuth";
 import { Leaf, LayoutDashboard, Package, Tags, Settings, LogOut, Loader2, Menu, Globe, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "অ্যাডমিন প্যানেল — তাজা বাজার" }] }),
@@ -13,6 +14,8 @@ function AdminLayout() {
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { data: settings } = useSiteSettings();
+  const brand = settings?.brand;
 
   if (loading) {
     return (
@@ -57,11 +60,15 @@ function AdminLayout() {
   const SidebarBody = () => (
     <>
       <div className="px-5 py-5 flex items-center gap-2">
-        <div className="size-10 rounded-2xl grid place-items-center text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
-          <Leaf className="size-5" />
-        </div>
+        {brand?.logo_url ? (
+          <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
+        ) : (
+          <div className="size-10 rounded-2xl grid place-items-center text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
+            <Leaf className="size-5" />
+          </div>
+        )}
         <div>
-          <div className="font-extrabold text-[var(--leaf-deep)]">তাজা বাজার</div>
+          <div className="font-extrabold text-[var(--leaf-deep)]">{brand?.name_bn || "তাজা বাজার"}</div>
           <div className="text-[10px] text-muted-foreground">অ্যাডমিন প্যানেল</div>
         </div>
       </div>
