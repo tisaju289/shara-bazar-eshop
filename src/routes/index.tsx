@@ -163,12 +163,6 @@ function Index() {
     [cart, products],
   );
 
-  const filtered = products.filter((p) => {
-    const matchesCat = activeCat === "all" || p.category_id === activeCat;
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch = !q || p.name_bn.toLowerCase().includes(q);
-    return matchesCat && matchesSearch;
-  });
   const catCounts = useMemo(() => {
     const m: Record<string, number> = {};
     for (const p of products) if (p.category_id) m[p.category_id] = (m[p.category_id] ?? 0) + 1;
