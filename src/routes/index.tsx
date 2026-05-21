@@ -62,7 +62,7 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null;
 };
-type DBCategory = { id: string; name_bn: string; slug: string; emoji: string; sort_order: number; image_url: string | null };
+type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 function useCategories() {
   return useQuery({
@@ -316,7 +316,7 @@ function Index() {
               <button key={c.id} onClick={() => setActiveCat(c.id)}
                 className={`group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border transition ${activeCat === c.id ? "border-primary shadow-[var(--shadow-soft)]" : "border-border hover:border-primary"}`}>
                 <div className="size-12 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                  {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : c.emoji}
+                  {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
                 </div>
                 <div className="text-[11px] md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
                 <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
@@ -437,7 +437,7 @@ function Index() {
           <div>
             <h4 className="font-bold mb-3">ক্যাটাগরি</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/75">
-              {categories.slice(0, 5).map((c) => <li key={c.id}>{c.emoji} {c.name_bn}</li>)}
+              {categories.slice(0, 5).map((c) => <li key={c.id}>{c.name_bn}</li>)}
             </ul>
           </div>
           <div>

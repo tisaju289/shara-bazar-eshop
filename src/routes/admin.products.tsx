@@ -20,7 +20,7 @@ type Product = {
   stock: number;
   is_active: boolean;
 };
-type Category = { id: string; name_bn: string; emoji: string };
+type Category = { id: string; name_bn: string };
 
 const emptyForm: Omit<Product, "id"> = {
   name_bn: "", category_id: null, unit: "১ কেজি", price: 0, old_price: null,
@@ -41,7 +41,7 @@ function AdminProducts() {
     setLoading(true);
     const [{ data: ps }, { data: cs }] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
-      supabase.from("categories").select("id, name_bn, emoji").order("sort_order"),
+      supabase.from("categories").select("id, name_bn").order("sort_order"),
     ]);
     setItems((ps as Product[]) ?? []);
     setCats((cs as Category[]) ?? []);
@@ -175,7 +175,7 @@ function AdminProducts() {
               <Field label="ক্যাটাগরি">
                 <select value={form.category_id ?? ""} onChange={(e) => setForm({ ...form, category_id: e.target.value || null })} className="input">
                   <option value="">— নির্বাচন করুন —</option>
-                  {cats.map((c) => <option key={c.id} value={c.id}>{c.emoji} {c.name_bn}</option>)}
+                  {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
                 </select>
               </Field>
               <div className="grid grid-cols-2 gap-3">

@@ -17,7 +17,6 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
-          emoji: string
           id: string
           image_url: string | null
           name_bn: string
@@ -26,7 +25,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          emoji?: string
           id?: string
           image_url?: string | null
           name_bn: string
@@ -35,7 +33,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          emoji?: string
           id?: string
           image_url?: string | null
           name_bn?: string

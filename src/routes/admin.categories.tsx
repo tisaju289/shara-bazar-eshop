@@ -8,14 +8,14 @@ export const Route = createFileRoute("/admin/categories")({
   component: AdminCategories,
 });
 
-type Cat = { id: string; name_bn: string; slug: string; emoji: string; sort_order: number; image_url: string | null };
+type Cat = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 function AdminCategories() {
   const [items, setItems] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Cat | null>(null);
-  const [form, setForm] = useState({ name_bn: "", slug: "", emoji: "🛒", sort_order: 0, image_url: "" });
+  const [form, setForm] = useState({ name_bn: "", slug: "", sort_order: 0, image_url: "" });
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -26,8 +26,8 @@ function AdminCategories() {
   };
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm({ name_bn: "", slug: "", emoji: "🛒", sort_order: items.length + 1, image_url: "" }); setOpen(true); };
-  const openEdit = (c: Cat) => { setEditing(c); setForm({ name_bn: c.name_bn, slug: c.slug, emoji: c.emoji, sort_order: c.sort_order, image_url: c.image_url ?? "" }); setOpen(true); };
+  const openNew = () => { setEditing(null); setForm({ name_bn: "", slug: "", sort_order: items.length + 1, image_url: "" }); setOpen(true); };
+  const openEdit = (c: Cat) => { setEditing(c); setForm({ name_bn: c.name_bn, slug: c.slug, sort_order: c.sort_order, image_url: c.image_url ?? "" }); setOpen(true); };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +82,7 @@ function AdminCategories() {
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg grid place-items-center text-2xl overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                          {c.image_url ? <img src={c.image_url} alt="" className="size-full object-cover" /> : c.emoji}
+                          {c.image_url ? <img src={c.image_url} alt="" className="size-full object-cover" /> : "🛒"}
                         </div>
                         <div className="font-semibold">{c.name_bn}</div>
                       </div>
@@ -115,14 +115,9 @@ function AdminCategories() {
               <label className="block"><span className="text-sm font-medium block mb-1">নাম (বাংলা)</span>
                 <input required value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
               </label>
-              <div className="grid grid-cols-3 gap-3">
-                <label className="block col-span-1"><span className="text-sm font-medium block mb-1">ইমোজি</span>
-                  <input required value={form.emoji} onChange={(e) => setForm({ ...form, emoji: e.target.value })} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary text-center text-xl" />
-                </label>
-                <label className="block col-span-2"><span className="text-sm font-medium block mb-1">Slug</span>
-                  <input required value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
-                </label>
-              </div>
+              <label className="block"><span className="text-sm font-medium block mb-1">Slug</span>
+                <input required value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </label>
               <label className="block"><span className="text-sm font-medium block mb-1">Sort Order</span>
                 <input required type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
               </label>
