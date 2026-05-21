@@ -339,3 +339,36 @@ function TrackingTab({ v, on }: { v: SiteSettings["tracking"]; on: (v: SiteSetti
     </div>
   );
 }
+
+function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSettings["delivery"]) => void }) {
+  const setOpt = (i: number, patch: Partial<SiteSettings["delivery"]["options"][number]>) => {
+    const next = v.options.map((o, idx) => (idx === i ? { ...o, ...patch } : o));
+    on({ ...v, options: next });
+  };
+  return (
+    <div className="space-y-6">
+      <label className="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" checked={v.enabled} onChange={(e) => on({ ...v, enabled: e.target.checked })} className="size-4 accent-primary" />
+        <span className="text-sm font-semibold">ডেলিভারি চার্জ অপশন চালু করুন</span>
+      </label>
+      <p className="text-xs text-muted-foreground">চেকআউট পপআপে এই অপশনগুলো রেডিও আকারে দেখানো হবে। কাস্টমার একটি বেছে নিতে পারবে এবং চার্জ মোট অর্ডারে যুক্ত হবে।</p>
+      <div className="space-y-4">
+        {v.options.map((o, i) => (
+          <div key={i} className="rounded-2xl border border-border p-4 space-y-3 bg-secondary/30">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-muted-foreground">অপশন {i + 1}</span>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" checked={o.enabled} onChange={(e) => setOpt(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
+                <span>সক্রিয়</span>
+              </label>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="লেবেল (বাংলা)"><input className={inputCls} value={o.label_bn} onChange={(e) => setOpt(i, { label_bn: e.target.value })} placeholder="যেমন: ঢাকার ভিতরে" /></Field>
+              <Field label="চার্জ (৳)"><input type="number" min={0} className={inputCls} value={o.charge} onChange={(e) => setOpt(i, { charge: Number(e.target.value) || 0 })} /></Field>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
