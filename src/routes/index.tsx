@@ -558,14 +558,44 @@ function Index() {
                   <button onClick={() => !placing && setCheckoutOpen(false)}><X /></button>
                 </div>
                 <div className="p-4 space-y-4">
-                  <div className="bg-secondary/50 rounded-2xl p-3 space-y-2">
+                  <div className="bg-secondary/50 rounded-2xl p-3 space-y-3">
                     {Object.entries(checkoutItems).map(([id, q]) => {
                       const p = products.find((x) => x.id === id);
                       if (!p) return null;
                       return (
-                        <div key={id} className="flex justify-between text-sm">
-                          <span className="truncate pr-2">{p.name_bn} × {q}</span>
-                          <span className="font-semibold whitespace-nowrap">৳{p.price * q}</span>
+                        <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
+                          {p.image_url ? (
+                            <img src={p.image_url} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
+                          ) : (
+                            <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
+                          )}
+                          <div className="flex-1 min-w-0 text-sm">
+                            <div className="font-semibold leading-tight truncate">{p.name_bn}</div>
+                            <div className="text-xs text-muted-foreground">৳{p.price} · ৳{p.price * q}</div>
+                          </div>
+                          <div className="flex items-center gap-1 bg-secondary rounded-lg shrink-0">
+                            <button
+                              onClick={() =>
+                                setCheckoutItems((prev) => {
+                                  const next = { ...prev };
+                                  const nq = (next[id] ?? 0) - 1;
+                                  if (nq <= 0) delete next[id];
+                                  else next[id] = nq;
+                                  return next;
+                                })
+                              }
+                              className="size-7 grid place-items-center"
+                            >
+                              <Minus className="size-3.5" />
+                            </button>
+                            <span className="text-sm font-bold w-5 text-center">{q}</span>
+                            <button
+                              onClick={() => setCheckoutItems((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }))}
+                              className="size-7 grid place-items-center"
+                            >
+                              <Plus className="size-3.5" />
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
