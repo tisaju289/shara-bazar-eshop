@@ -4,6 +4,12 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+export type SiteHeaderProps = {
+  cartCount?: number;
+  cartTotal?: number;
+  onCartClick?: () => void;
+};
+
 /**
  * Shared site header for non-home pages.
  * - Desktop: full header (topbar + logo + search + cart link to home)
