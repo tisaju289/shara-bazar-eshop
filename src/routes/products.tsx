@@ -206,7 +206,7 @@ function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
+      <SiteHeader cartCount={cartCount} cartTotal={cartTotal} onCartClick={() => setCartOpen(true)} />
 
       <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4 space-y-6">
@@ -490,17 +490,6 @@ function ProductsPage() {
         </div>
       </nav>
 
-      {/* Desktop floating cart button */}
-      <button
-        onClick={() => setCartOpen(true)}
-        className="hidden md:flex fixed bottom-6 right-6 z-50 h-14 px-5 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] items-center gap-2 hover:opacity-90"
-      >
-        <ShoppingCart className="size-5" />
-        <span>কার্ট</span>
-        {cartCount > 0 && (
-          <span className="size-6 rounded-full bg-[var(--chili)] text-white text-xs grid place-items-center font-bold">{cartCount}</span>
-        )}
-      </button>
     </div>
   );
 }

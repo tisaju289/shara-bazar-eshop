@@ -4,12 +4,18 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+export type SiteHeaderProps = {
+  cartCount?: number;
+  cartTotal?: number;
+  onCartClick?: () => void;
+};
+
 /**
  * Shared site header for non-home pages.
  * - Desktop: full header (topbar + logo + search + cart link to home)
  * - Mobile: compact bar with logo centered
  */
-export function SiteHeader() {
+export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProps = {}) {
   const { data: settings } = useSiteSettings();
   const brand = settings?.brand;
   const topbar = settings?.topbar;
@@ -77,10 +83,20 @@ export function SiteHeader() {
             </div>
           </form>
 
-          <Link to="/" className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
-            <ShoppingCart className="size-5" />
-            <span className="hidden sm:inline text-sm font-semibold">কার্ট</span>
-          </Link>
+          {onCartClick ? (
+            <button onClick={onCartClick} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
+              <ShoppingCart className="size-5" />
+              <span className="hidden sm:inline text-sm font-semibold">{cartTotal ? `৳${cartTotal}` : "কার্ট"}</span>
+              {!!cartCount && (
+                <span className="absolute -top-1 -right-1 size-5 rounded-full bg-[var(--chili)] text-white text-[11px] grid place-items-center font-bold">{cartCount}</span>
+              )}
+            </button>
+          ) : (
+            <Link to="/" className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
+              <ShoppingCart className="size-5" />
+              <span className="hidden sm:inline text-sm font-semibold">কার্ট</span>
+            </Link>
+          )}
         </div>
       </header>
 

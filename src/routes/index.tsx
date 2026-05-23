@@ -277,7 +277,7 @@ function Index() {
 
       {/* Mobile site header (logo + search) */}
       <div className="md:hidden">
-        <SiteHeader />
+        <SiteHeader cartCount={cartCount} cartTotal={cartTotal} onCartClick={() => setCartOpen(true)} />
       </div>
 
       {/* Mobile search bar (toggleable) */}
