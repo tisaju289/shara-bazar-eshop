@@ -13,14 +13,13 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "topbar", label: "টপ বার" },
   { key: "hero", label: "হিরো সেকশন" },
-  { key: "sections", label: "সেকশন হেডিং" },
   { key: "home_sections", label: "হোম সেকশন" },
   { key: "offer", label: "অফার ব্যানার" },
   { key: "features", label: "ফিচার" },
@@ -48,9 +47,18 @@ function SettingsPage() {
   const saveTab = async () => {
     if (!draft) return;
     setSaving(true);
+    // The "home_sections" tab also edits the legacy "sections" headings,
+    // so persist both keys together when saving that tab.
+    const rows =
+      tab === "home_sections"
+        ? [
+            { key: "home_sections", value: draft.home_sections },
+            { key: "sections", value: draft.sections },
+          ]
+        : [{ key: tab, value: draft[tab] }];
     const { error } = await (supabase as any)
       .from("site_settings")
-      .upsert({ key: tab, value: draft[tab] }, { onConflict: "key" });
+      .upsert(rows, { onConflict: "key" });
     setSaving(false);
     if (error) return toast.error("সেভ ব্যর্থ: " + error.message);
     toast.success("সেভ হয়েছে");
@@ -78,8 +86,14 @@ function SettingsPage() {
         {tab === "seo" && <SeoTab v={draft.seo} on={(v) => update("seo", v)} />}
         {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
         {tab === "hero" && <HeroTab v={draft.hero} on={(v) => update("hero", v)} />}
-        {tab === "sections" && <SectionsTab v={draft.sections} on={(v) => update("sections", v)} />}
-        {tab === "home_sections" && <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />}
+        {tab === "home_sections" && (
+          <HomeSectionsTab
+            v={draft.home_sections}
+            on={(v) => update("home_sections", v)}
+            sections={draft.sections}
+            onSections={(v) => update("sections", v)}
+          />
+        )}
         {tab === "offer" && <OfferTab v={draft.offer} on={(v) => update("offer", v)} />}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
