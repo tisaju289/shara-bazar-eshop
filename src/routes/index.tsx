@@ -213,11 +213,8 @@ function Index() {
 
   const brand = settings?.brand;
   const topbar = settings?.topbar;
-  const hero = settings?.hero;
-  const offer = settings?.offer;
   const features = settings?.features ?? [];
   const footer = settings?.footer;
-  const sections = settings?.sections;
   const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
 
   return (
@@ -302,106 +299,154 @@ function Index() {
 
 
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="space-y-6 hidden md:block">
-            {hero?.badge_bn && (
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
-                <Leaf className="size-3.5" /> {hero.badge_bn}
-              </span>
-            )}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.05] text-[var(--leaf-deep)]">
-              {hero?.title_bn} <br />
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-hero)" }}>
-                {hero?.title_highlight_bn}
-              </span>{" "}
-              {hero?.title_suffix_bn}
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-lg">{hero?.subtitle_bn}</p>
-            <div className="flex flex-wrap gap-3">
-              {hero?.cta_primary_enabled !== false && (
-                <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
-                  {hero?.cta_primary_bn} <ChevronRight className="size-4" />
-                </a>
-              )}
-              {hero?.cta_secondary_enabled !== false && (
-                <a href="#categories" className="h-12 px-6 rounded-full bg-secondary text-secondary-foreground font-semibold inline-flex items-center hover:bg-secondary/80">
-                  {hero?.cta_secondary_bn}
-                </a>
-              )}
-            </div>
-            {features.length > 0 && (
-              <div className="flex flex-wrap gap-6 pt-4 text-sm">
-                {features.map((f, i) => {
-                  const Icon = ICONS[f.icon] ?? Leaf;
-                  return <div key={i} className="flex items-center gap-2"><Icon className="size-5 text-primary" /> {f.text_bn}</div>;
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
-            <HeroSlider images={(hero?.images ?? []).filter(Boolean)} fallback={hero?.image_url || heroImg} />
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section id="categories" className="py-10 md:py-14">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center mb-6 gap-2 text-center">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sections?.categories_title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
-            <p className="text-muted-foreground text-sm">{sections?.categories_subtitle_bn || "যেটি দরকার, এক ক্লিকেই খুঁজে নিন"}</p>
-          </div>
-          <div className="grid grid-cols-4 md:flex md:flex-wrap md:justify-center gap-2 md:gap-4">
-            {categories.slice(0, 8).map((c, i) => (
-              <Link key={c.id} to="/products"
-                search={{ cat: c.id }}
-                className={`group flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-full md:w-[calc(12.5%-0.875rem)] md:min-w-[80px] ${i >= 4 ? "hidden md:flex" : ""}`}>
-                <div className="size-11 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                  {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
-                </div>
-                <div className="text-[11px] md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
-                <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
-              </Link>
-            ))}
-          </div>
-          <div className="flex justify-center mt-6">
-            <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
-              সব দেখুন <ChevronRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Offer banner */}
-      {offer?.enabled && (
-        <section id="offer" className="py-6 md:py-10">
-          <div className="container mx-auto px-4">
-            <div className="rounded-3xl p-6 md:p-10 relative overflow-hidden text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
-              <div className="absolute -right-10 -top-10 size-48 rounded-full bg-white/10 blur-2xl" />
-              <div className="relative max-w-xl space-y-3 text-center  mx-auto ">
-                <span className="inline-block text-xs font-bold tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full">{offer.label_bn}</span>
-                <h3 className="text-2xl md:text-4xl font-extrabold leading-tight">{offer.title_bn}</h3>
-                <p className="text-primary-foreground/85 text-sm md:text-base">{offer.subtitle_bn} — <span className="font-bold tracking-wider">{offer.coupon_code}</span> · {offer.min_order_bn}</p>
-                <a href="#shop" className="inline-flex items-center gap-2 mt-2 h-11 px-6 rounded-full bg-white text-[var(--leaf-deep)] font-semibold mx-auto ">{offer.cta_bn} <ChevronRight className="size-4" /></a>
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* Admin-configurable home sections */}
+      {prodLoading && (
+        <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
       )}
-
-      {/* Custom home sections (admin-configurable) */}
-      {homeSections.map((sec) => {
+      {!prodLoading && homeSections.map((sec) => {
+        if (sec.type === "hero") {
+          return (
+            <section key={sec.id} className="relative overflow-hidden">
+              <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div className="space-y-6 hidden md:block">
+                  {sec.badge_bn && (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
+                      <Leaf className="size-3.5" /> {sec.badge_bn}
+                    </span>
+                  )}
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.05] text-[var(--leaf-deep)]">
+                    {sec.title_bn} <br />
+                    <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-hero)" }}>
+                      {sec.title_highlight_bn}
+                    </span>{" "}
+                    {sec.title_suffix_bn}
+                  </h1>
+                  <p className="text-base md:text-lg text-muted-foreground max-w-lg">{sec.subtitle_bn}</p>
+                  <div className="flex flex-wrap gap-3">
+                    {sec.cta_primary_enabled !== false && (
+                      <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
+                        {sec.cta_primary_bn} <ChevronRight className="size-4" />
+                      </a>
+                    )}
+                    {sec.cta_secondary_enabled !== false && (
+                      <a href="#categories" className="h-12 px-6 rounded-full bg-secondary text-secondary-foreground font-semibold inline-flex items-center hover:bg-secondary/80">
+                        {sec.cta_secondary_bn}
+                      </a>
+                    )}
+                  </div>
+                  {features.length > 0 && (
+                    <div className="flex flex-wrap gap-6 pt-4 text-sm">
+                      {features.map((f, i) => {
+                        const Icon = ICONS[f.icon] ?? Leaf;
+                        return <div key={i} className="flex items-center gap-2"><Icon className="size-5 text-primary" /> {f.text_bn}</div>;
+                      })}
+                    </div>
+                  )}
+                </div>
+                <div className="relative">
+                  <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
+                  <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} />
+                </div>
+              </div>
+            </section>
+          );
+        }
+        if (sec.type === "category") {
+          return (
+            <section key={sec.id} id="categories" className="py-10 md:py-14">
+              <div className="container mx-auto px-4">
+                <div className="flex flex-col items-center mb-6 gap-2 text-center">
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
+                  {sec.subtitle_bn && <p className="text-muted-foreground text-sm">{sec.subtitle_bn}</p>}
+                </div>
+                <div className="grid grid-cols-4 md:flex md:flex-wrap md:justify-center gap-2 md:gap-4">
+                  {categories.slice(0, 8).map((c, i) => (
+                    <Link key={c.id} to="/products" search={{ cat: c.id }}
+                      className={`group flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition w-full md:w-[calc(12.5%-0.875rem)] md:min-w-[80px] ${i >= 4 ? "hidden md:flex" : ""}`}>
+                      <div className="size-11 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                        {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
+                      </div>
+                      <div className="text-[11px] md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
+                      <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="flex justify-center mt-6">
+                  <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                    সব দেখুন <ChevronRight className="size-4" />
+                  </Link>
+                </div>
+              </div>
+            </section>
+          );
+        }
+        if (sec.type === "offer") {
+          return (
+            <section key={sec.id} className="py-6 md:py-10">
+              <div className="container mx-auto px-4">
+                <div className="rounded-3xl p-6 md:p-10 relative overflow-hidden text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
+                  <div className="absolute -right-10 -top-10 size-48 rounded-full bg-white/10 blur-2xl" />
+                  <div className="relative max-w-xl space-y-3 text-center mx-auto">
+                    {sec.label_bn && <span className="inline-block text-xs font-bold tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full">{sec.label_bn}</span>}
+                    <h3 className="text-2xl md:text-4xl font-extrabold leading-tight">{sec.title_bn}</h3>
+                    <p className="text-primary-foreground/85 text-sm md:text-base">
+                      {sec.subtitle_bn}
+                      {sec.coupon_code && <> — <span className="font-bold tracking-wider">{sec.coupon_code}</span></>}
+                      {sec.min_order_bn && <> · {sec.min_order_bn}</>}
+                    </p>
+                    {sec.cta_bn && <a href="#shop" className="inline-flex items-center gap-2 mt-2 h-11 px-6 rounded-full bg-white text-[var(--leaf-deep)] font-semibold mx-auto">{sec.cta_bn} <ChevronRight className="size-4" /></a>}
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+        if (sec.type === "banner") {
+          if (!sec.image_url) return null;
+          const img = (
+            <div className="rounded-3xl overflow-hidden relative">
+              <img src={sec.image_url} alt={sec.caption_bn || "banner"} className="w-full h-auto object-cover" />
+              {sec.caption_bn && (
+                <div className="absolute inset-x-0 bottom-0 p-4 md:p-6 bg-gradient-to-t from-black/60 to-transparent text-white font-semibold">
+                  {sec.caption_bn}
+                </div>
+              )}
+            </div>
+          );
+          return (
+            <section key={sec.id} className="py-6 md:py-10">
+              <div className="container mx-auto px-4">
+                {sec.link ? <a href={sec.link}>{img}</a> : img}
+              </div>
+            </section>
+          );
+        }
+        // product
         const items = (sec.category_id
           ? products.filter((p) => p.category_id === sec.category_id)
-          : products
+          : (() => {
+              // mix across categories so same-cat items spread out
+              const byCat: Record<string, typeof products> = {};
+              for (const p of products) {
+                const k = p.category_id ?? "__none";
+                (byCat[k] ||= []).push(p);
+              }
+              const ks = Object.keys(byCat);
+              const mixed: typeof products = [];
+              let pos = 0, more = true;
+              while (more) {
+                more = false;
+                for (const k of ks) {
+                  if (pos < byCat[k].length) { mixed.push(byCat[k][pos]); more = true; }
+                }
+                pos++;
+              }
+              return mixed;
+            })()
         ).slice(0, sec.limit);
         if (items.length === 0) return null;
         return (
-          <section key={sec.id} className="py-8 md:py-12">
+          <section key={sec.id} id="shop" className="py-8 md:py-12">
             <div className="container mx-auto px-4 space-y-6">
               <div className="flex flex-col items-center text-center">
                 <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
@@ -419,6 +464,9 @@ function Index() {
                           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
                         )}
                         {p.tag && <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>}
+                        <button className="absolute top-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
+                          <Heart className="size-4" />
+                        </button>
                       </div>
                       <div className="p-3 md:p-4 space-y-2 text-center">
                         <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
@@ -452,107 +500,13 @@ function Index() {
         );
       })}
 
-      {/* Products grouped by category */}
-      <section id="shop" className="py-10 md:py-14">
-        <div className="container mx-auto px-4 space-y-10">
-          <div className="flex flex-col items-center mb-2">
-            <div className="text-center">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sections?.products_title_bn || "আজকের তাজা পণ্য"}</h2>
-              <p className="text-muted-foreground text-sm mt-1">{sections?.products_subtitle_bn || "সরাসরি কৃষক থেকে সংগ্রহ করা"}</p>
-            </div>
-          </div>
-
-          {prodLoading ? (
-            <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
-          ) : products.length === 0 ? (
-            <p className="text-center text-muted-foreground py-20">এখনো কোনো পণ্য নেই। অ্যাডমিন প্যানেল থেকে পণ্য যোগ করুন।</p>
-          ) : (
-            <>
-              {(() => {
-                // Interleave products by category so same-category items are spread apart
-                const byCat: Record<string, typeof products> = {};
-                for (const p of products) {
-                  const cat = p.category_id ?? "__none";
-                  if (!byCat[cat]) byCat[cat] = [];
-                  byCat[cat].push(p);
-                }
-                const catIds = Object.keys(byCat);
-                const mixed: typeof products = [];
-                let pos = 1;
-                let hasMore = true;
-                while (hasMore) {
-                  hasMore = false;
-                  for (const cat of catIds) {
-                    const idx = pos - 1;
-                    if (idx < byCat[cat].length) {
-                      mixed.push(byCat[cat][idx]);
-                      hasMore = true;
-                    }
-                  }
-                  pos++;
-                }
-                return (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                    {mixed.map((p) => {
-                      const qty = cart[p.id] ?? 0;
-                      return (
-                        <article key={p.id} className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
-                          <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                            {p.image_url ? (
-                              <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
-                            ) : (
-                              <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
-                            )}
-                            {p.tag && (
-                              <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
-                            )}
-                            <button className="absolute top-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
-                              <Heart className="size-4" />
-                            </button>
-                          </div>
-                          <div className="p-3 md:p-4 space-y-2 text-center">
-                            <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-                            <div className="flex items-baseline justify-center gap-1.5 pt-1">
-                              <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
-                              {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 pt-1">
-                              {qty === 0 ? (
-                                <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
-                                  <Plus className="size-3.5" /> কার্ট
-                                </button>
-                              ) : (
-                                <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
-                                  <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
-                                  <span className="text-xs font-bold">{qty}</span>
-                                  <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
-                                </div>
-                              )}
-                              <button
-                                onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
-                                className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
-                              >
-                                এখনই কিনুন
-                              </button>
-                            </div>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-
-              {/* All products CTA */}
-              <div className="text-center pt-6">
-                <Link to="/products" className="inline-flex items-center gap-2 h-12 px-8 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
-                  সব পণ্য দেখুন <ChevronRight className="size-4" />
-                </Link>
-              </div>
-            </>
-          )}
+      {!prodLoading && products.length > 0 && (
+        <div className="container mx-auto px-4 text-center pb-10">
+          <Link to="/products" className="inline-flex items-center gap-2 h-12 px-8 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
+            সব পণ্য দেখুন <ChevronRight className="size-4" />
+          </Link>
         </div>
-      </section>
+      )}
 
       {/* Footer */}
       <footer className="bg-[var(--leaf-deep)] text-primary-foreground/90 pt-12 pb-20 md:pb-6 mt-8">

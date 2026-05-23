@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type SiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType } from "@/hooks/useSiteSettings";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,15 +13,13 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "topbar" | "home_sections" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "topbar", label: "টপ বার" },
-  { key: "hero", label: "হিরো সেকশন" },
   { key: "home_sections", label: "হোম সেকশন" },
-  { key: "offer", label: "অফার ব্যানার" },
   { key: "features", label: "ফিচার" },
   { key: "footer", label: "ফুটার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
@@ -47,15 +45,7 @@ function SettingsPage() {
   const saveTab = async () => {
     if (!draft) return;
     setSaving(true);
-    // The "home_sections" tab also edits the legacy "sections" headings,
-    // so persist both keys together when saving that tab.
-    const rows =
-      tab === "home_sections"
-        ? [
-            { key: "home_sections", value: draft.home_sections },
-            { key: "sections", value: draft.sections },
-          ]
-        : [{ key: tab, value: draft[tab] }];
+    const rows = [{ key: tab, value: (draft as any)[tab] }];
     const { error } = await (supabase as any)
       .from("site_settings")
       .upsert(rows, { onConflict: "key" });
@@ -85,16 +75,9 @@ function SettingsPage() {
         {tab === "brand" && <BrandTab v={draft.brand} on={(v) => update("brand", v)} />}
         {tab === "seo" && <SeoTab v={draft.seo} on={(v) => update("seo", v)} />}
         {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
-        {tab === "hero" && <HeroTab v={draft.hero} on={(v) => update("hero", v)} />}
         {tab === "home_sections" && (
-          <HomeSectionsTab
-            v={draft.home_sections}
-            on={(v) => update("home_sections", v)}
-            sections={draft.sections}
-            onSections={(v) => update("sections", v)}
-          />
+          <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />
         )}
-        {tab === "offer" && <OfferTab v={draft.offer} on={(v) => update("offer", v)} />}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
@@ -112,11 +95,9 @@ function SettingsPage() {
   );
 }
 
-function HomeSectionsTab({ v, on, sections, onSections }: {
-  v: SiteSettings["home_sections"];
-  on: (v: SiteSettings["home_sections"]) => void;
-  sections: SiteSettings["sections"];
-  onSections: (v: SiteSettings["sections"]) => void;
+function HomeSectionsTab({ v, on }: {
+  v: HomeSection[];
+  on: (v: HomeSection[]) => void;
 }) {
   const { data: cats = [] } = useQuery({
     queryKey: ["categories", "admin-options"],
@@ -126,14 +107,24 @@ function HomeSectionsTab({ v, on, sections, onSections }: {
       return data ?? [];
     },
   });
-  const setItem = (i: number, patch: Partial<SiteSettings["home_sections"][number]>) => {
-    on(v.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+  const setItem = (i: number, patch: Partial<HomeSection>) => {
+    on(v.map((s, idx) => (idx === i ? ({ ...s, ...patch } as HomeSection) : s)));
   };
-  const addItem = () => {
-    on([
-      ...v,
-      { id: crypto.randomUUID(), title_bn: "নতুন সেকশন", subtitle_bn: "", category_id: "", limit: 8, enabled: true },
-    ]);
+  const addItem = (type: HomeSectionType) => {
+    const id = crypto.randomUUID();
+    let next: HomeSection;
+    if (type === "hero") {
+      next = { id, enabled: true, type, badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "", subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_primary_enabled: true, cta_secondary_bn: "দেখুন", cta_secondary_enabled: true, image_url: "", images: [] };
+    } else if (type === "category") {
+      next = { id, enabled: true, type, title_bn: "জনপ্রিয় ক্যাটাগরি", subtitle_bn: "" };
+    } else if (type === "product") {
+      next = { id, enabled: true, type, title_bn: "নতুন পণ্য সেকশন", subtitle_bn: "", category_id: "", limit: 8 };
+    } else if (type === "offer") {
+      next = { id, enabled: true, type, label_bn: "অফার", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "অর্ডার করুন" };
+    } else {
+      next = { id, enabled: true, type: "banner", image_url: "", link: "", caption_bn: "" };
+    }
+    on([...v, next]);
   };
   const move = (i: number, dir: -1 | 1) => {
     const j = i + dir;
@@ -142,40 +133,28 @@ function HomeSectionsTab({ v, on, sections, onSections }: {
     [n[i], n[j]] = [n[j], n[i]];
     on(n);
   };
+  const TYPE_LABEL: Record<HomeSectionType, string> = {
+    hero: "হিরো", category: "ক্যাটাগরি", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
+  };
   return (
     <div className="space-y-4">
-      <div className="space-y-4 rounded-2xl border border-border p-4 bg-secondary/30">
-        <div>
-          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">সেকশন হেডিং</h3>
-          <p className="text-[11px] text-muted-foreground mt-1">ক্যাটাগরি ও ডিফল্ট পণ্য সেকশনের টাইটেল / সাবটাইটেল</p>
-        </div>
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">ক্যাটাগরি সেকশন</p>
-          <div className="grid md:grid-cols-2 gap-3">
-            <Field label="টাইটেল"><input className={inputCls} value={sections.categories_title_bn} onChange={(e) => onSections({ ...sections, categories_title_bn: e.target.value })} /></Field>
-            <Field label="সাবটাইটেল"><input className={inputCls} value={sections.categories_subtitle_bn} onChange={(e) => onSections({ ...sections, categories_subtitle_bn: e.target.value })} /></Field>
-          </div>
-        </div>
-        <div className="space-y-2 pt-3 border-t border-border">
-          <p className="text-xs font-semibold text-muted-foreground">ডিফল্ট পণ্য সেকশন</p>
-          <div className="grid md:grid-cols-2 gap-3">
-            <Field label="টাইটেল"><input className={inputCls} value={sections.products_title_bn} onChange={(e) => onSections({ ...sections, products_title_bn: e.target.value })} /></Field>
-            <Field label="সাবটাইটেল"><input className={inputCls} value={sections.products_subtitle_bn} onChange={(e) => onSections({ ...sections, products_subtitle_bn: e.target.value })} /></Field>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <p className="text-xs text-muted-foreground max-w-md">হোম পেজে যেকোনো সেকশন যোগ/বাদ দিন। প্রতিটা সেকশন আলাদাভাবে অন/অফ করা যাবে, উপরে-নিচে সরানো যাবে।</p>
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(TYPE_LABEL) as HomeSectionType[]).map((t) => (
+            <button key={t} type="button" onClick={() => addItem(t)}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+              <Plus className="size-3.5" /> {TYPE_LABEL[t]}
+            </button>
+          ))}
         </div>
       </div>
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">হোম পেজে আপনার ইচ্ছামতো সেকশন যোগ করুন — প্রতিটি সেকশনে নির্দিষ্ট ক্যাটাগরির পণ্য দেখাবে। চাইলে সেকশন বন্ধ/চালু করতে পারবেন।</p>
-        <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
-          <Plus className="size-4" /> সেকশন যোগ
-        </button>
-      </div>
-      {v.length === 0 && <p className="text-sm text-muted-foreground italic text-center py-6">কোনো সেকশন নেই — উপরের বাটনে চাপ দিন</p>}
+      {v.length === 0 && <p className="text-sm text-muted-foreground italic text-center py-6">কোনো সেকশন নেই — উপরের বাটন থেকে টাইপ বেছে যোগ করুন</p>}
       <div className="space-y-4">
         {v.map((s, i) => (
           <div key={s.id} className="rounded-2xl border border-border p-4 space-y-3 bg-secondary/30">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold text-muted-foreground">সেকশন {i + 1}</span>
+              <span className="text-xs font-bold text-muted-foreground">সেকশন {i + 1} · {TYPE_LABEL[s.type]}</span>
               <div className="flex items-center gap-2">
                 <label className="flex items-center gap-2 text-xs cursor-pointer">
                   <input type="checkbox" checked={s.enabled} onChange={(e) => setItem(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
@@ -186,23 +165,122 @@ function HomeSectionsTab({ v, on, sections, onSections }: {
                 <button type="button" onClick={() => on(v.filter((_, j) => j !== i))} className="size-8 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3.5" /></button>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-3">
-              <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem(i, { title_bn: e.target.value })} /></Field>
-              <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem(i, { subtitle_bn: e.target.value })} /></Field>
-              <Field label="ক্যাটাগরি">
-                <select className={inputCls} value={s.category_id} onChange={(e) => setItem(i, { category_id: e.target.value })}>
-                  <option value="">— সব ক্যাটাগরি —</option>
-                  {cats.map((c: { id: string; name_bn: string }) => (
-                    <option key={c.id} value={c.id}>{c.name_bn}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="সর্বোচ্চ পণ্য সংখ্যা">
-                <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem(i, { limit: Math.max(1, Number(e.target.value) || 8) })} />
-              </Field>
-            </div>
+            <SectionEditor section={s} setItem={(p) => setItem(i, p)} cats={cats as { id: string; name_bn: string }[]} />
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionEditor({ section: s, setItem, cats }: {
+  section: HomeSection;
+  setItem: (p: Partial<HomeSection>) => void;
+  cats: { id: string; name_bn: string }[];
+}) {
+  if (s.type === "hero") {
+    const images = s.images ?? [];
+    const setImages = (next: string[]) => setItem({ images: next } as any);
+    return (
+      <div className="space-y-3">
+        <Field label="ব্যাজ টেক্সট"><input className={inputCls} value={s.badge_bn} onChange={(e) => setItem({ badge_bn: e.target.value } as any)} /></Field>
+        <div className="grid md:grid-cols-3 gap-3">
+          <Field label="টাইটেল প্রথম অংশ"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+          <Field label="হাইলাইট অংশ"><input className={inputCls} value={s.title_highlight_bn} onChange={(e) => setItem({ title_highlight_bn: e.target.value } as any)} /></Field>
+          <Field label="শেষ অংশ"><input className={inputCls} value={s.title_suffix_bn} onChange={(e) => setItem({ title_suffix_bn: e.target.value } as any)} /></Field>
+        </div>
+        <Field label="সাবটাইটেল"><textarea className={areaCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+        <div className="grid md:grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Field label="প্রাইমারি বাটন"><input className={inputCls} value={s.cta_primary_bn} onChange={(e) => setItem({ cta_primary_bn: e.target.value } as any)} /></Field>
+            <label className="flex items-center gap-2 text-xs cursor-pointer">
+              <input type="checkbox" checked={s.cta_primary_enabled} onChange={(e) => setItem({ cta_primary_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
+              দেখান
+            </label>
+          </div>
+          <div className="space-y-2">
+            <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={s.cta_secondary_bn} onChange={(e) => setItem({ cta_secondary_bn: e.target.value } as any)} /></Field>
+            <label className="flex items-center gap-2 text-xs cursor-pointer">
+              <input type="checkbox" checked={s.cta_secondary_enabled} onChange={(e) => setItem({ cta_secondary_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
+              দেখান
+            </label>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold">স্লাইডার ইমেজ</span>
+            <button type="button" onClick={() => setImages([...images, ""])}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+              <Plus className="size-3.5" /> ইমেজ
+            </button>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {images.map((url, i) => (
+              <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold">স্লাইড {i + 1}</span>
+                  <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))}
+                    className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                </div>
+                <ImageInput value={url} onChange={(u) => { const n = [...images]; n[i] = u; setImages(n); }} folder="hero" />
+              </div>
+            ))}
+          </div>
+          <Field label="ফ্যালব্যাক ইমেজ" hint="স্লাইডার খালি থাকলে এটি দেখাবে">
+            <ImageInput value={s.image_url} onChange={(url) => setItem({ image_url: url } as any)} folder="hero" />
+          </Field>
+        </div>
+      </div>
+    );
+  }
+  if (s.type === "category") {
+    return (
+      <div className="grid md:grid-cols-2 gap-3">
+        <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+        <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+      </div>
+    );
+  }
+  if (s.type === "product") {
+    return (
+      <div className="grid md:grid-cols-2 gap-3">
+        <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+        <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+        <Field label="ক্যাটাগরি">
+          <select className={inputCls} value={s.category_id} onChange={(e) => setItem({ category_id: e.target.value } as any)}>
+            <option value="">— সব ক্যাটাগরি —</option>
+            {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+          </select>
+        </Field>
+        <Field label="সর্বোচ্চ পণ্য সংখ্যা">
+          <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 8) } as any)} />
+        </Field>
+      </div>
+    );
+  }
+  if (s.type === "offer") {
+    return (
+      <div className="space-y-3">
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="লেবেল"><input className={inputCls} value={s.label_bn} onChange={(e) => setItem({ label_bn: e.target.value } as any)} /></Field>
+          <Field label="কুপন কোড"><input className={inputCls} value={s.coupon_code} onChange={(e) => setItem({ coupon_code: e.target.value } as any)} /></Field>
+        </div>
+        <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+        <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="মিনিমাম অর্ডার টেক্সট"><input className={inputCls} value={s.min_order_bn} onChange={(e) => setItem({ min_order_bn: e.target.value } as any)} /></Field>
+          <Field label="বাটন টেক্সট"><input className={inputCls} value={s.cta_bn} onChange={(e) => setItem({ cta_bn: e.target.value } as any)} /></Field>
+        </div>
+      </div>
+    );
+  }
+  // banner
+  return (
+    <div className="space-y-3">
+      <Field label="ব্যানার ইমেজ"><ImageInput value={s.image_url} onChange={(url) => setItem({ image_url: url } as any)} folder="banner" /></Field>
+      <div className="grid md:grid-cols-2 gap-3">
+        <Field label="ক্যাপশন (ঐচ্ছিক)"><input className={inputCls} value={s.caption_bn} onChange={(e) => setItem({ caption_bn: e.target.value } as any)} /></Field>
+        <Field label="লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে"><input className={inputCls} value={s.link} onChange={(e) => setItem({ link: e.target.value } as any)} placeholder="/products?cat=…" /></Field>
       </div>
     </div>
   );

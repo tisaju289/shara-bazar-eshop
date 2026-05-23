@@ -26,14 +26,55 @@ export type Sections = {
 export type DeliveryOption = { label_bn: string; charge: number; enabled: boolean };
 export type Delivery = { enabled: boolean; options: DeliveryOption[] };
 
-export type HomeSection = {
-  id: string;
+export type HomeSectionType = "hero" | "category" | "product" | "offer" | "banner";
+type Base = { id: string; enabled: boolean };
+export type HeroSection = Base & {
+  type: "hero";
+  badge_bn: string;
+  title_bn: string;
+  title_highlight_bn: string;
+  title_suffix_bn: string;
+  subtitle_bn: string;
+  cta_primary_bn: string;
+  cta_primary_enabled: boolean;
+  cta_secondary_bn: string;
+  cta_secondary_enabled: boolean;
+  image_url: string;
+  images: string[];
+};
+export type CategorySection = Base & {
+  type: "category";
   title_bn: string;
   subtitle_bn: string;
-  category_id: string; // empty = all categories
-  limit: number;
-  enabled: boolean;
 };
+export type ProductSection = Base & {
+  type: "product";
+  title_bn: string;
+  subtitle_bn: string;
+  category_id: string; // empty = all
+  limit: number;
+};
+export type OfferSection = Base & {
+  type: "offer";
+  label_bn: string;
+  title_bn: string;
+  subtitle_bn: string;
+  coupon_code: string;
+  min_order_bn: string;
+  cta_bn: string;
+};
+export type BannerSection = Base & {
+  type: "banner";
+  image_url: string;
+  link: string;
+  caption_bn: string;
+};
+export type HomeSection =
+  | HeroSection
+  | CategorySection
+  | ProductSection
+  | OfferSection
+  | BannerSection;
 
 export type Tracking = {
   // Meta (Facebook) Pixel + Conversions API
@@ -119,8 +160,87 @@ export function useSiteSettings() {
       for (const row of (data ?? []) as { key: string; value: any }[]) {
         map[row.key] = row.value;
       }
-      return map as SiteSettings;
+      const settings = map as SiteSettings;
+      settings.home_sections = normalizeHomeSections(
+        settings.home_sections,
+        settings,
+      );
+      return settings;
     },
     staleTime: 60_000,
+  });
+}
+
+function normalizeHomeSections(
+  raw: any[] | undefined,
+  s: SiteSettings,
+): HomeSection[] {
+  const arr = Array.isArray(raw) ? raw : [];
+  if (arr.length === 0) {
+    // Seed defaults from legacy hero/sections/offer so the home page
+    // doesn't go blank for projects that never used home_sections.
+    const seed: HomeSection[] = [
+      {
+        id: "seed-hero",
+        enabled: true,
+        type: "hero",
+        badge_bn: s.hero.badge_bn,
+        title_bn: s.hero.title_bn,
+        title_highlight_bn: s.hero.title_highlight_bn,
+        title_suffix_bn: s.hero.title_suffix_bn,
+        subtitle_bn: s.hero.subtitle_bn,
+        cta_primary_bn: s.hero.cta_primary_bn,
+        cta_primary_enabled: s.hero.cta_primary_enabled,
+        cta_secondary_bn: s.hero.cta_secondary_bn,
+        cta_secondary_enabled: s.hero.cta_secondary_enabled,
+        image_url: s.hero.image_url,
+        images: s.hero.images ?? [],
+      },
+      {
+        id: "seed-category",
+        enabled: true,
+        type: "category",
+        title_bn: s.sections.categories_title_bn,
+        subtitle_bn: s.sections.categories_subtitle_bn,
+      },
+      ...(s.offer.enabled
+        ? [
+            {
+              id: "seed-offer",
+              enabled: true,
+              type: "offer" as const,
+              label_bn: s.offer.label_bn,
+              title_bn: s.offer.title_bn,
+              subtitle_bn: s.offer.subtitle_bn,
+              coupon_code: s.offer.coupon_code,
+              min_order_bn: s.offer.min_order_bn,
+              cta_bn: s.offer.cta_bn,
+            },
+          ]
+        : []),
+      {
+        id: "seed-product",
+        enabled: true,
+        type: "product",
+        title_bn: s.sections.products_title_bn,
+        subtitle_bn: s.sections.products_subtitle_bn,
+        category_id: "",
+        limit: 12,
+      },
+    ];
+    return seed;
+  }
+  return arr.map((item: any): HomeSection => {
+    if (item && item.type) return item as HomeSection;
+    // Legacy item (no type) → treat as product section
+    return {
+      id: item.id ?? crypto.randomUUID(),
+      enabled: item.enabled ?? true,
+      type: "product",
+      title_bn: item.title_bn ?? "",
+      subtitle_bn: item.subtitle_bn ?? "",
+      category_id: item.category_id ?? "",
+      limit: item.limit ?? 8,
+    };
   });
 }
