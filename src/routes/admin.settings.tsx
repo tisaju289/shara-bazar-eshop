@@ -13,14 +13,13 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "hero" | "sections" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "topbar" | "hero" | "home_sections" | "offer" | "features" | "footer" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "topbar", label: "টপ বার" },
   { key: "hero", label: "হিরো সেকশন" },
-  { key: "sections", label: "সেকশন হেডিং" },
   { key: "home_sections", label: "হোম সেকশন" },
   { key: "offer", label: "অফার ব্যানার" },
   { key: "features", label: "ফিচার" },
@@ -42,15 +41,24 @@ function SettingsPage() {
     return <div className="grid place-items-center h-64"><Loader2 className="size-6 animate-spin text-primary" /></div>;
   }
 
-  const update = <K extends TabKey>(key: K, value: SiteSettings[K]) =>
+  const update = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d));
 
   const saveTab = async () => {
     if (!draft) return;
     setSaving(true);
+    // The "home_sections" tab also edits the legacy "sections" headings,
+    // so persist both keys together when saving that tab.
+    const rows =
+      tab === "home_sections"
+        ? [
+            { key: "home_sections", value: draft.home_sections },
+            { key: "sections", value: draft.sections },
+          ]
+        : [{ key: tab, value: draft[tab] }];
     const { error } = await (supabase as any)
       .from("site_settings")
-      .upsert({ key: tab, value: draft[tab] }, { onConflict: "key" });
+      .upsert(rows, { onConflict: "key" });
     setSaving(false);
     if (error) return toast.error("সেভ ব্যর্থ: " + error.message);
     toast.success("সেভ হয়েছে");
@@ -78,8 +86,14 @@ function SettingsPage() {
         {tab === "seo" && <SeoTab v={draft.seo} on={(v) => update("seo", v)} />}
         {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
         {tab === "hero" && <HeroTab v={draft.hero} on={(v) => update("hero", v)} />}
-        {tab === "sections" && <SectionsTab v={draft.sections} on={(v) => update("sections", v)} />}
-        {tab === "home_sections" && <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />}
+        {tab === "home_sections" && (
+          <HomeSectionsTab
+            v={draft.home_sections}
+            on={(v) => update("home_sections", v)}
+            sections={draft.sections}
+            onSections={(v) => update("sections", v)}
+          />
+        )}
         {tab === "offer" && <OfferTab v={draft.offer} on={(v) => update("offer", v)} />}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
@@ -98,7 +112,12 @@ function SettingsPage() {
   );
 }
 
-function HomeSectionsTab({ v, on }: { v: SiteSettings["home_sections"]; on: (v: SiteSettings["home_sections"]) => void }) {
+function HomeSectionsTab({ v, on, sections, onSections }: {
+  v: SiteSettings["home_sections"];
+  on: (v: SiteSettings["home_sections"]) => void;
+  sections: SiteSettings["sections"];
+  onSections: (v: SiteSettings["sections"]) => void;
+}) {
   const { data: cats = [] } = useQuery({
     queryKey: ["categories", "admin-options"],
     queryFn: async () => {
@@ -125,6 +144,26 @@ function HomeSectionsTab({ v, on }: { v: SiteSettings["home_sections"]; on: (v: 
   };
   return (
     <div className="space-y-4">
+      <div className="space-y-4 rounded-2xl border border-border p-4 bg-secondary/30">
+        <div>
+          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">সেকশন হেডিং</h3>
+          <p className="text-[11px] text-muted-foreground mt-1">ক্যাটাগরি ও ডিফল্ট পণ্য সেকশনের টাইটেল / সাবটাইটেল</p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">ক্যাটাগরি সেকশন</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="টাইটেল"><input className={inputCls} value={sections.categories_title_bn} onChange={(e) => onSections({ ...sections, categories_title_bn: e.target.value })} /></Field>
+            <Field label="সাবটাইটেল"><input className={inputCls} value={sections.categories_subtitle_bn} onChange={(e) => onSections({ ...sections, categories_subtitle_bn: e.target.value })} /></Field>
+          </div>
+        </div>
+        <div className="space-y-2 pt-3 border-t border-border">
+          <p className="text-xs font-semibold text-muted-foreground">ডিফল্ট পণ্য সেকশন</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="টাইটেল"><input className={inputCls} value={sections.products_title_bn} onChange={(e) => onSections({ ...sections, products_title_bn: e.target.value })} /></Field>
+            <Field label="সাবটাইটেল"><input className={inputCls} value={sections.products_subtitle_bn} onChange={(e) => onSections({ ...sections, products_subtitle_bn: e.target.value })} /></Field>
+          </div>
+        </div>
+      </div>
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">হোম পেজে আপনার ইচ্ছামতো সেকশন যোগ করুন — প্রতিটি সেকশনে নির্দিষ্ট ক্যাটাগরির পণ্য দেখাবে। চাইলে সেকশন বন্ধ/চালু করতে পারবেন।</p>
         <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
@@ -292,26 +331,6 @@ function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["her
 }
 function OfferTab({ v, on }: { v: SiteSettings["offer"]; on: (v: SiteSettings["offer"]) => void }) {
   return _OfferTabImpl(v, on);
-}
-function SectionsTab({ v, on }: { v: SiteSettings["sections"]; on: (v: SiteSettings["sections"]) => void }) {
-  return (
-    <div className="space-y-5">
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ক্যাটাগরি সেকশন</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="টাইটেল"><input className={inputCls} value={v.categories_title_bn} onChange={(e) => on({ ...v, categories_title_bn: e.target.value })} /></Field>
-          <Field label="সাবটাইটেল"><input className={inputCls} value={v.categories_subtitle_bn} onChange={(e) => on({ ...v, categories_subtitle_bn: e.target.value })} /></Field>
-        </div>
-      </div>
-      <div className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">পণ্য সেকশন</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="টাইটেল"><input className={inputCls} value={v.products_title_bn} onChange={(e) => on({ ...v, products_title_bn: e.target.value })} /></Field>
-          <Field label="সাবটাইটেল"><input className={inputCls} value={v.products_subtitle_bn} onChange={(e) => on({ ...v, products_subtitle_bn: e.target.value })} /></Field>
-        </div>
-      </div>
-    </div>
-  );
 }
 function _OfferTabImpl(v: SiteSettings["offer"], on: (v: SiteSettings["offer"]) => void) {
   return (
