@@ -15,7 +15,7 @@ export type SiteHeaderProps = {
  * - Desktop: full header (topbar + logo + search + cart link to home)
  * - Mobile: compact bar with logo centered
  */
-export function SiteHeader() {
+export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProps = {}) {
   const { data: settings } = useSiteSettings();
   const brand = settings?.brand;
   const topbar = settings?.topbar;
