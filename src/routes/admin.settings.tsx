@@ -41,7 +41,7 @@ function SettingsPage() {
     return <div className="grid place-items-center h-64"><Loader2 className="size-6 animate-spin text-primary" /></div>;
   }
 
-  const update = <K extends TabKey>(key: K, value: SiteSettings[K]) =>
+  const update = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d));
 
   const saveTab = async () => {
@@ -112,7 +112,12 @@ function SettingsPage() {
   );
 }
 
-function HomeSectionsTab({ v, on }: { v: SiteSettings["home_sections"]; on: (v: SiteSettings["home_sections"]) => void }) {
+function HomeSectionsTab({ v, on, sections, onSections }: {
+  v: SiteSettings["home_sections"];
+  on: (v: SiteSettings["home_sections"]) => void;
+  sections: SiteSettings["sections"];
+  onSections: (v: SiteSettings["sections"]) => void;
+}) {
   const { data: cats = [] } = useQuery({
     queryKey: ["categories", "admin-options"],
     queryFn: async () => {
@@ -139,6 +144,26 @@ function HomeSectionsTab({ v, on }: { v: SiteSettings["home_sections"]; on: (v: 
   };
   return (
     <div className="space-y-4">
+      <div className="space-y-4 rounded-2xl border border-border p-4 bg-secondary/30">
+        <div>
+          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">সেকশন হেডিং</h3>
+          <p className="text-[11px] text-muted-foreground mt-1">ক্যাটাগরি ও ডিফল্ট পণ্য সেকশনের টাইটেল / সাবটাইটেল</p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">ক্যাটাগরি সেকশন</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="টাইটেল"><input className={inputCls} value={sections.categories_title_bn} onChange={(e) => onSections({ ...sections, categories_title_bn: e.target.value })} /></Field>
+            <Field label="সাবটাইটেল"><input className={inputCls} value={sections.categories_subtitle_bn} onChange={(e) => onSections({ ...sections, categories_subtitle_bn: e.target.value })} /></Field>
+          </div>
+        </div>
+        <div className="space-y-2 pt-3 border-t border-border">
+          <p className="text-xs font-semibold text-muted-foreground">ডিফল্ট পণ্য সেকশন</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="টাইটেল"><input className={inputCls} value={sections.products_title_bn} onChange={(e) => onSections({ ...sections, products_title_bn: e.target.value })} /></Field>
+            <Field label="সাবটাইটেল"><input className={inputCls} value={sections.products_subtitle_bn} onChange={(e) => onSections({ ...sections, products_subtitle_bn: e.target.value })} /></Field>
+          </div>
+        </div>
+      </div>
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">হোম পেজে আপনার ইচ্ছামতো সেকশন যোগ করুন — প্রতিটি সেকশনে নির্দিষ্ট ক্যাটাগরির পণ্য দেখাবে। চাইলে সেকশন বন্ধ/চালু করতে পারবেন।</p>
         <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
@@ -306,26 +331,6 @@ function HeroTab({ v, on }: { v: SiteSettings["hero"]; on: (v: SiteSettings["her
 }
 function OfferTab({ v, on }: { v: SiteSettings["offer"]; on: (v: SiteSettings["offer"]) => void }) {
   return _OfferTabImpl(v, on);
-}
-function SectionsTab({ v, on }: { v: SiteSettings["sections"]; on: (v: SiteSettings["sections"]) => void }) {
-  return (
-    <div className="space-y-5">
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ক্যাটাগরি সেকশন</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="টাইটেল"><input className={inputCls} value={v.categories_title_bn} onChange={(e) => on({ ...v, categories_title_bn: e.target.value })} /></Field>
-          <Field label="সাবটাইটেল"><input className={inputCls} value={v.categories_subtitle_bn} onChange={(e) => on({ ...v, categories_subtitle_bn: e.target.value })} /></Field>
-        </div>
-      </div>
-      <div className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">পণ্য সেকশন</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="টাইটেল"><input className={inputCls} value={v.products_title_bn} onChange={(e) => on({ ...v, products_title_bn: e.target.value })} /></Field>
-          <Field label="সাবটাইটেল"><input className={inputCls} value={v.products_subtitle_bn} onChange={(e) => on({ ...v, products_subtitle_bn: e.target.value })} /></Field>
-        </div>
-      </div>
-    </div>
-  );
 }
 function _OfferTabImpl(v: SiteSettings["offer"], on: (v: SiteSettings["offer"]) => void) {
   return (
