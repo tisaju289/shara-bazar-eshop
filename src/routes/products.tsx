@@ -195,7 +195,7 @@ function ProductsPage() {
       cat?.keywords ?? "",
     ].join(" ").toLowerCase();
     const tokens = q.toLowerCase().trim().split(/[\s,]+/).filter(Boolean);
-    return catOk && tokens.every((t) => haystack.includes(t));
+    return catOk && tokens.every((t: string) => haystack.includes(t));
   });
 
   const grouped = useMemo(() => {
