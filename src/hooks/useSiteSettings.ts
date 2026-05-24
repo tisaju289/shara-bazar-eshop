@@ -46,6 +46,16 @@ export type Checkout = {
   success_title_bn: string;
   success_message_bn: string;
   success_close_bn: string;
+  custom_fields?: CustomField[];
+};
+
+export type CustomFieldType = "text" | "textarea" | "tel" | "number" | "email";
+export type CustomField = {
+  id: string;
+  label_bn: string;
+  placeholder_bn: string;
+  type: CustomFieldType;
+  required: boolean;
 };
 
 export type HomeSectionType = "hero" | "category" | "product" | "offer" | "banner";
