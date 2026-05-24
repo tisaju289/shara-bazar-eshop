@@ -6,10 +6,24 @@ const listeners = new Set<(c: Cart) => void>();
 let current: Cart = {};
 let loaded = false;
 
+function readCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${KEY.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function persist(next: Cart) {
+  if (typeof window === "undefined") return;
+  const raw = JSON.stringify(next);
+  try { window.localStorage.setItem(KEY, raw); } catch {}
+  try { window.sessionStorage.setItem(KEY, raw); } catch {}
+  try { document.cookie = `${KEY}=${encodeURIComponent(raw)}; path=/; max-age=2592000; SameSite=Lax`; } catch {}
+}
+
 function load(): Cart {
   if (loaded || typeof window === "undefined") return current;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(KEY) ?? window.sessionStorage.getItem(KEY) ?? readCookie();
     current = raw ? (JSON.parse(raw) as Cart) : {};
   } catch {
     current = {};
@@ -20,9 +34,7 @@ function load(): Cart {
 
 function emit(next: Cart) {
   current = next;
-  if (typeof window !== "undefined") {
-    try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
-  }
+  persist(next);
   listeners.forEach((l) => l(next));
 }
 
