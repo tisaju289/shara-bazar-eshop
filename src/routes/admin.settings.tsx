@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery" | "checkout";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -23,6 +23,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "features", label: "ফিচার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "delivery", label: "ডেলিভারি চার্জ" },
+  { key: "checkout", label: "চেকআউট" },
 ];
 
 function SettingsPage() {
@@ -92,6 +93,7 @@ function SettingsPage() {
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
+        {tab === "checkout" && <CheckoutTab v={draft.checkout} on={(v) => update("checkout", v)} />}
 
         <div className="pt-3 flex justify-end">
           <button onClick={saveTab} disabled={saving}
