@@ -19,12 +19,13 @@ type Product = {
   tag: string | null;
   stock: number;
   is_active: boolean;
+  keywords: string | null;
 };
 type Category = { id: string; name_bn: string };
 
 const emptyForm: Omit<Product, "id"> = {
   name_bn: "", category_id: null, unit: "১ কেজি", price: 0, old_price: null,
-  image_url: "", tag: "", stock: 0, is_active: true,
+  image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
 };
 
 function AdminProducts() {
@@ -52,7 +53,7 @@ function AdminProducts() {
   const openNew = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ ...p, old_price: p.old_price ?? null, image_url: p.image_url ?? "", tag: p.tag ?? "" });
+    setForm({ ...p, old_price: p.old_price ?? null, image_url: p.image_url ?? "", tag: p.tag ?? "", keywords: p.keywords ?? "" });
     setOpen(true);
   };
 
@@ -66,6 +67,7 @@ function AdminProducts() {
       stock: Number(form.stock),
       tag: form.tag || null,
       image_url: form.image_url || null,
+      keywords: form.keywords?.trim() || null,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -190,6 +192,9 @@ function AdminProducts() {
                 <ImageInput value={form.image_url ?? ""} onChange={(url) => setForm({ ...form, image_url: url })} folder="products" />
               </Field>
               <Field label="ট্যাগ (যেমন: সিজনাল, নতুন)"><input value={form.tag ?? ""} onChange={(e) => setForm({ ...form, tag: e.target.value })} className="input" /></Field>
+              <Field label="কীওয়ার্ড (সার্চের জন্য, কমা দিয়ে আলাদা করুন)">
+                <input value={form.keywords ?? ""} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="যেমন: ilish, hilsa, মাছ" className="input" />
+              </Field>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="size-4 accent-[color:var(--primary)]" />
                 সক্রিয় (ক্রেতারা দেখতে পাবে)

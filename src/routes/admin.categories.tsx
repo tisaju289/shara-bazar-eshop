@@ -8,14 +8,14 @@ export const Route = createFileRoute("/admin/categories")({
   component: AdminCategories,
 });
 
-type Cat = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
+type Cat = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null };
 
 function AdminCategories() {
   const [items, setItems] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Cat | null>(null);
-  const [form, setForm] = useState({ name_bn: "", slug: "", sort_order: 0, image_url: "" });
+  const [form, setForm] = useState({ name_bn: "", slug: "", sort_order: 0, image_url: "", keywords: "" });
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -26,13 +26,13 @@ function AdminCategories() {
   };
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm({ name_bn: "", slug: "", sort_order: items.length + 1, image_url: "" }); setOpen(true); };
-  const openEdit = (c: Cat) => { setEditing(c); setForm({ name_bn: c.name_bn, slug: c.slug, sort_order: c.sort_order, image_url: c.image_url ?? "" }); setOpen(true); };
+  const openNew = () => { setEditing(null); setForm({ name_bn: "", slug: "", sort_order: items.length + 1, image_url: "", keywords: "" }); setOpen(true); };
+  const openEdit = (c: Cat) => { setEditing(c); setForm({ name_bn: c.name_bn, slug: c.slug, sort_order: c.sort_order, image_url: c.image_url ?? "", keywords: c.keywords ?? "" }); setOpen(true); };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const payload = { ...form, image_url: form.image_url || null };
+    const payload = { ...form, image_url: form.image_url || null, keywords: form.keywords.trim() || null };
     const { error } = editing
       ? await supabase.from("categories").update(payload).eq("id", editing.id)
       : await supabase.from("categories").insert(payload);
@@ -125,6 +125,9 @@ function AdminCategories() {
                 <span className="text-sm font-medium block mb-1">ক্যাটাগরি ছবি (ঐচ্ছিক)</span>
                 <ImageInput value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} folder="categories" />
               </div>
+              <label className="block"><span className="text-sm font-medium block mb-1">কীওয়ার্ড (সার্চের জন্য, কমা দিয়ে আলাদা করুন)</span>
+                <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="যেমন: সবজি, vegetables, taja" className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </label>
             </div>
             <div className="p-5 border-t border-border flex gap-2">
               <button type="button" onClick={() => setOpen(false)} className="flex-1 h-11 rounded-xl bg-secondary font-semibold">বাতিল</button>
