@@ -252,7 +252,7 @@ function Index() {
             </div>
           </a>
 
-          <div className="flex-1 max-w-2xl mx-auto">
+          <div className="flex-1 max-w-xl">
             <div className="relative">
               <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -264,6 +264,14 @@ function Index() {
             </div>
           </div>
 
+          {menuItems.length > 0 && (
+            <nav className="flex items-center gap-x-5 text-sm font-medium text-[var(--leaf-deep)]">
+              {menuItems.map((m, i) => (
+                <a key={i} href={m.url} className="hover:text-primary transition whitespace-nowrap">{m.label_bn}</a>
+              ))}
+            </nav>
+          )}
+
           <button onClick={() => setCartOpen(true)} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
             <ShoppingCart className="size-5" />
             <span className="hidden sm:inline text-sm font-semibold">৳{cartTotal}</span>
@@ -272,13 +280,6 @@ function Index() {
             )}
           </button>
         </div>
-        {menuItems.length > 0 && (
-          <nav className="container mx-auto px-4 pb-3 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm font-medium text-[var(--leaf-deep)]">
-            {menuItems.map((m, i) => (
-              <a key={i} href={m.url} className="hover:text-primary transition">{m.label_bn}</a>
-            ))}
-          </nav>
-        )}
       </header>
 
       {/* Mobile site header (logo + search) */}
