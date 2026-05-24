@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
+import { useCart } from "@/hooks/useCart";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -92,7 +93,7 @@ function Index() {
   const { data: categories = [] } = useCategories();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cart, setCart] = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");

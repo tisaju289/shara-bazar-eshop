@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useCart } from "@/hooks/useCart";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -61,7 +62,7 @@ function ProductsPage() {
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
 
   // Cart state
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cart, setCart] = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
