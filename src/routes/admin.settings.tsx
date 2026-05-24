@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu } from "@/hooks/useSiteSettings";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,15 +13,14 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "home_sections" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
-  { key: "topbar", label: "টপ বার" },
+  { key: "header_footer", label: "হেডার / ফুটার" },
   { key: "home_sections", label: "হোম সেকশন" },
   { key: "features", label: "ফিচার" },
-  { key: "footer", label: "ফুটার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "delivery", label: "ডেলিভারি চার্জ" },
 ];
@@ -45,7 +44,10 @@ function SettingsPage() {
   const saveTab = async () => {
     if (!draft) return;
     setSaving(true);
-    const rows = [{ key: tab, value: (draft as any)[tab] }];
+    const keys = tab === "header_footer"
+      ? ["topbar", "header_menu", "footer"]
+      : [tab];
+    const rows = keys.map((k) => ({ key: k, value: (draft as any)[k] }));
     const { error } = await (supabase as any)
       .from("site_settings")
       .upsert(rows, { onConflict: "key" });
@@ -74,12 +76,20 @@ function SettingsPage() {
       <div className="bg-card border border-border rounded-3xl p-5 md:p-7 space-y-5">
         {tab === "brand" && <BrandTab v={draft.brand} on={(v) => update("brand", v)} />}
         {tab === "seo" && <SeoTab v={draft.seo} on={(v) => update("seo", v)} />}
-        {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
+        {tab === "header_footer" && (
+          <HeaderFooterTab
+            topbar={draft.topbar}
+            onTopbar={(v) => update("topbar", v)}
+            menu={draft.header_menu}
+            onMenu={(v) => update("header_menu", v)}
+            footer={draft.footer}
+            onFooter={(v) => update("footer", v)}
+          />
+        )}
         {tab === "home_sections" && (
           <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />
         )}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
-        {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
 
@@ -454,6 +464,59 @@ function FooterTab({ v, on }: { v: SiteSettings["footer"]; on: (v: SiteSettings[
         <Field label="ইমেইল"><input className={inputCls} value={v.email} onChange={(e) => on({ ...v, email: e.target.value })} /></Field>
         <Field label="ঠিকানা"><input className={inputCls} value={v.address_bn} onChange={(e) => on({ ...v, address_bn: e.target.value })} /></Field>
       </div>
+    </div>
+  );
+}
+
+function HeaderFooterTab({ topbar, onTopbar, menu, onMenu, footer, onFooter }: {
+  topbar: SiteSettings["topbar"];
+  onTopbar: (v: SiteSettings["topbar"]) => void;
+  menu: HeaderMenu;
+  onMenu: (v: HeaderMenu) => void;
+  footer: SiteSettings["footer"];
+  onFooter: (v: SiteSettings["footer"]) => void;
+}) {
+  const items = menu.items ?? [];
+  const setItems = (next: { label_bn: string; url: string }[]) => onMenu({ ...menu, items: next });
+  return (
+    <div className="space-y-8">
+      <section className="space-y-4">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডার — টপ বার</h3>
+        <TopbarTab v={topbar} on={onTopbar} />
+      </section>
+
+      <section className="space-y-3 pt-5 border-t border-border">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডার মেনু</h3>
+          <button type="button" onClick={() => setItems([...items, { label_bn: "", url: "/" }])}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+            <Plus className="size-3.5" /> মেনু যোগ
+          </button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">হেডারে দেখানোর জন্য মেনু আইটেম যোগ করুন (যেমন: হোম → /, ক্যাটাগরি → /categories, প্রোডাক্টস → /products)</p>
+        {items.length === 0 && <p className="text-xs text-muted-foreground italic py-2">কোনো মেনু নেই — উপরের বাটন থেকে যোগ করুন</p>}
+        <div className="space-y-2">
+          {items.map((it, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input className={inputCls + " flex-1"} placeholder="লেবেল (বাংলা)" value={it.label_bn}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], label_bn: e.target.value }; setItems(n); }} />
+              <input className={inputCls + " flex-1"} placeholder="URL (যেমন /products)" value={it.url}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], url: e.target.value }; setItems(n); }} />
+              <button type="button" disabled={i === 0} onClick={() => { const n = [...items]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; setItems(n); }}
+                className="h-9 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
+              <button type="button" disabled={i === items.length - 1} onClick={() => { const n = [...items]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; setItems(n); }}
+                className="h-9 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
+              <button type="button" onClick={() => setItems(items.filter((_, j) => j !== i))}
+                className="size-9 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4 pt-5 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ফুটার</h3>
+        <FooterTab v={footer} on={onFooter} />
+      </section>
     </div>
   );
 }

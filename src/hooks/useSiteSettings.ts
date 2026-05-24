@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 export type Brand = { name_bn: string; tagline_bn: string; logo_url: string };
 export type Seo = { title: string; description: string; keywords: string; og_image: string; favicon_url: string };
 export type Topbar = { location_bn: string; phone: string; enabled: boolean };
+export type MenuItem = { label_bn: string; url: string };
+export type HeaderMenu = { items: MenuItem[] };
 export type Hero = {
   badge_bn: string; title_bn: string; title_highlight_bn: string; title_suffix_bn: string;
   subtitle_bn: string; cta_primary_bn: string; cta_primary_enabled: boolean;
@@ -99,6 +101,7 @@ export type SiteSettings = {
   brand: Brand;
   seo: Seo;
   topbar: Topbar;
+  header_menu: HeaderMenu;
   hero: Hero;
   offer: Offer;
   features: Feature[];
@@ -113,6 +116,7 @@ const DEFAULTS: SiteSettings = {
   brand: { name_bn: "তাজা বাজার", tagline_bn: "তাজা · বিশ্বস্ত · দ্রুত", logo_url: "" },
   seo: { title: "তাজা বাজার", description: "", keywords: "", og_image: "", favicon_url: "" },
   topbar: { location_bn: "", phone: "", enabled: true },
+  header_menu: { items: [] },
   hero: {
     badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "",
     subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_primary_enabled: true,
