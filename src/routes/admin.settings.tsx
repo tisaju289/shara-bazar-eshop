@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType } from "@/hooks/useSiteSettings";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -109,6 +109,20 @@ function SettingsPage() {
 
 function CheckoutTab({ v, on }: { v: SiteSettings["checkout"]; on: (v: SiteSettings["checkout"]) => void }) {
   const f = <K extends keyof SiteSettings["checkout"]>(k: K) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => on({ ...v, [k]: e.target.value });
+  const fields: CustomField[] = v.custom_fields ?? [];
+  const setFields = (next: CustomField[]) => on({ ...v, custom_fields: next });
+  const addField = () =>
+    setFields([...fields, { id: crypto.randomUUID(), label_bn: "নতুন ফিল্ড", placeholder_bn: "", type: "text", required: false }]);
+  const updField = (i: number, patch: Partial<CustomField>) =>
+    setFields(fields.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const delField = (i: number) => setFields(fields.filter((_, idx) => idx !== i));
+  const moveField = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= fields.length) return;
+    const n = [...fields];
+    [n[i], n[j]] = [n[j], n[i]];
+    setFields(n);
+  };
   return (
     <div className="space-y-6">
       <p className="text-xs text-muted-foreground">চেকআউট পপআপের প্রতিটি লেখা/লেবেল/বাটন এখান থেকে কাস্টমাইজ করুন।</p>
@@ -158,6 +172,49 @@ function CheckoutTab({ v, on }: { v: SiteSettings["checkout"]; on: (v: SiteSetti
           <Field label="বন্ধ বাটন টেক্সট"><input className={inputCls} value={v.success_close_bn} onChange={f("success_close_bn")} /></Field>
         </div>
         <Field label="সফল বার্তা"><textarea className={areaCls} value={v.success_message_bn} onChange={f("success_message_bn")} /></Field>
+      </section>
+
+      <section className="space-y-3 pt-3 border-t border-border">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">কাস্টম ফিল্ড</h3>
+          <button onClick={addField} className="inline-flex items-center gap-1 h-9 px-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+            <Plus className="size-4" /> ফিল্ড যোগ
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground">এখানে যোগ করা ফিল্ডগুলো চেকআউট ফর্মে দেখা যাবে এবং অর্ডারের ঠিকানার সাথে যুক্ত হবে।</p>
+        {fields.length === 0 && <p className="text-xs text-muted-foreground italic">কোনো কাস্টম ফিল্ড যোগ করা হয়নি।</p>}
+        <div className="space-y-3">
+          {fields.map((cf, i) => (
+            <div key={cf.id} className="border border-border rounded-2xl p-3 space-y-3 bg-secondary/30">
+              <div className="grid md:grid-cols-2 gap-3">
+                <Field label="লেবেল"><input className={inputCls} value={cf.label_bn} onChange={(e) => updField(i, { label_bn: e.target.value })} /></Field>
+                <Field label="প্লেসহোল্ডার"><input className={inputCls} value={cf.placeholder_bn} onChange={(e) => updField(i, { placeholder_bn: e.target.value })} /></Field>
+                <Field label="টাইপ">
+                  <select className={inputCls} value={cf.type} onChange={(e) => updField(i, { type: e.target.value as CustomFieldType })}>
+                    <option value="text">টেক্সট</option>
+                    <option value="textarea">বড় টেক্সট</option>
+                    <option value="tel">ফোন</option>
+                    <option value="number">সংখ্যা</option>
+                    <option value="email">ইমেইল</option>
+                  </select>
+                </Field>
+                <div className="flex items-end gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm font-medium">
+                    <input type="checkbox" checked={cf.required} onChange={(e) => updField(i, { required: e.target.checked })} className="size-4 accent-primary" />
+                    আবশ্যিক
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => moveField(i, -1)} className="h-8 px-3 rounded-full border border-border text-xs">↑</button>
+                <button onClick={() => moveField(i, 1)} className="h-8 px-3 rounded-full border border-border text-xs">↓</button>
+                <button onClick={() => delField(i)} className="h-8 px-3 rounded-full border border-border text-xs inline-flex items-center gap-1 text-[var(--chili)]">
+                  <Trash2 className="size-3.5" /> মুছুন
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

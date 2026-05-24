@@ -38,6 +38,7 @@ export function CartDrawer() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "" });
+  const [customValues, setCustomValues] = useState<Record<string, string>>({});
   const [placing, setPlacing] = useState(false);
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -46,6 +47,7 @@ export function CartDrawer() {
   const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
   const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
   const c = settings?.checkout;
+  const customFields = c?.custom_fields ?? [];
   const t = {
     title: c?.title_bn ?? "চেকআউট",
     deliverySection: c?.delivery_section_title_bn ?? "ডেলিভারি এলাকা",
@@ -107,17 +109,31 @@ export function CartDrawer() {
       setOrderError(t.required);
       return;
     }
+    for (const cf of customFields) {
+      if (cf.required && !(customValues[cf.id] ?? "").trim()) {
+        setOrderError(t.required);
+        return;
+      }
+    }
     setPlacing(true);
     const items = Object.entries(checkoutItems).map(([id, q]) => {
       const p = products.find((x) => x.id === id);
       return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
     });
+    const extras = customFields
+      .map((cf) => {
+        const val = (customValues[cf.id] ?? "").trim();
+        return val ? `${cf.label_bn}: ${val}` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+    const fullAddress = extras ? `${orderForm.address.trim()}\n\n${extras}` : orderForm.address.trim();
     const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
       .from("orders")
       .insert({
         customer_name: orderForm.name.trim(),
         phone: orderForm.phone.trim(),
-        address: orderForm.address.trim(),
+        address: fullAddress,
         items,
         total: grandTotal,
         payment_method: "cod",
@@ -133,6 +149,7 @@ export function CartDrawer() {
       return next;
     });
     setOrderForm({ name: "", phone: "", address: "" });
+    setCustomValues({});
     setOrderDone(true);
     trackEvent("Purchase", {
       value: grandTotal,
@@ -302,6 +319,30 @@ export function CartDrawer() {
                     <label className="text-xs font-semibold">{t.addressLabel}</label>
                     <textarea value={orderForm.address} onChange={(e) => setOrderForm((f) => ({ ...f, address: e.target.value }))} placeholder={t.addressPh} rows={3} className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none" />
                   </div>
+                  {customFields.map((cf) => (
+                    <div key={cf.id} className="space-y-2">
+                      <label className="text-xs font-semibold">
+                        {cf.label_bn}{cf.required && <span className="text-[var(--chili)]"> *</span>}
+                      </label>
+                      {cf.type === "textarea" ? (
+                        <textarea
+                          value={customValues[cf.id] ?? ""}
+                          onChange={(e) => setCustomValues((s) => ({ ...s, [cf.id]: e.target.value }))}
+                          placeholder={cf.placeholder_bn}
+                          rows={3}
+                          className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none"
+                        />
+                      ) : (
+                        <input
+                          type={cf.type}
+                          value={customValues[cf.id] ?? ""}
+                          onChange={(e) => setCustomValues((s) => ({ ...s, [cf.id]: e.target.value }))}
+                          placeholder={cf.placeholder_bn}
+                          className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      )}
+                    </div>
+                  ))}
                   {orderError && <p className="text-sm text-[var(--chili)]">{orderError}</p>}
                   <button onClick={placeOrder} disabled={placing || Object.keys(checkoutItems).length === 0} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] inline-flex items-center justify-center gap-2 disabled:opacity-60">
                     {placing ? <><Loader2 className="size-4 animate-spin" /> {t.placing}</> : `${t.submit} · ৳${grandTotal}`}
