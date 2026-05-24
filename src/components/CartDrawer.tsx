@@ -38,6 +38,7 @@ export function CartDrawer() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "" });
+  const [customValues, setCustomValues] = useState<Record<string, string>>({});
   const [placing, setPlacing] = useState(false);
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -46,6 +47,7 @@ export function CartDrawer() {
   const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
   const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
   const c = settings?.checkout;
+  const customFields = c?.custom_fields ?? [];
   const t = {
     title: c?.title_bn ?? "চেকআউট",
     deliverySection: c?.delivery_section_title_bn ?? "ডেলিভারি এলাকা",
@@ -107,17 +109,31 @@ export function CartDrawer() {
       setOrderError(t.required);
       return;
     }
+    for (const cf of customFields) {
+      if (cf.required && !(customValues[cf.id] ?? "").trim()) {
+        setOrderError(t.required);
+        return;
+      }
+    }
     setPlacing(true);
     const items = Object.entries(checkoutItems).map(([id, q]) => {
       const p = products.find((x) => x.id === id);
       return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
     });
+    const extras = customFields
+      .map((cf) => {
+        const val = (customValues[cf.id] ?? "").trim();
+        return val ? `${cf.label_bn}: ${val}` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+    const fullAddress = extras ? `${orderForm.address.trim()}\n\n${extras}` : orderForm.address.trim();
     const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
       .from("orders")
       .insert({
         customer_name: orderForm.name.trim(),
         phone: orderForm.phone.trim(),
-        address: orderForm.address.trim(),
+        address: fullAddress,
         items,
         total: grandTotal,
         payment_method: "cod",
@@ -133,6 +149,7 @@ export function CartDrawer() {
       return next;
     });
     setOrderForm({ name: "", phone: "", address: "" });
+    setCustomValues({});
     setOrderDone(true);
     trackEvent("Purchase", {
       value: grandTotal,
