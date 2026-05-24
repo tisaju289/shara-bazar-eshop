@@ -201,6 +201,7 @@ const DEFAULTS: SiteSettings = {
     success_title_bn: "ধন্যবাদ! 🎉",
     success_message_bn: "আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
     success_close_bn: "বন্ধ করুন",
+    custom_fields: [],
   },
 };
 
