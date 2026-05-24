@@ -76,7 +76,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
             </div>
           </Link>
 
-          <form onSubmit={submit} className="flex-1 max-w-2xl mx-auto">
+          <form onSubmit={submit} className="flex-1 max-w-xl">
             <div className="relative">
               <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground hover:text-primary">
                 <Search className="size-5" />
@@ -90,6 +90,14 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
             </div>
           </form>
 
+          {menuItems.length > 0 && (
+            <nav className="flex items-center gap-x-5 text-sm font-medium text-[var(--leaf-deep)]">
+              {menuItems.map((m, i) => (
+                <a key={i} href={m.url} className="hover:text-primary transition whitespace-nowrap">{m.label_bn}</a>
+              ))}
+            </nav>
+          )}
+
           <button onClick={handleCartClick} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
             <ShoppingCart className="size-5" />
             <span className="hidden sm:inline text-sm font-semibold">{cartTotal ? `৳${cartTotal}` : "কার্ট"}</span>
@@ -98,13 +106,6 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
             )}
           </button>
         </div>
-        {menuItems.length > 0 && (
-          <nav className="container mx-auto px-4 pb-3 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm font-medium text-[var(--leaf-deep)]">
-            {menuItems.map((m, i) => (
-              <a key={i} href={m.url} className="hover:text-primary transition">{m.label_bn}</a>
-            ))}
-          </nav>
-        )}
       </header>
 
       {/* Mobile compact header: logo + search */}
