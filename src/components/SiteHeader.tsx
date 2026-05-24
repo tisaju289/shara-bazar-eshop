@@ -3,6 +3,7 @@ import { Search, ShoppingCart, MapPin, Phone, Leaf } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useCart } from "@/hooks/useCart";
 
 export type SiteHeaderProps = {
   cartCount?: number;
@@ -17,6 +18,9 @@ export type SiteHeaderProps = {
  */
 export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProps = {}) {
   const { data: settings } = useSiteSettings();
+  const [cart] = useCart();
+  const fallbackCount = Object.values(cart).reduce((a, b) => a + b, 0);
+  const effectiveCount = cartCount ?? fallbackCount;
   const brand = settings?.brand;
   const topbar = settings?.topbar;
   const navigate = useNavigate();
@@ -87,14 +91,17 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
             <button onClick={onCartClick} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
               <ShoppingCart className="size-5" />
               <span className="hidden sm:inline text-sm font-semibold">{cartTotal ? `৳${cartTotal}` : "কার্ট"}</span>
-              {!!cartCount && (
-                <span className="absolute -top-1 -right-1 size-5 rounded-full bg-[var(--chili)] text-white text-[11px] grid place-items-center font-bold">{cartCount}</span>
+              {!!effectiveCount && (
+                <span className="absolute -top-1 -right-1 size-5 rounded-full bg-[var(--chili)] text-white text-[11px] grid place-items-center font-bold">{effectiveCount}</span>
               )}
             </button>
           ) : (
-            <Link to="/" className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
+            <Link to="/products" className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
               <ShoppingCart className="size-5" />
               <span className="hidden sm:inline text-sm font-semibold">কার্ট</span>
+              {!!effectiveCount && (
+                <span className="absolute -top-1 -right-1 size-5 rounded-full bg-[var(--chili)] text-white text-[11px] grid place-items-center font-bold">{effectiveCount}</span>
+              )}
             </Link>
           )}
         </div>
