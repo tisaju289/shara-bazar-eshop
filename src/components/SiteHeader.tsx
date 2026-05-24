@@ -76,7 +76,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
             </div>
           </Link>
 
-          <form onSubmit={submit} className="flex-1 max-w-xl">
+          <form onSubmit={submit} className="flex-1 min-w-0">
             <div className="relative">
               <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground hover:text-primary">
                 <Search className="size-5" />

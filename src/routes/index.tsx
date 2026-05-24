@@ -252,7 +252,7 @@ function Index() {
             </div>
           </a>
 
-          <div className="flex-1 max-w-xl">
+          <div className="flex-1 min-w-0">
             <div className="relative">
               <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
