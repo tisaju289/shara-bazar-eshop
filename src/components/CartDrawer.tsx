@@ -45,6 +45,26 @@ export function CartDrawer() {
   const [deliveryIdx, setDeliveryIdx] = useState(0);
   const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
   const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
+  const c = settings?.checkout;
+  const t = {
+    title: c?.title_bn ?? "চেকআউট",
+    deliverySection: c?.delivery_section_title_bn ?? "ডেলিভারি এলাকা",
+    subtotal: c?.summary_subtotal_bn ?? "সাবটোটাল",
+    delivery: c?.summary_delivery_bn ?? "ডেলিভারি",
+    total: c?.summary_total_bn ?? "মোট",
+    nameLabel: c?.name_label_bn ?? "নাম",
+    namePh: c?.name_placeholder_bn ?? "আপনার নাম",
+    phoneLabel: c?.phone_label_bn ?? "ফোন নম্বর",
+    phonePh: c?.phone_placeholder_bn ?? "01XXXXXXXXX",
+    addressLabel: c?.address_label_bn ?? "ঠিকানা",
+    addressPh: c?.address_placeholder_bn ?? "পূর্ণ ঠিকানা লিখুন",
+    submit: c?.submit_btn_bn ?? "অর্ডার নিশ্চিত করুন",
+    placing: c?.placing_btn_bn ?? "অর্ডার হচ্ছে...",
+    required: c?.validation_required_bn ?? "সব তথ্য পূরণ করুন",
+    successTitle: c?.success_title_bn ?? "ধন্যবাদ! 🎉",
+    successMsg: c?.success_message_bn ?? "আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
+    successClose: c?.success_close_bn ?? "বন্ধ করুন",
+  };
 
   const add = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
   const sub = (id: string) =>
@@ -84,7 +104,7 @@ export function CartDrawer() {
   const placeOrder = async () => {
     setOrderError(null);
     if (!orderForm.name.trim() || !orderForm.phone.trim() || !orderForm.address.trim()) {
-      setOrderError("সব তথ্য পূরণ করুন");
+      setOrderError(t.required);
       return;
     }
     setPlacing(true);
@@ -193,8 +213,8 @@ export function CartDrawer() {
                   <CheckCircle2 className="size-9 text-white" />
                 </div>
                 <h3 className="text-2xl font-extrabold text-[var(--leaf-deep)]">ধন্যবাদ! 🎉</h3>
-                <p className="text-sm text-muted-foreground">আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
-                <button onClick={() => setCheckoutOpen(false)} className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold">বন্ধ করুন</button>
+                <p className="text-sm text-muted-foreground">{t.successMsg}</p>
+                <button onClick={() => setCheckoutOpen(false)} className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold">{t.successClose}</button>
               </div>
             ) : (
               <>
