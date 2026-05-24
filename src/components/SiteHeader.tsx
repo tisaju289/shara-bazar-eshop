@@ -25,6 +25,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
   const handleCartClick = onCartClick ?? openCartDrawer;
   const brand = settings?.brand;
   const topbar = settings?.topbar;
+  const menuItems = settings?.header_menu?.items ?? [];
   const navigate = useNavigate();
   const search = useRouterState({ select: (s) => s.location.search as { q?: string } });
   const [q, setQ] = useState(search?.q ?? "");
@@ -97,6 +98,13 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
             )}
           </button>
         </div>
+        {menuItems.length > 0 && (
+          <nav className="container mx-auto px-4 pb-3 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm font-medium text-[var(--leaf-deep)]">
+            {menuItems.map((m, i) => (
+              <a key={i} href={m.url} className="hover:text-primary transition">{m.label_bn}</a>
+            ))}
+          </nav>
+        )}
       </header>
 
       {/* Mobile compact header: logo + search */}
