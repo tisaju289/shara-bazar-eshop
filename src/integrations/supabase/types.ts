@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          keywords: string | null
           name_bn: string
           slug: string
           sort_order: number
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          keywords?: string | null
           name_bn: string
           slug: string
           sort_order?: number
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          keywords?: string | null
           name_bn?: string
           slug?: string
           sort_order?: number
@@ -84,6 +87,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          keywords: string | null
           name_bn: string
           old_price: number | null
           price: number
@@ -98,6 +102,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          keywords?: string | null
           name_bn: string
           old_price?: number | null
           price?: number
@@ -112,6 +117,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          keywords?: string | null
           name_bn?: string
           old_price?: number | null
           price?: number

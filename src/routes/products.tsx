@@ -28,9 +28,9 @@ export const Route = createFileRoute("/products")({
 type DBProduct = {
   id: string; name_bn: string; unit: string; price: number; old_price: number | null;
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
-  category_id: string | null;
+  category_id: string | null; keywords: string | null;
 };
-type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
+type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null };
 
 function useCategories() {
   return useQuery({
@@ -185,8 +185,17 @@ function ProductsPage() {
 
   const filtered = products.filter((p) => {
     const catOk = activeCat === "all" || p.category_id === activeCat;
-    const qOk = !q || p.name_bn.toLowerCase().includes(q.toLowerCase());
-    return catOk && qOk;
+    if (!q) return catOk;
+    const needle = q.toLowerCase().trim();
+    const cat = categories.find((c) => c.id === p.category_id);
+    const haystack = [
+      p.name_bn,
+      p.keywords ?? "",
+      p.tag ?? "",
+      cat?.name_bn ?? "",
+      cat?.keywords ?? "",
+    ].join(" ").toLowerCase();
+    return catOk && haystack.includes(needle);
   });
 
   const grouped = useMemo(() => {
