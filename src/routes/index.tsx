@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -97,6 +97,13 @@ function Index() {
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    navigate({ to: "/products", search: { q: q || undefined } as any });
+    setSearchOpen(false);
+  };
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "" });
@@ -252,9 +259,11 @@ function Index() {
             </div>
           </a>
 
-          <div className="flex-1 min-w-0">
+          <form onSubmit={submitSearch} className="flex-1 min-w-0">
             <div className="relative">
-              <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground hover:text-primary">
+                <Search className="size-5" />
+              </button>
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -262,7 +271,7 @@ function Index() {
                 className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none transition placeholder:text-muted-foreground"
               />
             </div>
-          </div>
+          </form>
 
           {menuItems.length > 0 && (
             <nav className="flex items-center gap-x-5 text-sm font-medium text-[var(--leaf-deep)]">
@@ -289,9 +298,11 @@ function Index() {
 
       {/* Mobile search bar (toggleable) */}
       {searchOpen && (
-        <div className="md:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
+        <form onSubmit={submitSearch} className="md:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
           <div className="relative">
-            <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground">
+              <Search className="size-5" />
+            </button>
             <input
               autoFocus
               value={searchQuery}
@@ -303,7 +314,7 @@ function Index() {
               <X className="size-5" />
             </button>
           </div>
-        </div>
+        </form>
       )}
 
 
