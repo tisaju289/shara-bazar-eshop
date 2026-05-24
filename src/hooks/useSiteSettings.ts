@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 export type Brand = { name_bn: string; tagline_bn: string; logo_url: string };
 export type Seo = { title: string; description: string; keywords: string; og_image: string; favicon_url: string };
 export type Topbar = { location_bn: string; phone: string; enabled: boolean };
+export type MenuItem = { label_bn: string; url: string };
+export type HeaderMenu = { items: MenuItem[] };
 export type Hero = {
   badge_bn: string; title_bn: string; title_highlight_bn: string; title_suffix_bn: string;
   subtitle_bn: string; cta_primary_bn: string; cta_primary_enabled: boolean;
@@ -99,6 +101,7 @@ export type SiteSettings = {
   brand: Brand;
   seo: Seo;
   topbar: Topbar;
+  header_menu: HeaderMenu;
   hero: Hero;
   offer: Offer;
   features: Feature[];
