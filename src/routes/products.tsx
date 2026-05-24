@@ -186,7 +186,6 @@ function ProductsPage() {
   const filtered = products.filter((p) => {
     const catOk = activeCat === "all" || p.category_id === activeCat;
     if (!q) return catOk;
-    const needle = q.toLowerCase().trim();
     const cat = categories.find((c) => c.id === p.category_id);
     const haystack = [
       p.name_bn,
@@ -195,7 +194,8 @@ function ProductsPage() {
       cat?.name_bn ?? "",
       cat?.keywords ?? "",
     ].join(" ").toLowerCase();
-    return catOk && haystack.includes(needle);
+    const tokens = q.toLowerCase().trim().split(/[\s,]+/).filter(Boolean);
+    return catOk && tokens.every((t) => haystack.includes(t));
   });
 
   const grouped = useMemo(() => {
