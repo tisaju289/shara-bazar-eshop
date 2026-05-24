@@ -216,6 +216,7 @@ function Index() {
   const topbar = settings?.topbar;
   const features = settings?.features ?? [];
   const footer = settings?.footer;
+  const menuItems = settings?.header_menu?.items ?? [];
   const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
 
   return (
@@ -271,6 +272,13 @@ function Index() {
             )}
           </button>
         </div>
+        {menuItems.length > 0 && (
+          <nav className="container mx-auto px-4 pb-3 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm font-medium text-[var(--leaf-deep)]">
+            {menuItems.map((m, i) => (
+              <a key={i} href={m.url} className="hover:text-primary transition">{m.label_bn}</a>
+            ))}
+          </nav>
+        )}
       </header>
 
       {/* Mobile site header (logo + search) */}
