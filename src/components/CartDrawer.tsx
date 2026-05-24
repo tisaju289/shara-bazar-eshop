@@ -319,6 +319,30 @@ export function CartDrawer() {
                     <label className="text-xs font-semibold">{t.addressLabel}</label>
                     <textarea value={orderForm.address} onChange={(e) => setOrderForm((f) => ({ ...f, address: e.target.value }))} placeholder={t.addressPh} rows={3} className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none" />
                   </div>
+                  {customFields.map((cf) => (
+                    <div key={cf.id} className="space-y-2">
+                      <label className="text-xs font-semibold">
+                        {cf.label_bn}{cf.required && <span className="text-[var(--chili)]"> *</span>}
+                      </label>
+                      {cf.type === "textarea" ? (
+                        <textarea
+                          value={customValues[cf.id] ?? ""}
+                          onChange={(e) => setCustomValues((s) => ({ ...s, [cf.id]: e.target.value }))}
+                          placeholder={cf.placeholder_bn}
+                          rows={3}
+                          className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none"
+                        />
+                      ) : (
+                        <input
+                          type={cf.type}
+                          value={customValues[cf.id] ?? ""}
+                          onChange={(e) => setCustomValues((s) => ({ ...s, [cf.id]: e.target.value }))}
+                          placeholder={cf.placeholder_bn}
+                          className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      )}
+                    </div>
+                  ))}
                   {orderError && <p className="text-sm text-[var(--chili)]">{orderError}</p>}
                   <button onClick={placeOrder} disabled={placing || Object.keys(checkoutItems).length === 0} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] inline-flex items-center justify-center gap-2 disabled:opacity-60">
                     {placing ? <><Loader2 className="size-4 animate-spin" /> {t.placing}</> : `${t.submit} · ৳${grandTotal}`}
