@@ -283,7 +283,7 @@ function ProductsPage() {
       {cartOpen && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50" onClick={() => setCartOpen(false)} />
-          <aside className="absolute right-0 top-0 bottom-0 w-full sm:w-96 bg-background flex flex-col shadow-2xl">
+          <aside className="absolute inset-x-3 bottom-3 top-auto max-h-[85vh] rounded-3xl overflow-hidden sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 sm:w-96 sm:max-h-none sm:rounded-none bg-background flex flex-col shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <span className="font-bold text-lg">আপনার কার্ট ({cartCount})</span>
               <button onClick={() => setCartOpen(false)}><X className="size-5" /></button>
