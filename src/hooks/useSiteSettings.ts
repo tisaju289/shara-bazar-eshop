@@ -116,6 +116,7 @@ const DEFAULTS: SiteSettings = {
   brand: { name_bn: "তাজা বাজার", tagline_bn: "তাজা · বিশ্বস্ত · দ্রুত", logo_url: "" },
   seo: { title: "তাজা বাজার", description: "", keywords: "", og_image: "", favicon_url: "" },
   topbar: { location_bn: "", phone: "", enabled: true },
+  header_menu: { items: [] },
   hero: {
     badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "",
     subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_primary_enabled: true,
