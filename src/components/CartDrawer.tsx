@@ -212,14 +212,14 @@ export function CartDrawer() {
                 <div className="mx-auto size-16 rounded-full grid place-items-center" style={{ background: "var(--gradient-hero)" }}>
                   <CheckCircle2 className="size-9 text-white" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-[var(--leaf-deep)]">ধন্যবাদ! 🎉</h3>
+                <h3 className="text-2xl font-extrabold text-[var(--leaf-deep)]">{t.successTitle}</h3>
                 <p className="text-sm text-muted-foreground">{t.successMsg}</p>
                 <button onClick={() => setCheckoutOpen(false)} className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold">{t.successClose}</button>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between p-4 border-b border-border">
-                  <span className="font-bold text-lg">চেকআউট</span>
+                  <span className="font-bold text-lg">{t.title}</span>
                   <button onClick={() => !placing && setCheckoutOpen(false)}><X className="size-5" /></button>
                 </div>
                 <div className="p-4 space-y-4">
@@ -262,23 +262,23 @@ export function CartDrawer() {
                       );
                     })}
                     <div className="flex justify-between pt-2 border-t border-border text-sm">
-                      <span className="text-muted-foreground">সাবটোটাল</span>
+                      <span className="text-muted-foreground">{t.subtotal}</span>
                       <span className="font-semibold">৳{checkoutTotal}</span>
                     </div>
                     {deliveryOptions.length > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">ডেলিভারি{deliveryLabel ? ` (${deliveryLabel})` : ""}</span>
+                        <span className="text-muted-foreground">{t.delivery}{deliveryLabel ? ` (${deliveryLabel})` : ""}</span>
                         <span className="font-semibold">৳{deliveryCharge}</span>
                       </div>
                     )}
                     <div className="flex justify-between pt-2 border-t border-border font-bold">
-                      <span>মোট</span>
+                      <span>{t.total}</span>
                       <span className="text-[var(--leaf-deep)]">৳{grandTotal}</span>
                     </div>
                   </div>
                   {deliveryOptions.length > 0 && (
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold">ডেলিভারি এলাকা</label>
+                      <label className="text-xs font-semibold">{t.deliverySection}</label>
                       <div className="space-y-2">
                         {deliveryOptions.map((o, i) => (
                           <label key={i} className={`flex items-center gap-3 rounded-2xl border p-3 cursor-pointer transition ${deliveryIdx === i ? "border-primary bg-primary/5" : "border-border bg-secondary/40"}`}>
@@ -291,20 +291,20 @@ export function CartDrawer() {
                     </div>
                   )}
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold">নাম</label>
-                    <input value={orderForm.name} onChange={(e) => setOrderForm((f) => ({ ...f, name: e.target.value }))} placeholder="আপনার নাম" className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+                    <label className="text-xs font-semibold">{t.nameLabel}</label>
+                    <input value={orderForm.name} onChange={(e) => setOrderForm((f) => ({ ...f, name: e.target.value }))} placeholder={t.namePh} className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold">ফোন নম্বর</label>
-                    <input value={orderForm.phone} onChange={(e) => setOrderForm((f) => ({ ...f, phone: e.target.value }))} placeholder="01XXXXXXXXX" type="tel" className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
+                    <label className="text-xs font-semibold">{t.phoneLabel}</label>
+                    <input value={orderForm.phone} onChange={(e) => setOrderForm((f) => ({ ...f, phone: e.target.value }))} placeholder={t.phonePh} type="tel" className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold">ঠিকানা</label>
-                    <textarea value={orderForm.address} onChange={(e) => setOrderForm((f) => ({ ...f, address: e.target.value }))} placeholder="পূর্ণ ঠিকানা লিখুন" rows={3} className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none" />
+                    <label className="text-xs font-semibold">{t.addressLabel}</label>
+                    <textarea value={orderForm.address} onChange={(e) => setOrderForm((f) => ({ ...f, address: e.target.value }))} placeholder={t.addressPh} rows={3} className="w-full px-4 py-3 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary resize-none" />
                   </div>
                   {orderError && <p className="text-sm text-[var(--chili)]">{orderError}</p>}
                   <button onClick={placeOrder} disabled={placing || Object.keys(checkoutItems).length === 0} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold shadow-[var(--shadow-pop)] inline-flex items-center justify-center gap-2 disabled:opacity-60">
-                    {placing ? <><Loader2 className="size-4 animate-spin" /> অর্ডার হচ্ছে...</> : `অর্ডার নিশ্চিত করুন · ৳${grandTotal}`}
+                    {placing ? <><Loader2 className="size-4 animate-spin" /> {t.placing}</> : `${t.submit} · ৳${grandTotal}`}
                   </button>
                 </div>
               </>
