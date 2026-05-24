@@ -13,15 +13,14 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "topbar" | "home_sections" | "features" | "footer" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
-  { key: "topbar", label: "টপ বার" },
+  { key: "header_footer", label: "হেডার / ফুটার" },
   { key: "home_sections", label: "হোম সেকশন" },
   { key: "features", label: "ফিচার" },
-  { key: "footer", label: "ফুটার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "delivery", label: "ডেলিভারি চার্জ" },
 ];
@@ -45,7 +44,10 @@ function SettingsPage() {
   const saveTab = async () => {
     if (!draft) return;
     setSaving(true);
-    const rows = [{ key: tab, value: (draft as any)[tab] }];
+    const keys = tab === "header_footer"
+      ? ["topbar", "header_menu", "footer"]
+      : [tab];
+    const rows = keys.map((k) => ({ key: k, value: (draft as any)[k] }));
     const { error } = await (supabase as any)
       .from("site_settings")
       .upsert(rows, { onConflict: "key" });
@@ -74,12 +76,20 @@ function SettingsPage() {
       <div className="bg-card border border-border rounded-3xl p-5 md:p-7 space-y-5">
         {tab === "brand" && <BrandTab v={draft.brand} on={(v) => update("brand", v)} />}
         {tab === "seo" && <SeoTab v={draft.seo} on={(v) => update("seo", v)} />}
-        {tab === "topbar" && <TopbarTab v={draft.topbar} on={(v) => update("topbar", v)} />}
+        {tab === "header_footer" && (
+          <HeaderFooterTab
+            topbar={draft.topbar}
+            onTopbar={(v) => update("topbar", v)}
+            menu={draft.header_menu}
+            onMenu={(v) => update("header_menu", v)}
+            footer={draft.footer}
+            onFooter={(v) => update("footer", v)}
+          />
+        )}
         {tab === "home_sections" && (
           <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />
         )}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
-        {tab === "footer" && <FooterTab v={draft.footer} on={(v) => update("footer", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
 
