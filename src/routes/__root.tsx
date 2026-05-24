@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { TrackingScripts } from "@/components/TrackingScripts";
 import { useEffect } from "react";
+import { CartDrawer } from "@/components/CartDrawer";
 
 function NotFoundComponent() {
   return (
@@ -120,6 +121,7 @@ function RootComponent() {
       <DynamicHead />
       <TrackingScripts />
       <Outlet />
+      <CartDrawer />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
