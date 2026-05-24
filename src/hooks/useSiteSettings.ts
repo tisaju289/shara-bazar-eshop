@@ -28,6 +28,26 @@ export type Sections = {
 export type DeliveryOption = { label_bn: string; charge: number; enabled: boolean };
 export type Delivery = { enabled: boolean; options: DeliveryOption[] };
 
+export type Checkout = {
+  title_bn: string;
+  delivery_section_title_bn: string;
+  summary_subtotal_bn: string;
+  summary_delivery_bn: string;
+  summary_total_bn: string;
+  name_label_bn: string;
+  name_placeholder_bn: string;
+  phone_label_bn: string;
+  phone_placeholder_bn: string;
+  address_label_bn: string;
+  address_placeholder_bn: string;
+  submit_btn_bn: string;
+  placing_btn_bn: string;
+  validation_required_bn: string;
+  success_title_bn: string;
+  success_message_bn: string;
+  success_close_bn: string;
+};
+
 export type HomeSectionType = "hero" | "category" | "product" | "offer" | "banner";
 type Base = { id: string; enabled: boolean };
 export type HeroSection = Base & {
@@ -110,6 +130,7 @@ export type SiteSettings = {
   tracking: Tracking;
   delivery: Delivery;
   home_sections: HomeSection[];
+  checkout: Checkout;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -152,6 +173,25 @@ const DEFAULTS: SiteSettings = {
     ],
   },
   home_sections: [],
+  checkout: {
+    title_bn: "চেকআউট",
+    delivery_section_title_bn: "ডেলিভারি এলাকা",
+    summary_subtotal_bn: "সাবটোটাল",
+    summary_delivery_bn: "ডেলিভারি",
+    summary_total_bn: "মোট",
+    name_label_bn: "নাম",
+    name_placeholder_bn: "আপনার নাম",
+    phone_label_bn: "ফোন নম্বর",
+    phone_placeholder_bn: "01XXXXXXXXX",
+    address_label_bn: "ঠিকানা",
+    address_placeholder_bn: "পূর্ণ ঠিকানা লিখুন",
+    submit_btn_bn: "অর্ডার নিশ্চিত করুন",
+    placing_btn_bn: "অর্ডার হচ্ছে...",
+    validation_required_bn: "সব তথ্য পূরণ করুন",
+    success_title_bn: "ধন্যবাদ! 🎉",
+    success_message_bn: "আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
+    success_close_bn: "বন্ধ করুন",
+  },
 };
 
 export function useSiteSettings() {

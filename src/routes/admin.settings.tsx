@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery" | "checkout";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -23,6 +23,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "features", label: "ফিচার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "delivery", label: "ডেলিভারি চার্জ" },
+  { key: "checkout", label: "চেকআউট" },
 ];
 
 function SettingsPage() {
@@ -92,6 +93,7 @@ function SettingsPage() {
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
+        {tab === "checkout" && <CheckoutTab v={draft.checkout} on={(v) => update("checkout", v)} />}
 
         <div className="pt-3 flex justify-end">
           <button onClick={saveTab} disabled={saving}
@@ -101,6 +103,62 @@ function SettingsPage() {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CheckoutTab({ v, on }: { v: SiteSettings["checkout"]; on: (v: SiteSettings["checkout"]) => void }) {
+  const f = <K extends keyof SiteSettings["checkout"]>(k: K) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => on({ ...v, [k]: e.target.value });
+  return (
+    <div className="space-y-6">
+      <p className="text-xs text-muted-foreground">চেকআউট পপআপের প্রতিটি লেখা/লেবেল/বাটন এখান থেকে কাস্টমাইজ করুন।</p>
+
+      <section className="space-y-3">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডিং ও সেকশন</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="পপআপ টাইটেল"><input className={inputCls} value={v.title_bn} onChange={f("title_bn")} /></Field>
+          <Field label="ডেলিভারি এলাকা সেকশন টাইটেল"><input className={inputCls} value={v.delivery_section_title_bn} onChange={f("delivery_section_title_bn")} /></Field>
+        </div>
+      </section>
+
+      <section className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">সামারি লেবেল</h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <Field label="সাবটোটাল লেবেল"><input className={inputCls} value={v.summary_subtotal_bn} onChange={f("summary_subtotal_bn")} /></Field>
+          <Field label="ডেলিভারি লেবেল"><input className={inputCls} value={v.summary_delivery_bn} onChange={f("summary_delivery_bn")} /></Field>
+          <Field label="মোট লেবেল"><input className={inputCls} value={v.summary_total_bn} onChange={f("summary_total_bn")} /></Field>
+        </div>
+      </section>
+
+      <section className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">কাস্টমার ফর্ম</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="নাম — লেবেল"><input className={inputCls} value={v.name_label_bn} onChange={f("name_label_bn")} /></Field>
+          <Field label="নাম — প্লেসহোল্ডার"><input className={inputCls} value={v.name_placeholder_bn} onChange={f("name_placeholder_bn")} /></Field>
+          <Field label="ফোন — লেবেল"><input className={inputCls} value={v.phone_label_bn} onChange={f("phone_label_bn")} /></Field>
+          <Field label="ফোন — প্লেসহোল্ডার"><input className={inputCls} value={v.phone_placeholder_bn} onChange={f("phone_placeholder_bn")} /></Field>
+          <Field label="ঠিকানা — লেবেল"><input className={inputCls} value={v.address_label_bn} onChange={f("address_label_bn")} /></Field>
+          <Field label="ঠিকানা — প্লেসহোল্ডার"><input className={inputCls} value={v.address_placeholder_bn} onChange={f("address_placeholder_bn")} /></Field>
+        </div>
+      </section>
+
+      <section className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">বাটন ও বার্তা</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="অর্ডার বাটন টেক্সট" hint="মোট দাম শেষে অটো যোগ হবে"><input className={inputCls} value={v.submit_btn_bn} onChange={f("submit_btn_bn")} /></Field>
+          <Field label="অর্ডার সাবমিট হচ্ছে — টেক্সট"><input className={inputCls} value={v.placing_btn_bn} onChange={f("placing_btn_bn")} /></Field>
+          <Field label="ভ্যালিডেশন এরর (ফাঁকা ফিল্ড)"><input className={inputCls} value={v.validation_required_bn} onChange={f("validation_required_bn")} /></Field>
+        </div>
+      </section>
+
+      <section className="space-y-3 pt-3 border-t border-border">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">অর্ডার সফল স্ক্রিন</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="সফল টাইটেল"><input className={inputCls} value={v.success_title_bn} onChange={f("success_title_bn")} /></Field>
+          <Field label="বন্ধ বাটন টেক্সট"><input className={inputCls} value={v.success_close_bn} onChange={f("success_close_bn")} /></Field>
+        </div>
+        <Field label="সফল বার্তা"><textarea className={areaCls} value={v.success_message_bn} onChange={f("success_message_bn")} /></Field>
+      </section>
     </div>
   );
 }
