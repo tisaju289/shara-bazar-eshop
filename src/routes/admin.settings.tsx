@@ -225,7 +225,7 @@ function CheckoutTab({ v, on, delivery, onDelivery }: {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
     </div>
   );
 }
