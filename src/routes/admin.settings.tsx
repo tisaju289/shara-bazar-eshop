@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType } from "@/hooks/useSiteSettings";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ImageInput } from "@/components/ImageInput";
 import { useQuery } from "@tanstack/react-query";
