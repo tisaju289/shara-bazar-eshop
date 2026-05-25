@@ -98,6 +98,8 @@ export type HeroSection = Base & {
   side_image_link?: string;
   aspect_ratio?: string; // e.g. "21/9", "16/9", "4/3"
   side_width_pct?: number; // e.g. 22
+  side_width?: string; // CSS value e.g. "300px" or "25%" — overrides side_width_pct grid track if set
+  side_height?: string; // CSS value e.g. "400px" or "100%" — default stretches to slider height
 };
 export type CategorySection = Base & {
   type: "category";
