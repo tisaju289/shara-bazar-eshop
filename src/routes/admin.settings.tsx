@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType, type ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
+import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
