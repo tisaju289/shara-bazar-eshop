@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Loader2, ShoppingCart, Plus, Minus, X, CheckCircle2,
+  Loader2, Plus, Minus, X, CheckCircle2,
   Home, LayoutGrid, Package,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
+import { ProductCard } from "@/components/ProductCard";
+import { ShoppingCart } from "lucide-react";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -28,9 +30,11 @@ export const Route = createFileRoute("/products")({
 type DBProduct = {
   id: string; name_bn: string; unit: string; price: number; old_price: number | null;
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
-  category_id: string | null; keywords: string | null;
+  category_id: string | null; brand_id: string | null; keywords: string | null;
+  reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null };
+type DBBrand = { id: string; name_bn: string };
 
 function useCategories() {
   return useQuery({
@@ -39,6 +43,16 @@ function useCategories() {
       const { data, error } = await supabase.from("categories").select("*").order("sort_order");
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+function useBrands() {
+  return useQuery({
+    queryKey: ["brands", "public"],
+    queryFn: async (): Promise<DBBrand[]> => {
+      const { data, error } = await supabase.from("brands").select("id, name_bn").order("sort_order");
+      if (error) throw error;
+      return (data as DBBrand[]) ?? [];
     },
   });
 }
@@ -57,6 +71,7 @@ function ProductsPage() {
   const { q, cat } = Route.useSearch();
   const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
@@ -260,7 +275,17 @@ function ProductsPage() {
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                         {items.map((p) => (
-                          <ProductCard key={p.id} product={p} categoryName={cat?.name_bn ?? ""} cart={cart} add={add} sub={sub} openCheckout={openCheckout} />
+                          <ProductCard
+                            key={p.id}
+                            product={p}
+                            categoryName={cat?.name_bn ?? ""}
+                            brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
+                            qty={cart[p.id] ?? 0}
+                            add={add}
+                            sub={sub}
+                            onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
+                            settings={settings?.product_card}
+                          />
                         ))}
                       </div>
                     </div>
@@ -270,7 +295,20 @@ function ProductsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                   {filtered.map((p) => {
                     const catName = categories.find((c) => c.id === p.category_id)?.name_bn ?? "";
-                    return <ProductCard key={p.id} product={p} categoryName={catName} cart={cart} add={add} sub={sub} openCheckout={openCheckout} />;
+                    const brandName = brands.find((b) => b.id === p.brand_id)?.name_bn ?? "";
+                    return (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        categoryName={catName}
+                        brandName={brandName}
+                        qty={cart[p.id] ?? 0}
+                        add={add}
+                        sub={sub}
+                        onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
+                        settings={settings?.product_card}
+                      />
+                    );
                   })}
                 </div>
               )}
