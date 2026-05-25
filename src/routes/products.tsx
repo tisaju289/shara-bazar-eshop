@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, ShoppingCart, Plus, Minus, X, CheckCircle2,
-  Home, LayoutGrid, Package,
+  Home, LayoutGrid, Package, Leaf,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -214,9 +214,31 @@ function ProductsPage() {
     return ordered.filter((id) => grouped[id] && grouped[id].length > 1);
   }, [categories, grouped]);
 
+  const brand = settings?.brand;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader cartCount={cartCount} cartTotal={cartTotal} onCartClick={() => setCartOpen(true)} />
+
+      {/* Brand banner */}
+      <section className="relative overflow-hidden bg-[var(--leaf-deep)] text-primary-foreground">
+        <div className="absolute inset-1 rounded-[2.5rem] opacity-20" style={{ background: "var(--gradient-warm)" }} />
+        <div className="container mx-auto px-4 py-8 md:py-12 relative">
+          <div className="flex flex-col items-center text-center gap-3">
+            {brand?.logo_url ? (
+              <img src={brand.logo_url} alt={brand.name_bn} className="size-16 md:size-20 rounded-3xl object-contain bg-white p-2 shadow-lg" />
+            ) : (
+              <div className="size-16 md:size-20 rounded-3xl grid place-items-center bg-white/10 backdrop-blur-sm">
+                <Leaf className="size-8 md:size-10" />
+              </div>
+            )}
+            <div>
+              <h2 className="text-2xl md:text-4xl font-[family-name:var(--font-display)] font-extrabold">{brand?.name_bn ?? "তাজা বাজার"}</h2>
+              {brand?.tagline_bn && <p className="text-primary-foreground/80 text-sm md:text-base mt-1">{brand.tagline_bn}</p>}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4 space-y-6">
