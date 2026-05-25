@@ -17,7 +17,21 @@ export type Offer = {
   coupon_code: string; min_order_bn: string; cta_bn: string;
 };
 export type Feature = { icon: string; text_bn: string };
-export type Footer = { about_bn: string; phone: string; email: string; address_bn: string };
+export type Footer = {
+  about_bn: string;
+  phone: string;
+  email: string;
+  address_bn: string;
+  categories_title_bn: string;
+  contact_title_bn: string;
+  copyright_bn: string;
+  show_brand_column: boolean;
+  show_categories_column: boolean;
+  show_contact_column: boolean;
+  show_copyright: boolean;
+  bg_color: string;
+  text_color: string;
+};
 export type Sections = {
   categories_title_bn: string;
   categories_subtitle_bn: string;
@@ -180,7 +194,21 @@ const DEFAULTS: SiteSettings = {
   },
   offer: { enabled: false, label_bn: "", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "" },
   features: [],
-  footer: { about_bn: "", phone: "", email: "", address_bn: "" },
+  footer: {
+    about_bn: "",
+    phone: "",
+    email: "",
+    address_bn: "",
+    categories_title_bn: "ক্যাটাগরি",
+    contact_title_bn: "যোগাযোগ",
+    copyright_bn: "© {year} {brand} — সর্বস্বত্ব সংরক্ষিত",
+    show_brand_column: true,
+    show_categories_column: true,
+    show_contact_column: true,
+    show_copyright: true,
+    bg_color: "",
+    text_color: "",
+  },
   sections: {
     categories_title_bn: "জনপ্রিয় ক্যাটাগরি",
     categories_subtitle_bn: "যেটি দরকার, এক ক্লিকেই খুঁজে নিন",
