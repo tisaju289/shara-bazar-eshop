@@ -219,6 +219,19 @@ function AdminProducts() {
                 <ImageInput value={form.image_url ?? ""} onChange={(url) => setForm({ ...form, image_url: url })} folder="products" />
               </Field>
               <Field label="ট্যাগ (যেমন: সিজনাল, নতুন)"><input value={form.tag ?? ""} onChange={(e) => setForm({ ...form, tag: e.target.value })} className="input" /></Field>
+              <Field label="অফার ব্যাজ (যেমন: 10 TK OFF)">
+                <input value={form.offer_badge ?? ""} onChange={(e) => setForm({ ...form, offer_badge: e.target.value })} placeholder="খালি রাখলে দেখাবে না" className="input" />
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="রিভিউ রেটিং (0-5)">
+                  <input type="number" min="0" max="5" step="0.1" value={form.reviews_rating ?? 0}
+                    onChange={(e) => setForm({ ...form, reviews_rating: Number(e.target.value) })} className="input" />
+                </Field>
+                <Field label="রিভিউ সংখ্যা">
+                  <input type="number" min="0" value={form.reviews_count ?? 0}
+                    onChange={(e) => setForm({ ...form, reviews_count: Number(e.target.value) })} className="input" />
+                </Field>
+              </div>
               <Field label="কীওয়ার্ড (সার্চের জন্য, কমা দিয়ে আলাদা করুন)">
                 <input value={form.keywords ?? ""} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="যেমন: ilish, hilsa, মাছ" className="input" />
               </Field>
