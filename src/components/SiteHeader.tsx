@@ -51,7 +51,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
           <div className="container mx-auto px-4 flex items-center gap-4 py-2">
             <span className="flex items-center gap-1.5 shrink-0"><MapPin className="size-3.5" /> {topbar.location_bn}</span>
             {topbar.notice_enabled && topbar.notice_bn && (
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden text-right rounded-none">
                 <div
                   className="marquee-track"
                   style={{ animationDuration: `${topbar.notice_speed ?? 30}s` }}
