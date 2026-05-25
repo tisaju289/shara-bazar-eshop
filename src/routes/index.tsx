@@ -463,13 +463,14 @@ function Index() {
                   <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
                 </div>
                 {sec.side_image_url && (
-                  <a
-                    href={sec.side_image_link || "#"}
-                    className="relative hidden md:block rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white hero-frame"
-                    style={{ ["--hero-ar" as any]: (sec.aspect_ratio || "21/9").replace("/", " / ") }}
-                  >
-                    <img src={sec.side_image_url} alt="offer" className="absolute inset-0 w-full h-full object-cover" />
-                  </a>
+                  <div className="hidden md:flex items-center justify-center">
+                    <a
+                      href={sec.side_image_link || "#"}
+                      className="relative block w-full aspect-square rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white"
+                    >
+                      <img src={sec.side_image_url} alt="offer" className="absolute inset-0 w-full h-full object-cover" />
+                    </a>
+                  </div>
                 )}
               </div>
             </section>
