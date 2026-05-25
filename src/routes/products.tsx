@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, Plus, Minus, X, CheckCircle2,
-  Home, LayoutGrid, Package, ChevronDown, ChevronUp,
+  Home, LayoutGrid, Package, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -75,7 +75,7 @@ function ProductsPage() {
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
-  const [catExpanded, setCatExpanded] = useState(false);
+  const catScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Cart state
   const [cart, setCart] = useCart();
@@ -240,15 +240,12 @@ function ProductsPage() {
             {q ? `"${q}" এর ফলাফল` : "সব পণ্য"}
           </h1>
 
-          {/* Category grid: image + name, 4 per row, rest behind toggle */}
           {(() => {
             const allItem = { id: "all" as const, name_bn: "সব", image_url: null as string | null };
             const items: Array<{ id: string; name_bn: string; image_url: string | null }> = [
               allItem,
               ...categories.map((c) => ({ id: c.id, name_bn: c.name_bn, image_url: c.image_url })),
             ];
-            const visible = catExpanded ? items : items.slice(0, 4);
-            const hasMore = items.length > 4;
             const onPick = (id: string) => {
               setActiveCat("all");
               if (id === "all") {
@@ -259,16 +256,41 @@ function ProductsPage() {
                 document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
               }, 50);
             };
+            const scrollByDir = (dir: 1 | -1) => {
+              const el = catScrollRef.current;
+              if (!el) return;
+              const amount = el.clientWidth * 0.8 * dir;
+              el.scrollBy({ left: amount, behavior: "smooth" });
+            };
             return (
-              <div className="space-y-3">
-                <div className="grid grid-cols-4 gap-3 md:gap-4">
-                  {visible.map((c) => {
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => scrollByDir(-1)}
+                  aria-label="Previous"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-card border border-border shadow grid place-items-center hover:border-primary"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollByDir(1)}
+                  aria-label="Next"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-card border border-border shadow grid place-items-center hover:border-primary"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+                <div
+                  ref={catScrollRef}
+                  className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth snap-x px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {items.map((c) => {
                     const isActive = activeCat === c.id || (c.id === "all" && activeCat === "all");
                     return (
                       <button
                         key={c.id}
                         onClick={() => onPick(c.id)}
-                        className="flex flex-col items-center gap-1.5 group"
+                        className="flex flex-col items-center gap-1.5 group shrink-0 snap-start w-20"
                       >
                         <div className={`size-16 md:size-20 rounded-full grid place-items-center overflow-hidden border-2 transition ${isActive ? "border-primary shadow-[var(--shadow-pop)]" : "border-border group-hover:border-primary"}`} style={{ background: "var(--gradient-warm)" }}>
                           {c.image_url ? (
@@ -284,16 +306,6 @@ function ProductsPage() {
                     );
                   })}
                 </div>
-                {hasMore && (
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => setCatExpanded((v) => !v)}
-                      className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-card border border-border text-xs font-semibold hover:border-primary transition"
-                    >
-                      {catExpanded ? (<>কম দেখুন <ChevronUp className="size-3.5" /></>) : (<>আরও দেখুন <ChevronDown className="size-3.5" /></>)}
-                    </button>
-                  </div>
-                )}
               </div>
             );
           })()}
