@@ -96,8 +96,6 @@ function Index() {
   const { data: categories = [] } = useCategories();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
-  const catScrollRef = (typeof window !== "undefined" ? (window as any) : {}) as any;
-
   const [cart, setCart] = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
