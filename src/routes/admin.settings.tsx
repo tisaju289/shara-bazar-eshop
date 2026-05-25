@@ -585,6 +585,10 @@ function FeaturesTab({ v, on }: { v: SiteSettings["features"]; on: (v: SiteSetti
         <div key={i} className="flex gap-2 items-center">
           <input className={inputCls + " flex-1"} placeholder="আইকন" value={f.icon} onChange={(e) => { const n = [...v]; n[i] = { ...n[i], icon: e.target.value }; on(n); }} />
           <input className={inputCls + " flex-[2]"} placeholder="টেক্সট" value={f.text_bn} onChange={(e) => { const n = [...v]; n[i] = { ...n[i], text_bn: e.target.value }; on(n); }} />
+          <button type="button" disabled={i === 0} onClick={() => { const n = [...v]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; on(n); }}
+            className="h-11 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
+          <button type="button" disabled={i === v.length - 1} onClick={() => { const n = [...v]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; on(n); }}
+            className="h-11 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
           <button onClick={() => on(v.filter((_, j) => j !== i))} className="size-11 rounded-xl bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
         </div>
       ))}
