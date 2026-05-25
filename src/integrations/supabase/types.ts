@@ -120,8 +120,11 @@ export type Database = {
           is_active: boolean
           keywords: string | null
           name_bn: string
+          offer_badge: string | null
           old_price: number | null
           price: number
+          reviews_count: number
+          reviews_rating: number | null
           stock: number
           tag: string | null
           unit: string
@@ -136,8 +139,11 @@ export type Database = {
           is_active?: boolean
           keywords?: string | null
           name_bn: string
+          offer_badge?: string | null
           old_price?: number | null
           price?: number
+          reviews_count?: number
+          reviews_rating?: number | null
           stock?: number
           tag?: string | null
           unit?: string
@@ -152,8 +158,11 @@ export type Database = {
           is_active?: boolean
           keywords?: string | null
           name_bn?: string
+          offer_badge?: string | null
           old_price?: number | null
           price?: number
+          reviews_count?: number
+          reviews_rating?: number | null
           stock?: number
           tag?: string | null
           unit?: string

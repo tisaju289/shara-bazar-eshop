@@ -145,6 +145,27 @@ export type SiteSettings = {
   delivery: Delivery;
   home_sections: HomeSection[];
   checkout: Checkout;
+  product_card: ProductCard;
+};
+
+export type ProductCard = {
+  show_category: boolean;
+  show_brand: boolean;
+  show_unit: boolean;
+  show_name: boolean;
+  show_price: boolean;
+  show_old_price: boolean;
+  show_tag: boolean;
+  show_offer_badge: boolean;
+  show_reviews: boolean;
+  show_add_to_cart: boolean;
+  show_buy_now: boolean;
+  show_wishlist: boolean;
+  add_to_cart_text_bn: string;
+  buy_now_text_bn: string;
+  badge_bg: string;
+  badge_color: string;
+  badge_style: "starburst" | "ribbon" | "pill";
 };
 
 const DEFAULTS: SiteSettings = {
@@ -206,6 +227,25 @@ const DEFAULTS: SiteSettings = {
     success_message_bn: "আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
     success_close_bn: "বন্ধ করুন",
     custom_fields: [],
+  },
+  product_card: {
+    show_category: true,
+    show_brand: true,
+    show_unit: true,
+    show_name: true,
+    show_price: true,
+    show_old_price: true,
+    show_tag: true,
+    show_offer_badge: true,
+    show_reviews: true,
+    show_add_to_cart: true,
+    show_buy_now: true,
+    show_wishlist: false,
+    add_to_cart_text_bn: "কার্ট",
+    buy_now_text_bn: "এখনই কিনুন",
+    badge_bg: "#e11d48",
+    badge_color: "#ffffff",
+    badge_style: "starburst",
   },
 };
 
