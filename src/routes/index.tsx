@@ -334,9 +334,17 @@ function Index() {
       {/* Top utility bar */}
       {topbar?.enabled && (
         <div className="hidden md:block bg-[var(--leaf-deep)] text-primary-foreground/90 text-xs">
-          <div className="container mx-auto px-4 flex justify-between py-2">
-            <span className="flex items-center gap-1.5"><MapPin className="size-3.5" /> {topbar.location_bn}</span>
-            <span className="flex items-center gap-4">
+          <div className="container mx-auto px-4 flex items-center gap-4 py-2">
+            <span className="flex items-center gap-1.5 shrink-0"><MapPin className="size-3.5" /> {topbar.location_bn}</span>
+            {topbar.notice_enabled && topbar.notice_bn && (
+              <div className="flex-1 overflow-hidden">
+                <div className="marquee-track" style={{ animationDuration: `${topbar.notice_speed ?? 30}s` }}>
+                  <span className="px-8">📢 {topbar.notice_bn}</span>
+                  <span className="px-8">📢 {topbar.notice_bn}</span>
+                </div>
+              </div>
+            )}
+            <span className="flex items-center gap-4 shrink-0 ml-auto">
               <span className="flex items-center gap-1.5"><Phone className="size-3.5" /> {topbar.phone}</span>
               <span>সাহায্য</span>
               <span>আমার অর্ডার</span>
