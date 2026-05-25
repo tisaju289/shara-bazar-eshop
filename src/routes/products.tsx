@@ -227,7 +227,7 @@ function ProductsPage() {
   const catOrder = useMemo(() => {
     const ordered = categories.map((c) => c.id);
     if (grouped["uncategorized"]) ordered.push("uncategorized");
-    return ordered.filter((id) => grouped[id] && grouped[id].length > 1);
+    return ordered.filter((id) => grouped[id] && grouped[id].length >= 1);
   }, [categories, grouped]);
 
   return (
