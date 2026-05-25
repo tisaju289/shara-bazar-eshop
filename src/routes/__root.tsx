@@ -14,6 +14,29 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { TrackingScripts } from "@/components/TrackingScripts";
 import { useEffect } from "react";
 import { CartDrawer } from "@/components/CartDrawer";
+import { supabase } from "@/integrations/supabase/client";
+
+async function loadSeo() {
+  try {
+    const { data } = await (supabase as any)
+      .from("site_settings")
+      .select("key,value")
+      .in("key", ["seo", "brand"]);
+    const map: any = {};
+    for (const row of (data ?? []) as { key: string; value: any }[]) {
+      map[row.key] = row.value;
+    }
+    return {
+      title: map.seo?.title || map.brand?.name_bn || "",
+      description: map.seo?.description || map.brand?.tagline_bn || "",
+      keywords: map.seo?.keywords || "",
+      og_image: map.seo?.og_image || "",
+      favicon_url: map.seo?.favicon_url || "",
+    };
+  } catch {
+    return { title: "", description: "", keywords: "", og_image: "", favicon_url: "" };
+  }
+}
 
 function NotFoundComponent() {
   return (
@@ -73,26 +96,35 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
+  loader: () => loadSeo(),
+  head: ({ loaderData }) => {
+    const d = loaderData ?? { title: "", description: "", keywords: "", og_image: "", favicon_url: "" };
+    const title = d.title || "Lovable App";
+    const description = d.description || "Lovable Generated Project";
+    const meta: Array<Record<string, string>> = [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
-  }),
+      { property: "og:site_name", content: title },
+      { name: "twitter:card", content: d.og_image ? "summary_large_image" : "summary" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+    ];
+    if (d.keywords) meta.push({ name: "keywords", content: d.keywords });
+    if (d.og_image) {
+      meta.push({ property: "og:image", content: d.og_image });
+      meta.push({ name: "twitter:image", content: d.og_image });
+    }
+    const links: Array<Record<string, string>> = [
+      { rel: "stylesheet", href: appCss },
+    ];
+    if (d.favicon_url) links.push({ rel: "icon", href: d.favicon_url });
+    return { meta, links };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
