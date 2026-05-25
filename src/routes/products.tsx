@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Loader2, ShoppingCart, Plus, Minus, X, CheckCircle2,
+  Loader2, Plus, Minus, X, CheckCircle2,
   Home, LayoutGrid, Package,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
+import { ProductCard } from "@/components/ProductCard";
+import { ShoppingCart } from "lucide-react";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -28,9 +30,11 @@ export const Route = createFileRoute("/products")({
 type DBProduct = {
   id: string; name_bn: string; unit: string; price: number; old_price: number | null;
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
-  category_id: string | null; keywords: string | null;
+  category_id: string | null; brand_id: string | null; keywords: string | null;
+  reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null };
+type DBBrand = { id: string; name_bn: string };
 
 function useCategories() {
   return useQuery({
@@ -39,6 +43,16 @@ function useCategories() {
       const { data, error } = await supabase.from("categories").select("*").order("sort_order");
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+function useBrands() {
+  return useQuery({
+    queryKey: ["brands", "public"],
+    queryFn: async (): Promise<DBBrand[]> => {
+      const { data, error } = await supabase.from("brands").select("id, name_bn").order("sort_order");
+      if (error) throw error;
+      return (data as DBBrand[]) ?? [];
     },
   });
 }
@@ -57,6 +71,7 @@ function ProductsPage() {
   const { q, cat } = Route.useSearch();
   const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
@@ -260,7 +275,17 @@ function ProductsPage() {
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                         {items.map((p) => (
-                          <ProductCard key={p.id} product={p} categoryName={cat?.name_bn ?? ""} cart={cart} add={add} sub={sub} openCheckout={openCheckout} />
+                          <ProductCard
+                            key={p.id}
+                            product={p}
+                            categoryName={cat?.name_bn ?? ""}
+                            brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
+                            qty={cart[p.id] ?? 0}
+                            add={add}
+                            sub={sub}
+                            onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
+                            settings={settings?.product_card}
+                          />
                         ))}
                       </div>
                     </div>
@@ -270,7 +295,20 @@ function ProductsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                   {filtered.map((p) => {
                     const catName = categories.find((c) => c.id === p.category_id)?.name_bn ?? "";
-                    return <ProductCard key={p.id} product={p} categoryName={catName} cart={cart} add={add} sub={sub} openCheckout={openCheckout} />;
+                    const brandName = brands.find((b) => b.id === p.brand_id)?.name_bn ?? "";
+                    return (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        categoryName={catName}
+                        brandName={brandName}
+                        qty={cart[p.id] ?? 0}
+                        add={add}
+                        sub={sub}
+                        onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
+                        settings={settings?.product_card}
+                      />
+                    );
                   })}
                 </div>
               )}
@@ -504,61 +542,3 @@ function ProductsPage() {
   );
 }
 
-function ProductCard({
-  product: p,
-  categoryName,
-  cart,
-  add,
-  sub,
-  openCheckout,
-}: {
-  product: DBProduct;
-  categoryName: string;
-  cart: Record<string, number>;
-  add: (id: string) => void;
-  sub: (id: string) => void;
-  openCheckout: (items: Record<string, number>) => void;
-}) {
-  const qty = cart[p.id] ?? 0;
-  return (
-    <article className="group rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
-      <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-        {p.image_url ? (
-          <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
-        ) : (
-          <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
-        )}
-        {p.tag && (
-          <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
-        )}
-      </div>
-      <div className="p-3 md:p-4 space-y-2 text-center">
-        <div className="text-[11px] text-muted-foreground">{categoryName} · {p.unit}</div>
-        <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>
-        <div className="flex items-baseline gap-1.5 pt-1 justify-center">
-          <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
-          {p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
-        </div>
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          {qty === 0 ? (
-            <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
-              <Plus className="size-3.5" /> কার্ট
-            </button>
-          ) : (
-            <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
-              <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
-              <span className="text-xs font-bold">{qty}</span>
-              <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
-            </div>
-          )}
-          <button
-            onClick={() => openCheckout({ [p.id]: Math.max(qty, 1) })}
-            className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]"
-          >
-            এখনই কিনুন
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}

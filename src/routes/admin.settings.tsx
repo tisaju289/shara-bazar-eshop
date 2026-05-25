@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType, type ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
+import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
@@ -13,13 +14,14 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "tracking" | "checkout";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "tracking" | "checkout" | "product_card";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "header_footer", label: "হেডার / ফুটার" },
   { key: "home_sections", label: "হোম সেকশন" },
+  { key: "product_card", label: "প্রোডাক্ট কার্ড" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "checkout", label: "চেকআউট" },
 ];
@@ -87,6 +89,9 @@ function SettingsPage() {
         )}
         {tab === "home_sections" && (
           <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />
+        )}
+        {tab === "product_card" && (
+          <ProductCardTab v={draft.product_card} on={(v) => update("product_card", v)} />
         )}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "checkout" && (
@@ -302,6 +307,105 @@ function HomeSectionsTab({ v, on }: {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ProductCardTab({ v, on }: { v: ProductCardSettings; on: (v: ProductCardSettings) => void }) {
+  const toggle = (key: keyof ProductCardSettings) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    on({ ...v, [key]: e.target.checked } as ProductCardSettings);
+  const set = <K extends keyof ProductCardSettings>(key: K, val: ProductCardSettings[K]) =>
+    on({ ...v, [key]: val });
+
+  const sample: ProductCardData = {
+    id: "preview",
+    name_bn: "কাতল মাছ",
+    unit: "১ কেজি",
+    price: 330,
+    old_price: 350,
+    image_url: null,
+    tag: "নতুন",
+    category_id: null,
+    brand_id: null,
+    reviews_rating: 4.5,
+    reviews_count: 23,
+    offer_badge: v.show_offer_badge ? "10 TK OFF" : null,
+  };
+
+  const toggles: { key: keyof ProductCardSettings; label: string }[] = [
+    { key: "show_category", label: "ক্যাটাগরি" },
+    { key: "show_brand", label: "ব্র্যান্ড" },
+    { key: "show_unit", label: "একক" },
+    { key: "show_name", label: "নাম" },
+    { key: "show_price", label: "দাম" },
+    { key: "show_old_price", label: "পুরানো দাম" },
+    { key: "show_tag", label: "ট্যাগ" },
+    { key: "show_offer_badge", label: "অফার ব্যাজ" },
+    { key: "show_reviews", label: "রিভিউ স্টার" },
+    { key: "show_add_to_cart", label: "কার্ট বাটন" },
+    { key: "show_buy_now", label: "কিনুন বাটন" },
+    { key: "show_wishlist", label: "উইশলিস্ট আইকন" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <p className="text-xs text-muted-foreground">প্রোডাক্ট কার্ডের প্রতিটি ফিচার অন/অফ করুন এবং অফার ব্যাজ কাস্টমাইজ করুন।</p>
+
+      <Section title="ফিচার অন/অফ" defaultOpen>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {toggles.map((t) => (
+            <label key={t.key} className="flex items-center gap-2 text-sm bg-card border border-border rounded-xl px-3 py-2 cursor-pointer">
+              <input type="checkbox" checked={Boolean(v[t.key])} onChange={toggle(t.key)} className="size-4 accent-primary" />
+              <span>{t.label}</span>
+            </label>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="বাটন টেক্সট" defaultOpen>
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="কার্ট বাটন টেক্সট">
+            <input className={inputCls} value={v.add_to_cart_text_bn} onChange={(e) => set("add_to_cart_text_bn", e.target.value)} />
+          </Field>
+          <Field label="কিনুন বাটন টেক্সট">
+            <input className={inputCls} value={v.buy_now_text_bn} onChange={(e) => set("buy_now_text_bn", e.target.value)} />
+          </Field>
+        </div>
+      </Section>
+
+      <Section title="অফার ব্যাজ স্টাইল" defaultOpen>
+        <div className="grid md:grid-cols-3 gap-3">
+          <Field label="ব্যাজ স্টাইল">
+            <select className={inputCls} value={v.badge_style} onChange={(e) => set("badge_style", e.target.value as ProductCardSettings["badge_style"])}>
+              <option value="starburst">স্টারবার্স্ট (ছবির মতো)</option>
+              <option value="ribbon">রিবন</option>
+              <option value="pill">পিল</option>
+            </select>
+          </Field>
+          <Field label="ব্যাজ ব্যাকগ্রাউন্ড">
+            <input type="color" className="h-11 w-full rounded-xl bg-secondary border-0" value={v.badge_bg} onChange={(e) => set("badge_bg", e.target.value)} />
+          </Field>
+          <Field label="ব্যাজ টেক্সট রঙ">
+            <input type="color" className="h-11 w-full rounded-xl bg-secondary border-0" value={v.badge_color} onChange={(e) => set("badge_color", e.target.value)} />
+          </Field>
+        </div>
+        <p className="text-[11px] text-muted-foreground">প্রতিটি পণ্যের জন্য ব্যাজের টেক্সট (যেমন "10 TK OFF") অ্যাডমিন প্যানেলের পণ্য পেজ থেকে সেট করুন।</p>
+      </Section>
+
+      <Section title="লাইভ প্রিভিউ" defaultOpen>
+        <div className="max-w-[260px] mx-auto">
+          <ProductCard
+            product={sample}
+            categoryName="মাছ"
+            brandName="Fresh Fish"
+            qty={0}
+            add={() => {}}
+            sub={() => {}}
+            onBuyNow={() => {}}
+            settings={v}
+          />
+        </div>
+      </Section>
     </div>
   );
 }

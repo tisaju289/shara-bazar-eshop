@@ -21,6 +21,9 @@ type Product = {
   stock: number;
   is_active: boolean;
   keywords: string | null;
+  reviews_rating: number | null;
+  reviews_count: number | null;
+  offer_badge: string | null;
 };
 type Category = { id: string; name_bn: string };
 type Brand = { id: string; name_bn: string };
@@ -28,6 +31,7 @@ type Brand = { id: string; name_bn: string };
 const emptyForm: Omit<Product, "id"> = {
   name_bn: "", category_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
   image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
+  reviews_rating: 0, reviews_count: 0, offer_badge: "",
 };
 
 function AdminProducts() {
@@ -58,7 +62,16 @@ function AdminProducts() {
   const openNew = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ ...p, old_price: p.old_price ?? null, image_url: p.image_url ?? "", tag: p.tag ?? "", keywords: p.keywords ?? "" });
+    setForm({
+      ...p,
+      old_price: p.old_price ?? null,
+      image_url: p.image_url ?? "",
+      tag: p.tag ?? "",
+      keywords: p.keywords ?? "",
+      reviews_rating: p.reviews_rating ?? 0,
+      reviews_count: p.reviews_count ?? 0,
+      offer_badge: p.offer_badge ?? "",
+    });
     setOpen(true);
   };
 
@@ -73,6 +86,9 @@ function AdminProducts() {
       tag: form.tag || null,
       image_url: form.image_url || null,
       keywords: form.keywords?.trim() || null,
+      reviews_rating: Number(form.reviews_rating) || 0,
+      reviews_count: Number(form.reviews_count) || 0,
+      offer_badge: form.offer_badge?.trim() || null,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -203,6 +219,19 @@ function AdminProducts() {
                 <ImageInput value={form.image_url ?? ""} onChange={(url) => setForm({ ...form, image_url: url })} folder="products" />
               </Field>
               <Field label="ট্যাগ (যেমন: সিজনাল, নতুন)"><input value={form.tag ?? ""} onChange={(e) => setForm({ ...form, tag: e.target.value })} className="input" /></Field>
+              <Field label="অফার ব্যাজ (যেমন: 10 TK OFF)">
+                <input value={form.offer_badge ?? ""} onChange={(e) => setForm({ ...form, offer_badge: e.target.value })} placeholder="খালি রাখলে দেখাবে না" className="input" />
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="রিভিউ রেটিং (0-5)">
+                  <input type="number" min="0" max="5" step="0.1" value={form.reviews_rating ?? 0}
+                    onChange={(e) => setForm({ ...form, reviews_rating: Number(e.target.value) })} className="input" />
+                </Field>
+                <Field label="রিভিউ সংখ্যা">
+                  <input type="number" min="0" value={form.reviews_count ?? 0}
+                    onChange={(e) => setForm({ ...form, reviews_count: Number(e.target.value) })} className="input" />
+                </Field>
+              </div>
               <Field label="কীওয়ার্ড (সার্চের জন্য, কমা দিয়ে আলাদা করুন)">
                 <input value={form.keywords ?? ""} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="যেমন: ilish, hilsa, মাছ" className="input" />
               </Field>
