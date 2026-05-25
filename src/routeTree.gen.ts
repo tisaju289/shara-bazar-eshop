@@ -19,6 +19,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
@@ -70,6 +71,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBrandsRoute = AdminBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/login'
     | '/products'
+    | '/admin/brands'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/login'
     | '/products'
+    | '/admin/brands'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/login'
     | '/products'
+    | '/admin/brands'
     | '/admin/categories'
     | '/admin/orders'
     | '/admin/products'
@@ -225,10 +237,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/brands': {
+      id: '/admin/brands'
+      path: '/brands'
+      fullPath: '/admin/brands'
+      preLoaderRoute: typeof AdminBrandsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -237,6 +257,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBrandsRoute: AdminBrandsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
@@ -256,13 +277,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

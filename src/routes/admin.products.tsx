@@ -12,6 +12,7 @@ type Product = {
   id: string;
   name_bn: string;
   category_id: string | null;
+  brand_id: string | null;
   unit: string;
   price: number;
   old_price: number | null;
@@ -22,15 +23,17 @@ type Product = {
   keywords: string | null;
 };
 type Category = { id: string; name_bn: string };
+type Brand = { id: string; name_bn: string };
 
 const emptyForm: Omit<Product, "id"> = {
-  name_bn: "", category_id: null, unit: "১ কেজি", price: 0, old_price: null,
+  name_bn: "", category_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
   image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
 };
 
 function AdminProducts() {
   const [items, setItems] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -40,12 +43,14 @@ function AdminProducts() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: ps }, { data: cs }] = await Promise.all([
+    const [{ data: ps }, { data: cs }, { data: bs }] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("categories").select("id, name_bn").order("sort_order"),
+      supabase.from("brands").select("id, name_bn").order("sort_order"),
     ]);
     setItems((ps as Product[]) ?? []);
     setCats((cs as Category[]) ?? []);
+    setBrands((bs as Brand[]) ?? []);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -178,6 +183,12 @@ function AdminProducts() {
                 <select value={form.category_id ?? ""} onChange={(e) => setForm({ ...form, category_id: e.target.value || null })} className="input">
                   <option value="">— নির্বাচন করুন —</option>
                   {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+                </select>
+              </Field>
+              <Field label="ব্র্যান্ড">
+                <select value={form.brand_id ?? ""} onChange={(e) => setForm({ ...form, brand_id: e.target.value || null })} className="input">
+                  <option value="">— নির্বাচন করুন —</option>
+                  {brands.map((b) => <option key={b.id} value={b.id}>{b.name_bn}</option>)}
                 </select>
               </Field>
               <div className="grid grid-cols-2 gap-3">

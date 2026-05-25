@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { Leaf, LayoutDashboard, Package, Tags, Settings, LogOut, Loader2, Menu, Globe, ShoppingBag } from "lucide-react";
+import { Leaf, LayoutDashboard, Package, Tags, Settings, LogOut, Loader2, Menu, Globe, ShoppingBag, Bookmark } from "lucide-react";
 import { useState } from "react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -53,6 +53,7 @@ function AdminLayout() {
     { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
     { to: "/admin/products", label: "পণ্য", icon: Package },
     { to: "/admin/categories", label: "ক্যাটাগরি", icon: Tags },
+    { to: "/admin/brands", label: "ব্র্যান্ড", icon: Bookmark },
     { to: "/admin/orders", label: "অর্ডার", icon: ShoppingBag },
     { to: "/admin/settings", label: "সাইট সেটিংস", icon: Settings },
   ];
