@@ -461,6 +461,31 @@ function Field({ label, children, hint }: { label: string; children: React.React
 const inputCls = "w-full h-11 px-4 rounded-xl bg-secondary border border-transparent focus:border-primary outline-none text-sm";
 const areaCls = "w-full min-h-[90px] p-3 rounded-xl bg-secondary border border-transparent focus:border-primary outline-none text-sm";
 
+function Section({ title, defaultOpen = false, right, children }: {
+  title: string;
+  defaultOpen?: boolean;
+  right?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="rounded-2xl border border-border bg-secondary/30 overflow-hidden">
+      <div className="flex items-center justify-between gap-2 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center gap-2 flex-1 text-left"
+        >
+          <ChevronDown className={`size-4 text-[var(--leaf-deep)] transition-transform ${open ? "rotate-0" : "-rotate-90"}`} />
+          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">{title}</h3>
+        </button>
+        {right}
+      </div>
+      {open && <div className="px-4 pb-4 pt-1 space-y-3">{children}</div>}
+    </section>
+  );
+}
+
 /* ---------- Tabs ---------- */
 function BrandTab({ v, on }: { v: SiteSettings["brand"]; on: (v: SiteSettings["brand"]) => void }) {
   return (
