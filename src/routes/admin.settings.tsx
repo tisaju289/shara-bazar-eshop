@@ -363,6 +363,14 @@ function SectionEditor({ section: s, setItem, cats }: {
             <input className={inputCls} value={s.side_image_link ?? ""} onChange={(e) => setItem({ side_image_link: e.target.value } as any)} placeholder="/products?cat=…" />
           </Field>
         </div>
+        <div className="grid md:grid-cols-2 gap-3 pt-2 border-t border-border">
+          <Field label="হিরো অ্যাসপেক্ট রেশিও (ডেস্কটপ)" hint="যেমন: 21/9 (চিকন), 16/9, 4/3 (লম্বা)। মোবাইলে সবসময় 4/3।">
+            <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
+          </Field>
+          <Field label="সাইড ইমেজ চওড়া (%)" hint="ডেস্কটপে সাইড ইমেজের চওড়া, ডিফল্ট 22">
+            <input type="number" min={10} max={50} className={inputCls} value={s.side_width_pct ?? 22} onChange={(e) => setItem({ side_width_pct: Number(e.target.value) || 22 } as any)} />
+          </Field>
+        </div>
       </div>
     );
   }

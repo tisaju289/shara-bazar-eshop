@@ -75,6 +75,8 @@ export type HeroSection = Base & {
   images: string[];
   side_image_url?: string;
   side_image_link?: string;
+  aspect_ratio?: string; // e.g. "21/9", "16/9", "4/3"
+  side_width_pct?: number; // e.g. 22
 };
 export type CategorySection = Base & {
   type: "category";

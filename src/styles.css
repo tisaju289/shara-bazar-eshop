@@ -5,6 +5,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Customizable hero frame: admin controls aspect ratio and side image width */
+.hero-frame { aspect-ratio: 4 / 3; }
+@media (min-width: 768px) {
+  .hero-frame { aspect-ratio: var(--hero-ar, 21 / 9); }
+  .hero-grid { grid-template-columns: 1fr var(--hero-side, 22%); }
+}
+
 /*
  * Design system definition.
  *

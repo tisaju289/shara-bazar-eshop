@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function HeroSlider({ images, fallback }: { images: string[]; fallback: string }) {
+function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallback: string; aspectRatio?: string }) {
   const slides = images.length > 0 ? images : [fallback];
   const [idx, setIdx] = useState(0);
   useEffect(() => {
@@ -28,7 +28,10 @@ function HeroSlider({ images, fallback }: { images: string[]; fallback: string }
   const go = (n: number) => setIdx((n + slides.length) % slides.length);
   return (
     <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white">
-      <div className="relative aspect-[4/3] md:aspect-[21/9]">
+      <div
+        className="relative hero-frame"
+        style={{ ["--hero-ar" as any]: (aspectRatio || "21/9").replace("/", " / ") }}
+      >
         {slides.map((src, i) => (
           <img key={i} src={src} alt={`hero-${i}`}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
@@ -328,7 +331,10 @@ function Index() {
         if (sec.type === "hero") {
           return (
             <section key={sec.id} className="relative overflow-hidden">
-              <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-[1fr_minmax(0,22%)] gap-4 md:gap-6 items-stretch">
+              <div
+                className="container mx-auto px-4 py-10 md:py-16 grid hero-grid gap-4 md:gap-6 items-stretch"
+                style={{ ["--hero-side" as any]: `${sec.side_width_pct ?? 22}%` }}
+              >
                 <div className="space-y-6 hidden">
                   {sec.badge_bn && (
                     <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
@@ -366,12 +372,13 @@ function Index() {
                 </div>
                 <div className="relative">
                   <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
-                  <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} />
+                  <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
                 </div>
                 {sec.side_image_url && (
                   <a
                     href={sec.side_image_link || "#"}
-                    className="relative hidden md:block rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white"
+                    className="relative hidden md:block rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white hero-frame"
+                    style={{ ["--hero-ar" as any]: (sec.aspect_ratio || "21/9").replace("/", " / ") }}
                   >
                     <img src={sec.side_image_url} alt="offer" className="absolute inset-0 w-full h-full object-cover" />
                   </a>
