@@ -57,11 +57,11 @@ function AdminCategories() {
     next[i] = { ...a, sort_order: b.sort_order };
     next[j] = { ...b, sort_order: a.sort_order };
     setItems(next.sort((x, y) => x.sort_order - y.sort_order));
-    const { error } = await supabase.from("categories").upsert([
-      { id: a.id, sort_order: b.sort_order },
-      { id: b.id, sort_order: a.sort_order },
+    const [r1, r2] = await Promise.all([
+      supabase.from("categories").update({ sort_order: b.sort_order }).eq("id", a.id),
+      supabase.from("categories").update({ sort_order: a.sort_order }).eq("id", b.id),
     ]);
-    if (error) { alert(error.message); await load(); }
+    if (r1.error || r2.error) { alert((r1.error || r2.error)!.message); await load(); }
   };
 
   return (
@@ -93,7 +93,7 @@ function AdminCategories() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((c) => (
+                {items.map((c, i) => (
                   <tr key={c.id} className="border-t border-border hover:bg-secondary/30">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
