@@ -73,6 +73,8 @@ export type HeroSection = Base & {
   cta_secondary_enabled: boolean;
   image_url: string;
   images: string[];
+  side_image_url?: string;
+  side_image_link?: string;
 };
 export type CategorySection = Base & {
   type: "category";
