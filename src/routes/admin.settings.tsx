@@ -741,6 +741,23 @@ function FooterTab({ v, on }: { v: SiteSettings["footer"]; on: (v: SiteSettings[
         <Field label="ইমেইল"><input className={inputCls} value={v.email} onChange={(e) => on({ ...v, email: e.target.value })} /></Field>
         <Field label="ঠিকানা"><input className={inputCls} value={v.address_bn} onChange={(e) => on({ ...v, address_bn: e.target.value })} /></Field>
       </div>
+      <div className="grid md:grid-cols-2 gap-4">
+        <Field label="ক্যাটাগরি কলাম হেডিং"><input className={inputCls} value={v.categories_title_bn} onChange={(e) => on({ ...v, categories_title_bn: e.target.value })} /></Field>
+        <Field label="যোগাযোগ কলাম হেডিং"><input className={inputCls} value={v.contact_title_bn} onChange={(e) => on({ ...v, contact_title_bn: e.target.value })} /></Field>
+      </div>
+      <Field label="কপিরাইট টেক্সট ({year} এবং {brand} ব্যবহার করতে পারেন)">
+        <input className={inputCls} value={v.copyright_bn} onChange={(e) => on({ ...v, copyright_bn: e.target.value })} />
+      </Field>
+      <div className="grid md:grid-cols-2 gap-4">
+        <Field label="ব্যাকগ্রাউন্ড কালার (খালি = ডিফল্ট)"><input type="text" placeholder="#0a4a2a" className={inputCls} value={v.bg_color} onChange={(e) => on({ ...v, bg_color: e.target.value })} /></Field>
+        <Field label="টেক্সট কালার (খালি = ডিফল্ট)"><input type="text" placeholder="#ffffff" className={inputCls} value={v.text_color} onChange={(e) => on({ ...v, text_color: e.target.value })} /></Field>
+      </div>
+      <div className="grid md:grid-cols-2 gap-3 pt-2">
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={v.show_brand_column} onChange={(e) => on({ ...v, show_brand_column: e.target.checked })} /> ব্র্যান্ড কলাম দেখান</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={v.show_categories_column} onChange={(e) => on({ ...v, show_categories_column: e.target.checked })} /> ক্যাটাগরি কলাম দেখান</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={v.show_contact_column} onChange={(e) => on({ ...v, show_contact_column: e.target.checked })} /> যোগাযোগ কলাম দেখান</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={v.show_copyright} onChange={(e) => on({ ...v, show_copyright: e.target.checked })} /> কপিরাইট দেখান</label>
+      </div>
     </div>
   );
 }
