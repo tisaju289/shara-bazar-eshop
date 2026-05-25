@@ -355,6 +355,14 @@ function SectionEditor({ section: s, setItem, cats }: {
             <ImageInput value={s.image_url} onChange={(url) => setItem({ image_url: url } as any)} folder="hero" />
           </Field>
         </div>
+        <div className="grid md:grid-cols-2 gap-3 pt-2 border-t border-border">
+          <Field label="ডেস্কটপ সাইড অফার ইমেজ" hint="ডেস্কটপ ভিউতে স্লাইডারের ডানপাশে দেখাবে (~25%)">
+            <ImageInput value={s.side_image_url ?? ""} onChange={(url) => setItem({ side_image_url: url } as any)} folder="hero" />
+          </Field>
+          <Field label="সাইড ইমেজ লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে">
+            <input className={inputCls} value={s.side_image_link ?? ""} onChange={(e) => setItem({ side_image_link: e.target.value } as any)} placeholder="/products?cat=…" />
+          </Field>
+        </div>
       </div>
     );
   }
