@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2, ChevronUp, ChevronDown } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
 
 export const Route = createFileRoute("/admin/categories")({
@@ -48,6 +48,22 @@ function AdminCategories() {
     await load();
   };
 
+  const move = async (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= items.length) return;
+    const a = items[i], b = items[j];
+    // swap sort_order
+    const next = [...items];
+    next[i] = { ...a, sort_order: b.sort_order };
+    next[j] = { ...b, sort_order: a.sort_order };
+    setItems(next.sort((x, y) => x.sort_order - y.sort_order));
+    const { error } = await supabase.from("categories").upsert([
+      { id: a.id, sort_order: b.sort_order },
+      { id: b.id, sort_order: a.sort_order },
+    ]);
+    if (error) { alert(error.message); await load(); }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -91,6 +107,8 @@ function AdminCategories() {
                     <td className="p-3 hidden sm:table-cell">{c.sort_order}</td>
                     <td className="p-3">
                       <div className="flex justify-end gap-1">
+                        <button onClick={() => move(i, -1)} disabled={i === 0} className="size-8 rounded-lg hover:bg-secondary grid place-items-center disabled:opacity-30 disabled:hover:bg-transparent" title="উপরে"><ChevronUp className="size-4" /></button>
+                        <button onClick={() => move(i, 1)} disabled={i === items.length - 1} className="size-8 rounded-lg hover:bg-secondary grid place-items-center disabled:opacity-30 disabled:hover:bg-transparent" title="নিচে"><ChevronDown className="size-4" /></button>
                         <button onClick={() => openEdit(c)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Pencil className="size-4" /></button>
                         <button onClick={() => remove(c.id)} className="size-8 rounded-lg hover:bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
                       </div>
