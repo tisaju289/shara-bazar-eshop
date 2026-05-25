@@ -328,8 +328,8 @@ function Index() {
         if (sec.type === "hero") {
           return (
             <section key={sec.id} className="relative overflow-hidden">
-              <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                <div className="space-y-6 hidden md:block">
+              <div className="container mx-auto px-4 py-10 md:py-16 grid md:grid-cols-[1fr_minmax(0,22%)] gap-4 md:gap-6 items-stretch">
+                <div className="space-y-6 hidden">
                   {sec.badge_bn && (
                     <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
                       <Leaf className="size-3.5" /> {sec.badge_bn}
@@ -368,6 +368,14 @@ function Index() {
                   <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
                   <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} />
                 </div>
+                {sec.side_image_url && (
+                  <a
+                    href={sec.side_image_link || "#"}
+                    className="relative hidden md:block rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white"
+                  >
+                    <img src={sec.side_image_url} alt="offer" className="absolute inset-0 w-full h-full object-cover" />
+                  </a>
+                )}
               </div>
             </section>
           );
