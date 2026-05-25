@@ -344,8 +344,14 @@ function SectionEditor({ section: s, setItem, cats }: {
               <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold">স্লাইড {i + 1}</span>
-                  <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))}
-                    className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                  <div className="flex gap-1">
+                    <button type="button" disabled={i === 0} onClick={() => { const n = [...images]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; setImages(n); }}
+                      className="h-6 px-1.5 rounded-md bg-secondary border border-border text-[11px] disabled:opacity-40">↑</button>
+                    <button type="button" disabled={i === images.length - 1} onClick={() => { const n = [...images]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; setImages(n); }}
+                      className="h-6 px-1.5 rounded-md bg-secondary border border-border text-[11px] disabled:opacity-40">↓</button>
+                    <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))}
+                      className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                  </div>
                 </div>
                 <ImageInput value={url} onChange={(u) => { const n = [...images]; n[i] = u; setImages(n); }} folder="hero" />
               </div>
