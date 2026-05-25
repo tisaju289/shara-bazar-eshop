@@ -720,6 +720,13 @@ function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSetti
     const next = v.options.map((o, idx) => (idx === i ? { ...o, ...patch } : o));
     on({ ...v, options: next });
   };
+  const moveOpt = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= v.options.length) return;
+    const n = [...v.options];
+    [n[i], n[j]] = [n[j], n[i]];
+    on({ ...v, options: n });
+  };
   return (
     <div className="space-y-6">
       <label className="flex items-center gap-3 cursor-pointer">
@@ -732,10 +739,14 @@ function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSetti
           <div key={i} className="rounded-2xl border border-border p-4 space-y-3 bg-secondary/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-muted-foreground">অপশন {i + 1}</span>
-              <label className="flex items-center gap-2 text-xs cursor-pointer">
-                <input type="checkbox" checked={o.enabled} onChange={(e) => setOpt(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
-                <span>সক্রিয়</span>
-              </label>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={o.enabled} onChange={(e) => setOpt(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
+                  <span>সক্রিয়</span>
+                </label>
+                <button type="button" disabled={i === 0} onClick={() => moveOpt(i, -1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
+                <button type="button" disabled={i === v.options.length - 1} onClick={() => moveOpt(i, 1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
+              </div>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="লেবেল (বাংলা)"><input className={inputCls} value={o.label_bn} onChange={(e) => setOpt(i, { label_bn: e.target.value })} placeholder="যেমন: ঢাকার ভিতরে" /></Field>
