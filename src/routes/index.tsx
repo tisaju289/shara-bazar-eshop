@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, X, Plus, Minus, ChevronLeft,
-  Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Heart, Loader2,
+  Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Loader2,
   Home, LayoutGrid, Package, CheckCircle2,
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
@@ -13,6 +13,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
+import { ProductCard } from "@/components/ProductCard";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -153,7 +154,8 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
 type DBProduct = {
   id: string; name_bn: string; unit: string; price: number; old_price: number | null;
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
-  category_id: string | null;
+  category_id: string | null; brand_id: string | null;
+  reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
@@ -164,6 +166,16 @@ function useCategories() {
       const { data, error } = await supabase.from("categories").select("*").order("sort_order");
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+function useBrands() {
+  return useQuery({
+    queryKey: ["brands", "public"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("brands").select("id, name_bn").order("sort_order");
+      if (error) throw error;
+      return (data as { id: string; name_bn: string }[]) ?? [];
     },
   });
 }
@@ -181,6 +193,7 @@ function useProducts() {
 function Index() {
   const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [cart, setCart] = useCart();
