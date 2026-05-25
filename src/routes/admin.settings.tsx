@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery" | "checkout";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "checkout";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -22,7 +22,6 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "home_sections", label: "হোম সেকশন" },
   { key: "features", label: "ফিচার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
-  { key: "delivery", label: "ডেলিভারি চার্জ" },
   { key: "checkout", label: "চেকআউট" },
 ];
 
