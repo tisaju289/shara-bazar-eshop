@@ -114,7 +114,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
         onClick={() => scroll(-1)}
         disabled={!canPrev}
         aria-label="prev"
-        className="hidden md:grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+        className="grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 md:-translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <ChevronLeft className="size-5" />
       </button>
@@ -123,7 +123,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
         onClick={() => scroll(1)}
         disabled={!canNext}
         aria-label="next"
-        className="hidden md:grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+        className="grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/3 md:translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <ChevronRight className="size-5" />
       </button>
@@ -136,7 +136,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
             key={c.id}
             to="/products"
             search={{ cat: c.id }}
-            className="group snap-start shrink-0 basis-[28%] md:basis-[14%] flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
+            className="group snap-start shrink-0 basis-[calc(25%-0.6rem)] md:basis-[14%] flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
           >
             <div className="size-14 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
               {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
