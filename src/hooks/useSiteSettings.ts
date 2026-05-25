@@ -3,7 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type Brand = { name_bn: string; tagline_bn: string; logo_url: string };
 export type Seo = { title: string; description: string; keywords: string; og_image: string; favicon_url: string };
-export type Topbar = { location_bn: string; phone: string; enabled: boolean };
+export type Topbar = {
+  location_bn: string;
+  phone: string;
+  enabled: boolean;
+  notice_enabled?: boolean;
+  notice_bn?: string;
+  notice_speed?: number; // seconds for one loop
+};
 export type MenuItem = { label_bn: string; url: string };
 export type HeaderMenu = { items: MenuItem[] };
 export type Hero = {
@@ -185,7 +192,7 @@ export type ProductCard = {
 const DEFAULTS: SiteSettings = {
   brand: { name_bn: "তাজা বাজার", tagline_bn: "তাজা · বিশ্বস্ত · দ্রুত", logo_url: "" },
   seo: { title: "তাজা বাজার", description: "", keywords: "", og_image: "", favicon_url: "" },
-  topbar: { location_bn: "", phone: "", enabled: true },
+  topbar: { location_bn: "", phone: "", enabled: true, notice_enabled: false, notice_bn: "", notice_speed: 30 },
   header_menu: { items: [] },
   hero: {
     badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "",
