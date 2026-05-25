@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, ShoppingCart, Plus, Minus, X, CheckCircle2,
-  Home, LayoutGrid, Package,
+  Home, LayoutGrid, Package, Leaf,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
