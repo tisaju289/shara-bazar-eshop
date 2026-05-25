@@ -656,19 +656,19 @@ function HeaderFooterTab({ topbar, onTopbar, menu, onMenu, footer, onFooter }: {
   const setItems = (next: { label_bn: string; url: string }[]) => onMenu({ ...menu, items: next });
   return (
     <div className="space-y-8">
-      <section className="space-y-4">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডার — টপ বার</h3>
+      <Section title="হেডার — টপ বার">
         <TopbarTab v={topbar} on={onTopbar} />
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-5 border-t border-border">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডার মেনু</h3>
+      <Section
+        title="হেডার মেনু"
+        right={
           <button type="button" onClick={() => setItems([...items, { label_bn: "", url: "/" }])}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
             <Plus className="size-3.5" /> মেনু যোগ
           </button>
-        </div>
+        }
+      >
         <p className="text-[11px] text-muted-foreground">হেডারে দেখানোর জন্য মেনু আইটেম যোগ করুন (যেমন: হোম → /, ক্যাটাগরি → /categories, প্রোডাক্টস → /products)</p>
         {items.length === 0 && <p className="text-xs text-muted-foreground italic py-2">কোনো মেনু নেই — উপরের বাটন থেকে যোগ করুন</p>}
         <div className="space-y-2">
@@ -687,12 +687,11 @@ function HeaderFooterTab({ topbar, onTopbar, menu, onMenu, footer, onFooter }: {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="space-y-4 pt-5 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ফুটার</h3>
+      <Section title="ফুটার">
         <FooterTab v={footer} on={onFooter} />
-      </section>
+      </Section>
     </div>
   );
 }
