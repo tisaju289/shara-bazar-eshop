@@ -643,6 +643,16 @@ function TopbarTab({ v, on }: { v: SiteSettings["topbar"]; on: (v: SiteSettings[
         <Field label="ডেলিভারি এরিয়া টেক্সট"><input className={inputCls} value={v.location_bn} onChange={(e) => on({ ...v, location_bn: e.target.value })} /></Field>
         <Field label="হটলাইন নাম্বার"><input className={inputCls} value={v.phone} onChange={(e) => on({ ...v, phone: e.target.value })} /></Field>
       </div>
+      <div className="rounded-2xl border border-border p-3 space-y-3 bg-secondary/30">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" checked={!!v.notice_enabled} onChange={(e) => on({ ...v, notice_enabled: e.target.checked })} className="size-4 accent-primary" />
+          <span className="text-sm font-semibold">নোটিশ মার্কি দেখান</span>
+        </label>
+        <Field label="নোটিশ টেক্সট"><input className={inputCls} value={v.notice_bn ?? ""} onChange={(e) => on({ ...v, notice_bn: e.target.value })} placeholder="যেমন: ঈদ উপলক্ষে ১০% ছাড়! কুপন: EID10" /></Field>
+        <Field label="স্ক্রল স্পিড (সেকেন্ড)" hint="কম মান = দ্রুত স্ক্রল">
+          <input type="number" min={5} max={120} className={inputCls} value={v.notice_speed ?? 30} onChange={(e) => on({ ...v, notice_speed: Number(e.target.value) || 30 })} />
+        </Field>
+      </div>
     </div>
   );
 }
