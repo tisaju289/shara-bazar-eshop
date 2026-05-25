@@ -13,14 +13,13 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "checkout";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "tracking" | "checkout";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "header_footer", label: "হেডার / ফুটার" },
   { key: "home_sections", label: "হোম সেকশন" },
-  { key: "features", label: "ফিচার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "checkout", label: "চেকআউট" },
 ];
@@ -89,7 +88,6 @@ function SettingsPage() {
         {tab === "home_sections" && (
           <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />
         )}
-        {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "checkout" && (
           <CheckoutTab
@@ -609,25 +607,6 @@ function _OfferTabImpl(v: SiteSettings["offer"], on: (v: SiteSettings["offer"]) 
         <Field label="মিনিমাম অর্ডার টেক্সট"><input className={inputCls} value={v.min_order_bn} onChange={(e) => on({ ...v, min_order_bn: e.target.value })} /></Field>
         <Field label="বাটন টেক্সট"><input className={inputCls} value={v.cta_bn} onChange={(e) => on({ ...v, cta_bn: e.target.value })} /></Field>
       </div>
-    </div>
-  );
-}
-function FeaturesTab({ v, on }: { v: SiteSettings["features"]; on: (v: SiteSettings["features"]) => void }) {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">আইকন অপশন: <code>truck, shield, clock, leaf, star</code></p>
-      {v.map((f, i) => (
-        <div key={i} className="flex gap-2 items-center">
-          <input className={inputCls + " flex-1"} placeholder="আইকন" value={f.icon} onChange={(e) => { const n = [...v]; n[i] = { ...n[i], icon: e.target.value }; on(n); }} />
-          <input className={inputCls + " flex-[2]"} placeholder="টেক্সট" value={f.text_bn} onChange={(e) => { const n = [...v]; n[i] = { ...n[i], text_bn: e.target.value }; on(n); }} />
-          <button type="button" disabled={i === 0} onClick={() => { const n = [...v]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; on(n); }}
-            className="h-11 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
-          <button type="button" disabled={i === v.length - 1} onClick={() => { const n = [...v]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; on(n); }}
-            className="h-11 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
-          <button onClick={() => on(v.filter((_, j) => j !== i))} className="size-11 rounded-xl bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
-        </div>
-      ))}
-      <button onClick={() => on([...v, { icon: "leaf", text_bn: "" }])} className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-secondary text-sm font-semibold"><Plus className="size-4" /> ফিচার যোগ</button>
     </div>
   );
 }
