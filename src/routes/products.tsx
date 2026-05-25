@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, Plus, Minus, X, CheckCircle2,
-  Home, LayoutGrid, Package,
+  Home, LayoutGrid, Package, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -75,6 +75,7 @@ function ProductsPage() {
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
+  const [catExpanded, setCatExpanded] = useState(false);
 
   // Cart state
   const [cart, setCart] = useCart();
@@ -239,24 +240,63 @@ function ProductsPage() {
             {q ? `"${q}" এর ফলাফল` : "সব পণ্য"}
           </h1>
 
-          {/* Category tabs */}
-          <div className="flex gap-2 flex-wrap justify-center">
-            <button
-              onClick={() => setActiveCat("all")}
-              className={`px-4 py-2 rounded-full text-sm font-medium border transition ${activeCat === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary"}`}
-            >
-              সব
-            </button>
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setActiveCat(c.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition ${activeCat === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary"}`}
-              >
-                {c.name_bn}
-              </button>
-            ))}
-          </div>
+          {/* Category grid: image + name, 4 per row, rest behind toggle */}
+          {(() => {
+            const allItem = { id: "all" as const, name_bn: "সব", image_url: null as string | null };
+            const items: Array<{ id: string; name_bn: string; image_url: string | null }> = [
+              allItem,
+              ...categories.map((c) => ({ id: c.id, name_bn: c.name_bn, image_url: c.image_url })),
+            ];
+            const visible = catExpanded ? items : items.slice(0, 4);
+            const hasMore = items.length > 4;
+            const onPick = (id: string) => {
+              setActiveCat("all");
+              if (id === "all") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                return;
+              }
+              setTimeout(() => {
+                document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 50);
+            };
+            return (
+              <div className="space-y-3">
+                <div className="grid grid-cols-4 gap-3 md:gap-4">
+                  {visible.map((c) => {
+                    const isActive = activeCat === c.id || (c.id === "all" && activeCat === "all");
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => onPick(c.id)}
+                        className="flex flex-col items-center gap-1.5 group"
+                      >
+                        <div className={`size-16 md:size-20 rounded-full grid place-items-center overflow-hidden border-2 transition ${isActive ? "border-primary shadow-[var(--shadow-pop)]" : "border-border group-hover:border-primary"}`} style={{ background: "var(--gradient-warm)" }}>
+                          {c.image_url ? (
+                            <img src={c.image_url} alt={c.name_bn} className="w-full h-full object-cover" />
+                          ) : c.id === "all" ? (
+                            <LayoutGrid className="size-7 text-[var(--leaf-deep)]" />
+                          ) : (
+                            <Package className="size-7 text-[var(--leaf-deep)]" />
+                          )}
+                        </div>
+                        <span className={`text-[11px] md:text-xs font-medium leading-tight text-center line-clamp-2 ${isActive ? "text-primary" : "text-foreground"}`}>{c.name_bn}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {hasMore && (
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setCatExpanded((v) => !v)}
+                      className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-card border border-border text-xs font-semibold hover:border-primary transition"
+                    >
+                      {catExpanded ? (<>কম দেখুন <ChevronUp className="size-3.5" /></>) : (<>আরও দেখুন <ChevronDown className="size-3.5" /></>)}
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {prodLoading ? (
             <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
@@ -269,7 +309,7 @@ function ProductsPage() {
                   const cat = categories.find((c) => c.id === catId);
                   const items = grouped[catId] ?? [];
                   return (
-                    <div key={catId}>
+                    <div key={catId} id={`cat-${catId}`} className="scroll-mt-24">
                       <div className="flex items-center justify-center mb-4">
                         <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] text-center">{cat?.name_bn ?? "অন্যান্য"}</h2>
                       </div>
