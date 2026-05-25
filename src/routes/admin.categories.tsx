@@ -124,8 +124,8 @@ function AdminCategories() {
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-          <form onSubmit={save} className="relative bg-background rounded-3xl w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-border">
+          <form onSubmit={save} className="relative bg-background rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-background flex items-center justify-between p-5 border-b border-border">
               <h2 className="font-bold text-lg">{editing ? "ক্যাটাগরি আপডেট" : "নতুন ক্যাটাগরি"}</h2>
               <button type="button" onClick={() => setOpen(false)}><X /></button>
             </div>
@@ -147,7 +147,7 @@ function AdminCategories() {
                 <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="যেমন: সবজি, vegetables, taja" className="w-full h-11 px-4 rounded-xl bg-secondary outline-none focus:ring-2 focus:ring-primary" />
               </label>
             </div>
-            <div className="p-5 border-t border-border flex gap-2">
+            <div className="sticky bottom-0 bg-background p-5 border-t border-border flex gap-2">
               <button type="button" onClick={() => setOpen(false)} className="flex-1 h-11 rounded-xl bg-secondary font-semibold">বাতিল</button>
               <button disabled={saving} className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60">
                 {saving && <Loader2 className="size-4 animate-spin" />}
