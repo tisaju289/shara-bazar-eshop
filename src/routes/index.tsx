@@ -466,7 +466,11 @@ function Index() {
                   <div className="hidden md:flex items-center justify-center">
                     <a
                       href={sec.side_image_link || "#"}
-                      className="relative block w-full aspect-square rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white"
+                      className="relative block rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white"
+                      style={{
+                        width: sec.side_width || "100%",
+                        height: sec.side_height || "100%",
+                      }}
                     >
                       <img src={sec.side_image_url} alt="offer" className="absolute inset-0 w-full h-full object-cover" />
                     </a>
