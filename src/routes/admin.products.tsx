@@ -21,6 +21,9 @@ type Product = {
   stock: number;
   is_active: boolean;
   keywords: string | null;
+  reviews_rating: number | null;
+  reviews_count: number | null;
+  offer_badge: string | null;
 };
 type Category = { id: string; name_bn: string };
 type Brand = { id: string; name_bn: string };
@@ -28,6 +31,7 @@ type Brand = { id: string; name_bn: string };
 const emptyForm: Omit<Product, "id"> = {
   name_bn: "", category_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
   image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
+  reviews_rating: 0, reviews_count: 0, offer_badge: "",
 };
 
 function AdminProducts() {
@@ -58,7 +62,16 @@ function AdminProducts() {
   const openNew = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ ...p, old_price: p.old_price ?? null, image_url: p.image_url ?? "", tag: p.tag ?? "", keywords: p.keywords ?? "" });
+    setForm({
+      ...p,
+      old_price: p.old_price ?? null,
+      image_url: p.image_url ?? "",
+      tag: p.tag ?? "",
+      keywords: p.keywords ?? "",
+      reviews_rating: p.reviews_rating ?? 0,
+      reviews_count: p.reviews_count ?? 0,
+      offer_badge: p.offer_badge ?? "",
+    });
     setOpen(true);
   };
 
@@ -73,6 +86,9 @@ function AdminProducts() {
       tag: form.tag || null,
       image_url: form.image_url || null,
       keywords: form.keywords?.trim() || null,
+      reviews_rating: Number(form.reviews_rating) || 0,
+      reviews_count: Number(form.reviews_count) || 0,
+      offer_badge: form.offer_badge?.trim() || null,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
