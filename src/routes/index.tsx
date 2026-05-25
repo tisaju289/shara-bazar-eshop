@@ -28,7 +28,7 @@ function HeroSlider({ images, fallback }: { images: string[]; fallback: string }
   const go = (n: number) => setIdx((n + slides.length) % slides.length);
   return (
     <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white">
-      <div className="relative aspect-[4/3] md:aspect-[5/4]">
+      <div className="relative aspect-[4/3] md:aspect-[21/9]">
         {slides.map((src, i) => (
           <img key={i} src={src} alt={`hero-${i}`}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
