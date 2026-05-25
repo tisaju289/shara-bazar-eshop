@@ -498,6 +498,14 @@ function SectionEditor({ section: s, setItem, cats }: {
               <input type="number" min={10} max={50} className={inputCls} value={s.side_width_pct ?? 22} onChange={(e) => setItem({ side_width_pct: Number(e.target.value) || 22 } as any)} />
             </Field>
           </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="সাইড ইমেজ Width (কাস্টম)" hint="যেকোনো CSS ভ্যালু, যেমন: 300px, 80%, 20rem। খালি = পুরো কলাম।">
+              <input className={inputCls} value={s.side_width ?? ""} onChange={(e) => setItem({ side_width: e.target.value } as any)} placeholder="যেমন: 300px বা 100%" />
+            </Field>
+            <Field label="সাইড ইমেজ Height (কাস্টম)" hint="যেকোনো CSS ভ্যালু, যেমন: 400px, 100%, 50vh। খালি = স্লাইডারের সমান হাইট।">
+              <input className={inputCls} value={s.side_height ?? ""} onChange={(e) => setItem({ side_height: e.target.value } as any)} placeholder="যেমন: 400px বা 100%" />
+            </Field>
+          </div>
         </Section>
       </div>
     );
