@@ -316,37 +316,44 @@ function SectionEditor({ section: s, setItem, cats }: {
     const setImages = (next: string[]) => setItem({ images: next } as any);
     return (
       <div className="space-y-3">
-        <Field label="ব্যাজ টেক্সট"><input className={inputCls} value={s.badge_bn} onChange={(e) => setItem({ badge_bn: e.target.value } as any)} /></Field>
-        <div className="grid md:grid-cols-3 gap-3">
-          <Field label="টাইটেল প্রথম অংশ"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
-          <Field label="হাইলাইট অংশ"><input className={inputCls} value={s.title_highlight_bn} onChange={(e) => setItem({ title_highlight_bn: e.target.value } as any)} /></Field>
-          <Field label="শেষ অংশ"><input className={inputCls} value={s.title_suffix_bn} onChange={(e) => setItem({ title_suffix_bn: e.target.value } as any)} /></Field>
-        </div>
-        <Field label="সাবটাইটেল"><textarea className={areaCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
-        <div className="grid md:grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Field label="প্রাইমারি বাটন"><input className={inputCls} value={s.cta_primary_bn} onChange={(e) => setItem({ cta_primary_bn: e.target.value } as any)} /></Field>
-            <label className="flex items-center gap-2 text-xs cursor-pointer">
-              <input type="checkbox" checked={s.cta_primary_enabled} onChange={(e) => setItem({ cta_primary_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
-              দেখান
-            </label>
+        <Section title="টাইটেল ও ব্যাজ">
+          <Field label="ব্যাজ টেক্সট"><input className={inputCls} value={s.badge_bn} onChange={(e) => setItem({ badge_bn: e.target.value } as any)} /></Field>
+          <div className="grid md:grid-cols-3 gap-3">
+            <Field label="টাইটেল প্রথম অংশ"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+            <Field label="হাইলাইট অংশ"><input className={inputCls} value={s.title_highlight_bn} onChange={(e) => setItem({ title_highlight_bn: e.target.value } as any)} /></Field>
+            <Field label="শেষ অংশ"><input className={inputCls} value={s.title_suffix_bn} onChange={(e) => setItem({ title_suffix_bn: e.target.value } as any)} /></Field>
           </div>
-          <div className="space-y-2">
-            <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={s.cta_secondary_bn} onChange={(e) => setItem({ cta_secondary_bn: e.target.value } as any)} /></Field>
-            <label className="flex items-center gap-2 text-xs cursor-pointer">
-              <input type="checkbox" checked={s.cta_secondary_enabled} onChange={(e) => setItem({ cta_secondary_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
-              দেখান
-            </label>
+          <Field label="সাবটাইটেল"><textarea className={areaCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+        </Section>
+
+        <Section title="বাটন সেটিং">
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Field label="প্রাইমারি বাটন"><input className={inputCls} value={s.cta_primary_bn} onChange={(e) => setItem({ cta_primary_bn: e.target.value } as any)} /></Field>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" checked={s.cta_primary_enabled} onChange={(e) => setItem({ cta_primary_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
+                দেখান
+              </label>
+            </div>
+            <div className="space-y-2">
+              <Field label="সেকেন্ডারি বাটন"><input className={inputCls} value={s.cta_secondary_bn} onChange={(e) => setItem({ cta_secondary_bn: e.target.value } as any)} /></Field>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" checked={s.cta_secondary_enabled} onChange={(e) => setItem({ cta_secondary_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
+                দেখান
+              </label>
+            </div>
           </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold">স্লাইডার ইমেজ</span>
+        </Section>
+
+        <Section
+          title="স্লাইডার ইমেজ"
+          right={
             <button type="button" onClick={() => setImages([...images, ""])}
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
               <Plus className="size-3.5" /> ইমেজ
             </button>
-          </div>
+          }
+        >
           <div className="grid md:grid-cols-2 gap-3">
             {images.map((url, i) => (
               <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
@@ -368,76 +375,87 @@ function SectionEditor({ section: s, setItem, cats }: {
           <Field label="ফ্যালব্যাক ইমেজ" hint="স্লাইডার খালি থাকলে এটি দেখাবে">
             <ImageInput value={s.image_url} onChange={(url) => setItem({ image_url: url } as any)} folder="hero" />
           </Field>
-        </div>
-        <div className="grid md:grid-cols-2 gap-3 pt-2 border-t border-border">
-          <Field label="ডেস্কটপ সাইড অফার ইমেজ" hint="ডেস্কটপ ভিউতে স্লাইডারের ডানপাশে দেখাবে (~25%)">
-            <ImageInput value={s.side_image_url ?? ""} onChange={(url) => setItem({ side_image_url: url } as any)} folder="hero" />
-          </Field>
-          <Field label="সাইড ইমেজ লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে">
-            <input className={inputCls} value={s.side_image_link ?? ""} onChange={(e) => setItem({ side_image_link: e.target.value } as any)} placeholder="/products?cat=…" />
-          </Field>
-        </div>
-        <div className="grid md:grid-cols-2 gap-3 pt-2 border-t border-border">
-          <Field label="হিরো অ্যাসপেক্ট রেশিও (ডেস্কটপ)" hint="যেমন: 21/9 (চিকন), 16/9, 4/3 (লম্বা)। মোবাইলে সবসময় 4/3।">
-            <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
-          </Field>
-          <Field label="সাইড ইমেজ চওড়া (%)" hint="ডেস্কটপে সাইড ইমেজের চওড়া, ডিফল্ট 22">
-            <input type="number" min={10} max={50} className={inputCls} value={s.side_width_pct ?? 22} onChange={(e) => setItem({ side_width_pct: Number(e.target.value) || 22 } as any)} />
-          </Field>
-        </div>
+        </Section>
+
+        <Section title="সাইড ইমেজ ও লেয়াউট">
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="ডেস্কটপ সাইড অফার ইমেজ" hint="ডেস্কটপ ভিউতে স্লাইডারের ডানপাশে দেখাবে (~25%)">
+              <ImageInput value={s.side_image_url ?? ""} onChange={(url) => setItem({ side_image_url: url } as any)} folder="hero" />
+            </Field>
+            <Field label="সাইড ইমেজ লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে">
+              <input className={inputCls} value={s.side_image_link ?? ""} onChange={(e) => setItem({ side_image_link: e.target.value } as any)} placeholder="/products?cat=…" />
+            </Field>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="হিরো অ্যাসপেক্ট রেশিও (ডেস্কটপ)" hint="যেমন: 21/9 (চিকন), 16/9, 4/3 (লম্বা)। মোবাইলে সবসময় 4/3।">
+              <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
+            </Field>
+            <Field label="সাইড ইমেজ চওড়া (%)" hint="ডেস্কটপে সাইড ইমেজের চওড়া, ডিফল্ট 22">
+              <input type="number" min={10} max={50} className={inputCls} value={s.side_width_pct ?? 22} onChange={(e) => setItem({ side_width_pct: Number(e.target.value) || 22 } as any)} />
+            </Field>
+          </div>
+        </Section>
       </div>
     );
   }
   if (s.type === "category") {
     return (
-      <div className="grid md:grid-cols-2 gap-3">
-        <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
-        <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
-      </div>
+      <Section title="ক্যাটাগরি সেটিং">
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+          <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+        </div>
+      </Section>
     );
   }
   if (s.type === "product") {
     return (
-      <div className="grid md:grid-cols-2 gap-3">
-        <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
-        <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
-        <Field label="ক্যাটাগরি">
-          <select className={inputCls} value={s.category_id} onChange={(e) => setItem({ category_id: e.target.value } as any)}>
-            <option value="">— সব ক্যাটাগরি —</option>
-            {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
-          </select>
-        </Field>
-        <Field label="সর্বোচ্চ পণ্য সংখ্যা">
-          <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 8) } as any)} />
-        </Field>
-      </div>
+      <Section title="পণ্য সেকশন সেটিং">
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+          <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+          <Field label="ক্যাটাগরি">
+            <select className={inputCls} value={s.category_id} onChange={(e) => setItem({ category_id: e.target.value } as any)}>
+              <option value="">— সব ক্যাটাগরি —</option>
+              {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+            </select>
+          </Field>
+          <Field label="সর্বোচ্চ পণ্য সংখ্যা">
+            <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 8) } as any)} />
+          </Field>
+        </div>
+      </Section>
     );
   }
   if (s.type === "offer") {
     return (
-      <div className="space-y-3">
-        <div className="grid md:grid-cols-2 gap-3">
-          <Field label="লেবেল"><input className={inputCls} value={s.label_bn} onChange={(e) => setItem({ label_bn: e.target.value } as any)} /></Field>
-          <Field label="কুপন কোড"><input className={inputCls} value={s.coupon_code} onChange={(e) => setItem({ coupon_code: e.target.value } as any)} /></Field>
+      <Section title="অফার সেটিং">
+        <div className="space-y-3">
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="লেবেল"><input className={inputCls} value={s.label_bn} onChange={(e) => setItem({ label_bn: e.target.value } as any)} /></Field>
+            <Field label="কুপন কোড"><input className={inputCls} value={s.coupon_code} onChange={(e) => setItem({ coupon_code: e.target.value } as any)} /></Field>
+          </div>
+          <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+          <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="মিনিমাম অর্ডার টেক্সট"><input className={inputCls} value={s.min_order_bn} onChange={(e) => setItem({ min_order_bn: e.target.value } as any)} /></Field>
+            <Field label="বাটন টেক্সট"><input className={inputCls} value={s.cta_bn} onChange={(e) => setItem({ cta_bn: e.target.value } as any)} /></Field>
+          </div>
         </div>
-        <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
-        <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
-        <div className="grid md:grid-cols-2 gap-3">
-          <Field label="মিনিমাম অর্ডার টেক্সট"><input className={inputCls} value={s.min_order_bn} onChange={(e) => setItem({ min_order_bn: e.target.value } as any)} /></Field>
-          <Field label="বাটন টেক্সট"><input className={inputCls} value={s.cta_bn} onChange={(e) => setItem({ cta_bn: e.target.value } as any)} /></Field>
-        </div>
-      </div>
+      </Section>
     );
   }
   // banner
   return (
-    <div className="space-y-3">
-      <Field label="ব্যানার ইমেজ"><ImageInput value={s.image_url} onChange={(url) => setItem({ image_url: url } as any)} folder="banner" /></Field>
-      <div className="grid md:grid-cols-2 gap-3">
-        <Field label="ক্যাপশন (ঐচ্ছিক)"><input className={inputCls} value={s.caption_bn} onChange={(e) => setItem({ caption_bn: e.target.value } as any)} /></Field>
-        <Field label="লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে"><input className={inputCls} value={s.link} onChange={(e) => setItem({ link: e.target.value } as any)} placeholder="/products?cat=…" /></Field>
+    <Section title="ব্যানার সেটিং">
+      <div className="space-y-3">
+        <Field label="ব্যানার ইমেজ"><ImageInput value={s.image_url} onChange={(url) => setItem({ image_url: url } as any)} folder="banner" /></Field>
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="ক্যাপশন (ঐচ্ছিক)"><input className={inputCls} value={s.caption_bn} onChange={(e) => setItem({ caption_bn: e.target.value } as any)} /></Field>
+          <Field label="লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে"><input className={inputCls} value={s.link} onChange={(e) => setItem({ link: e.target.value } as any)} placeholder="/products?cat=…" /></Field>
+        </div>
       </div>
-    </div>
+    </Section>
   );
 }
 
