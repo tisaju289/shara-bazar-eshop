@@ -332,7 +332,7 @@ function Index() {
           return (
             <section key={sec.id} className="relative overflow-hidden">
               <div
-                className="container mx-auto px-4 py-10 md:py-16 grid md:hero-grid gap-4 md:gap-6 items-stretch"
+                className="container mx-auto px-4 py-10 md:py-16 grid hero-grid gap-4 md:gap-6 items-stretch"
                 style={{ ["--hero-side" as any]: `${sec.side_width_pct ?? 22}%` }}
               >
                 <div className="space-y-6 hidden">
