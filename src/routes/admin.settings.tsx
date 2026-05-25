@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings, type SiteSettings, type HomeSection, type HomeSectionType, type HeaderMenu, type CustomField, type CustomFieldType } from "@/hooks/useSiteSettings";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ImageInput } from "@/components/ImageInput";
 import { useQuery } from "@tanstack/react-query";
@@ -137,30 +137,26 @@ function CheckoutTab({ v, on, delivery, onDelivery }: {
     <div className="space-y-6">
       <p className="text-xs text-muted-foreground">চেকআউট পপআপের প্রতিটি লেখা/লেবেল/বাটন এখান থেকে কাস্টমাইজ করুন।</p>
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ডেলিভারি চার্জ</h3>
+      <Section title="ডেলিভারি চার্জ">
         <DeliveryTab v={delivery} on={onDelivery} />
-      </section>
+      </Section>
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডিং ও সেকশন</h3>
+      <Section title="হেডিং ও সেকশন">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="পপআপ টাইটেল"><input className={inputCls} value={v.title_bn} onChange={f("title_bn")} /></Field>
           <Field label="ডেলিভারি এলাকা সেকশন টাইটেল"><input className={inputCls} value={v.delivery_section_title_bn} onChange={f("delivery_section_title_bn")} /></Field>
         </div>
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">সামারি লেবেল</h3>
+      <Section title="সামারি লেবেল">
         <div className="grid md:grid-cols-3 gap-4">
           <Field label="সাবটোটাল লেবেল"><input className={inputCls} value={v.summary_subtotal_bn} onChange={f("summary_subtotal_bn")} /></Field>
           <Field label="ডেলিভারি লেবেল"><input className={inputCls} value={v.summary_delivery_bn} onChange={f("summary_delivery_bn")} /></Field>
           <Field label="মোট লেবেল"><input className={inputCls} value={v.summary_total_bn} onChange={f("summary_total_bn")} /></Field>
         </div>
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">কাস্টমার ফর্ম</h3>
+      <Section title="কাস্টমার ফর্ম">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="নাম — লেবেল"><input className={inputCls} value={v.name_label_bn} onChange={f("name_label_bn")} /></Field>
           <Field label="নাম — প্লেসহোল্ডার"><input className={inputCls} value={v.name_placeholder_bn} onChange={f("name_placeholder_bn")} /></Field>
@@ -169,33 +165,32 @@ function CheckoutTab({ v, on, delivery, onDelivery }: {
           <Field label="ঠিকানা — লেবেল"><input className={inputCls} value={v.address_label_bn} onChange={f("address_label_bn")} /></Field>
           <Field label="ঠিকানা — প্লেসহোল্ডার"><input className={inputCls} value={v.address_placeholder_bn} onChange={f("address_placeholder_bn")} /></Field>
         </div>
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">বাটন ও বার্তা</h3>
+      <Section title="বাটন ও বার্তা">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="অর্ডার বাটন টেক্সট" hint="মোট দাম শেষে অটো যোগ হবে"><input className={inputCls} value={v.submit_btn_bn} onChange={f("submit_btn_bn")} /></Field>
           <Field label="অর্ডার সাবমিট হচ্ছে — টেক্সট"><input className={inputCls} value={v.placing_btn_bn} onChange={f("placing_btn_bn")} /></Field>
           <Field label="ভ্যালিডেশন এরর (ফাঁকা ফিল্ড)"><input className={inputCls} value={v.validation_required_bn} onChange={f("validation_required_bn")} /></Field>
         </div>
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">অর্ডার সফল স্ক্রিন</h3>
+      <Section title="অর্ডার সফল স্ক্রিন">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="সফল টাইটেল"><input className={inputCls} value={v.success_title_bn} onChange={f("success_title_bn")} /></Field>
           <Field label="বন্ধ বাটন টেক্সট"><input className={inputCls} value={v.success_close_bn} onChange={f("success_close_bn")} /></Field>
         </div>
         <Field label="সফল বার্তা"><textarea className={areaCls} value={v.success_message_bn} onChange={f("success_message_bn")} /></Field>
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-3 border-t border-border">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">কাস্টম ফিল্ড</h3>
+      <Section
+        title="কাস্টম ফিল্ড"
+        right={
           <button onClick={addField} className="inline-flex items-center gap-1 h-9 px-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
             <Plus className="size-4" /> ফিল্ড যোগ
           </button>
-        </div>
+        }
+      >
         <p className="text-xs text-muted-foreground">এখানে যোগ করা ফিল্ডগুলো চেকআউট ফর্মে দেখা যাবে এবং অর্ডারের ঠিকানার সাথে যুক্ত হবে।</p>
         {fields.length === 0 && <p className="text-xs text-muted-foreground italic">কোনো কাস্টম ফিল্ড যোগ করা হয়নি।</p>}
         <div className="space-y-3">
@@ -230,7 +225,7 @@ function CheckoutTab({ v, on, delivery, onDelivery }: {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
     </div>
   );
 }
@@ -461,6 +456,31 @@ function Field({ label, children, hint }: { label: string; children: React.React
 const inputCls = "w-full h-11 px-4 rounded-xl bg-secondary border border-transparent focus:border-primary outline-none text-sm";
 const areaCls = "w-full min-h-[90px] p-3 rounded-xl bg-secondary border border-transparent focus:border-primary outline-none text-sm";
 
+function Section({ title, defaultOpen = false, right, children }: {
+  title: string;
+  defaultOpen?: boolean;
+  right?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="rounded-2xl border border-border bg-secondary/30 overflow-hidden">
+      <div className="flex items-center justify-between gap-2 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center gap-2 flex-1 text-left"
+        >
+          <ChevronDown className={`size-4 text-[var(--leaf-deep)] transition-transform ${open ? "rotate-0" : "-rotate-90"}`} />
+          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">{title}</h3>
+        </button>
+        {right}
+      </div>
+      {open && <div className="px-4 pb-4 pt-1 space-y-3">{children}</div>}
+    </section>
+  );
+}
+
 /* ---------- Tabs ---------- */
 function BrandTab({ v, on }: { v: SiteSettings["brand"]; on: (v: SiteSettings["brand"]) => void }) {
   return (
@@ -636,19 +656,19 @@ function HeaderFooterTab({ topbar, onTopbar, menu, onMenu, footer, onFooter }: {
   const setItems = (next: { label_bn: string; url: string }[]) => onMenu({ ...menu, items: next });
   return (
     <div className="space-y-8">
-      <section className="space-y-4">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডার — টপ বার</h3>
+      <Section title="হেডার — টপ বার">
         <TopbarTab v={topbar} on={onTopbar} />
-      </section>
+      </Section>
 
-      <section className="space-y-3 pt-5 border-t border-border">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডার মেনু</h3>
+      <Section
+        title="হেডার মেনু"
+        right={
           <button type="button" onClick={() => setItems([...items, { label_bn: "", url: "/" }])}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
             <Plus className="size-3.5" /> মেনু যোগ
           </button>
-        </div>
+        }
+      >
         <p className="text-[11px] text-muted-foreground">হেডারে দেখানোর জন্য মেনু আইটেম যোগ করুন (যেমন: হোম → /, ক্যাটাগরি → /categories, প্রোডাক্টস → /products)</p>
         {items.length === 0 && <p className="text-xs text-muted-foreground italic py-2">কোনো মেনু নেই — উপরের বাটন থেকে যোগ করুন</p>}
         <div className="space-y-2">
@@ -667,12 +687,11 @@ function HeaderFooterTab({ topbar, onTopbar, menu, onMenu, footer, onFooter }: {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="space-y-4 pt-5 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ফুটার</h3>
+      <Section title="ফুটার">
         <FooterTab v={footer} on={onFooter} />
-      </section>
+      </Section>
     </div>
   );
 }
@@ -684,8 +703,7 @@ function TrackingTab({ v, on }: { v: SiteSettings["tracking"]; on: (v: SiteSetti
         <span className="text-sm font-semibold">সব ট্র্যাকিং চালু করুন (মাস্টার সুইচ)</span>
       </label>
 
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">Meta (Facebook) Pixel + Conversions API</h3>
+      <Section title="Meta (Facebook) Pixel + Conversions API">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="Pixel ID" hint="যেমন: 1234567890"><input className={inputCls} value={v.meta_pixel_id} onChange={(e) => on({ ...v, meta_pixel_id: e.target.value.trim() })} /></Field>
           <Field label="Test Event Code" hint="Events Manager → Test events"><input className={inputCls} value={v.meta_test_event_code} onChange={(e) => on({ ...v, meta_test_event_code: e.target.value.trim() })} /></Field>
@@ -693,32 +711,28 @@ function TrackingTab({ v, on }: { v: SiteSettings["tracking"]; on: (v: SiteSetti
         <Field label="Conversions API Access Token" hint="Events Manager → Settings → Generate access token। সার্ভার থেকে CAPI ইভেন্ট পাঠাতে এটি লাগবে।">
           <textarea className={areaCls} value={v.meta_capi_token} onChange={(e) => on({ ...v, meta_capi_token: e.target.value.trim() })} />
         </Field>
-      </div>
+      </Section>
 
-      <div className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">Google Analytics 4 / Google Ads</h3>
+      <Section title="Google Analytics 4 / Google Ads">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="GA4 Measurement ID" hint="যেমন: G-XXXXXXX"><input className={inputCls} value={v.ga4_id} onChange={(e) => on({ ...v, ga4_id: e.target.value.trim() })} /></Field>
           <Field label="Google Ads ID" hint="যেমন: AW-123456789"><input className={inputCls} value={v.google_ads_id} onChange={(e) => on({ ...v, google_ads_id: e.target.value.trim() })} /></Field>
         </div>
         <Field label="Google Ads Purchase Conversion Label" hint="ঐচ্ছিক"><input className={inputCls} value={v.google_ads_purchase_label} onChange={(e) => on({ ...v, google_ads_purchase_label: e.target.value.trim() })} /></Field>
-      </div>
+      </Section>
 
-      <div className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">Google Tag Manager</h3>
+      <Section title="Google Tag Manager">
         <Field label="GTM Container ID" hint="যেমন: GTM-XXXXXX"><input className={inputCls} value={v.gtm_id} onChange={(e) => on({ ...v, gtm_id: e.target.value.trim() })} /></Field>
-      </div>
+      </Section>
 
-      <div className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">TikTok Pixel</h3>
+      <Section title="TikTok Pixel">
         <Field label="TikTok Pixel ID"><input className={inputCls} value={v.tiktok_pixel_id} onChange={(e) => on({ ...v, tiktok_pixel_id: e.target.value.trim() })} /></Field>
-      </div>
+      </Section>
 
-      <div className="space-y-3 pt-3 border-t border-border">
-        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">কাস্টম স্ক্রিপ্ট</h3>
+      <Section title="কাস্টম স্ক্রিপ্ট">
         <Field label="Head HTML" hint="<script>...</script> বা যেকোনো verification ট্যাগ"><textarea className={areaCls + " font-mono text-xs"} value={v.head_html} onChange={(e) => on({ ...v, head_html: e.target.value })} /></Field>
         <Field label="Body HTML" hint="<noscript> পিক্সেল / চ্যাট উইজেট ইত্যাদি"><textarea className={areaCls + " font-mono text-xs"} value={v.body_html} onChange={(e) => on({ ...v, body_html: e.target.value })} /></Field>
-      </div>
+      </Section>
 
       <div className="rounded-2xl bg-secondary/60 p-4 text-xs text-muted-foreground space-y-1.5">
         <p className="font-semibold text-foreground">কীভাবে কাজ করে:</p>
