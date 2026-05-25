@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "delivery" | "checkout";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "checkout";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
@@ -22,7 +22,6 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "home_sections", label: "হোম সেকশন" },
   { key: "features", label: "ফিচার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
-  { key: "delivery", label: "ডেলিভারি চার্জ" },
   { key: "checkout", label: "চেকআউট" },
 ];
 
@@ -92,8 +91,14 @@ function SettingsPage() {
         )}
         {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
-        {tab === "delivery" && <DeliveryTab v={draft.delivery} on={(v) => update("delivery", v)} />}
-        {tab === "checkout" && <CheckoutTab v={draft.checkout} on={(v) => update("checkout", v)} />}
+        {tab === "checkout" && (
+          <CheckoutTab
+            v={draft.checkout}
+            on={(v) => update("checkout", v)}
+            delivery={draft.delivery}
+            onDelivery={(v) => update("delivery", v)}
+          />
+        )}
 
         <div className="pt-3 flex justify-end">
           <button onClick={saveTab} disabled={saving}
@@ -107,7 +112,12 @@ function SettingsPage() {
   );
 }
 
-function CheckoutTab({ v, on }: { v: SiteSettings["checkout"]; on: (v: SiteSettings["checkout"]) => void }) {
+function CheckoutTab({ v, on, delivery, onDelivery }: {
+  v: SiteSettings["checkout"];
+  on: (v: SiteSettings["checkout"]) => void;
+  delivery: SiteSettings["delivery"];
+  onDelivery: (v: SiteSettings["delivery"]) => void;
+}) {
   const f = <K extends keyof SiteSettings["checkout"]>(k: K) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => on({ ...v, [k]: e.target.value });
   const fields: CustomField[] = v.custom_fields ?? [];
   const setFields = (next: CustomField[]) => on({ ...v, custom_fields: next });
@@ -126,6 +136,11 @@ function CheckoutTab({ v, on }: { v: SiteSettings["checkout"]; on: (v: SiteSetti
   return (
     <div className="space-y-6">
       <p className="text-xs text-muted-foreground">চেকআউট পপআপের প্রতিটি লেখা/লেবেল/বাটন এখান থেকে কাস্টমাইজ করুন।</p>
+
+      <section className="space-y-3">
+        <h3 className="text-sm font-bold text-[var(--leaf-deep)]">ডেলিভারি চার্জ</h3>
+        <DeliveryTab v={delivery} on={onDelivery} />
+      </section>
 
       <section className="space-y-3">
         <h3 className="text-sm font-bold text-[var(--leaf-deep)]">হেডিং ও সেকশন</h3>
