@@ -13,14 +13,13 @@ export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
 });
 
-type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "features" | "tracking" | "checkout";
+type TabKey = "brand" | "seo" | "header_footer" | "home_sections" | "tracking" | "checkout";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "brand", label: "ব্র্যান্ড" },
   { key: "seo", label: "SEO / মেটা" },
   { key: "header_footer", label: "হেডার / ফুটার" },
   { key: "home_sections", label: "হোম সেকশন" },
-  { key: "features", label: "ফিচার" },
   { key: "tracking", label: "ট্র্যাকিং / পিক্সেল" },
   { key: "checkout", label: "চেকআউট" },
 ];
@@ -89,7 +88,6 @@ function SettingsPage() {
         {tab === "home_sections" && (
           <HomeSectionsTab v={draft.home_sections} on={(v) => update("home_sections", v)} />
         )}
-        {tab === "features" && <FeaturesTab v={draft.features} on={(v) => update("features", v)} />}
         {tab === "tracking" && <TrackingTab v={draft.tracking} on={(v) => update("tracking", v)} />}
         {tab === "checkout" && (
           <CheckoutTab
