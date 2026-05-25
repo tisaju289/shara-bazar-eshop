@@ -347,7 +347,6 @@ function Index() {
             <span className="flex items-center gap-4 shrink-0 ml-auto">
               <span className="flex items-center gap-1.5"><Phone className="size-3.5" /> {topbar.phone}</span>
               <span>সাহায্য</span>
-              <span>আমার অর্ডার</span>
             </span>
           </div>
         </div>
