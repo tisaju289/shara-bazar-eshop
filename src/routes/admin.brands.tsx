@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X, Loader2, ChevronUp, ChevronDown } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/brands")({
   component: AdminBrands,
@@ -37,14 +38,16 @@ function AdminBrands() {
       ? await supabase.from("brands").update(payload).eq("id", editing.id)
       : await supabase.from("brands").insert(payload);
     setSaving(false);
-    if (error) return alert(error.message);
+    if (error) return toast.error("সেভ ব্যর্থ: " + error.message);
+    toast.success(editing ? "ব্র্যান্ড আপডেট হয়েছে" : "নতুন ব্র্যান্ড যোগ হয়েছে");
     setOpen(false); await load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("ব্র্যান্ড মুছবেন?")) return;
     const { error } = await supabase.from("brands").delete().eq("id", id);
-    if (error) return alert(error.message);
+    if (error) return toast.error("মুছতে ব্যর্থ: " + error.message);
+    toast.success("ব্র্যান্ড মুছে গেছে");
     await load();
   };
 
@@ -61,7 +64,7 @@ function AdminBrands() {
       supabase.from("brands").update({ sort_order: b.sort_order }).eq("id", a.id),
       supabase.from("brands").update({ sort_order: a.sort_order }).eq("id", b.id),
     ]);
-    if (r1.error || r2.error) { alert((r1.error || r2.error)!.message); await load(); }
+    if (r1.error || r2.error) { toast.error((r1.error || r2.error)!.message); await load(); }
   };
 
   return (

@@ -47,6 +47,8 @@ function SettingsPage() {
     setSaving(true);
     const keys = tab === "header_footer"
       ? ["topbar", "header_menu", "footer"]
+      : tab === "checkout"
+      ? ["checkout", "delivery"]
       : [tab];
     const rows = keys.map((k) => ({ key: k, value: (draft as any)[k] }));
     const { error } = await (supabase as any)
@@ -892,6 +894,12 @@ function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSetti
     [n[i], n[j]] = [n[j], n[i]];
     on({ ...v, options: n });
   };
+  const addOpt = () => {
+    on({ ...v, options: [...v.options, { label_bn: "", charge: 0, enabled: true }] });
+  };
+  const removeOpt = (i: number) => {
+    on({ ...v, options: v.options.filter((_, idx) => idx !== i) });
+  };
   return (
     <div className="space-y-6">
       <label className="flex items-center gap-3 cursor-pointer">
@@ -911,6 +919,7 @@ function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSetti
                 </label>
                 <button type="button" disabled={i === 0} onClick={() => moveOpt(i, -1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
                 <button type="button" disabled={i === v.options.length - 1} onClick={() => moveOpt(i, 1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
+                <button type="button" onClick={() => removeOpt(i)} className="size-8 rounded-md bg-destructive/10 text-destructive grid place-items-center" title="মুছুন"><Trash2 className="size-3.5" /></button>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
@@ -920,6 +929,10 @@ function DeliveryTab({ v, on }: { v: SiteSettings["delivery"]; on: (v: SiteSetti
           </div>
         ))}
       </div>
+      <button type="button" onClick={addOpt}
+        className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-secondary border border-border text-sm font-semibold hover:bg-secondary/80 transition">
+        <Plus className="size-4" /> নতুন অপশন যোগ করুন
+      </button>
     </div>
   );
 }

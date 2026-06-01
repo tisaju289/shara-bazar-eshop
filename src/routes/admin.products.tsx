@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProducts,
@@ -94,7 +95,8 @@ function AdminProducts() {
       ? await supabase.from("products").update(payload).eq("id", editing.id)
       : await supabase.from("products").insert(payload);
     setSaving(false);
-    if (error) return alert(error.message);
+    if (error) return toast.error("সেভ ব্যর্থ: " + error.message);
+    toast.success(editing ? "পণ্য আপডেট হয়েছে" : "নতুন পণ্য যোগ হয়েছে");
     setOpen(false);
     await load();
   };
@@ -102,7 +104,8 @@ function AdminProducts() {
   const remove = async (id: string) => {
     if (!confirm("আপনি কি নিশ্চিত? এই পণ্য মুছে যাবে।")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return alert(error.message);
+    if (error) return toast.error("মুছতে ব্যর্থ: " + error.message);
+    toast.success("পণ্য মুছে গেছে");
     await load();
   };
 
