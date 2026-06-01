@@ -15,6 +15,8 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
+import { Route as BrandsBrandIdRouteImport } from './routes/brands.$brandId'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -50,6 +52,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const CatCatIdRoute = CatCatIdRouteImport.update({
+  id: '/cat/$catId',
+  path: '/cat/$catId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandsBrandIdRoute = BrandsBrandIdRouteImport.update({
+  id: '/brands/$brandId',
+  path: '/brands/$brandId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
@@ -88,6 +100,8 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/brands/$brandId': typeof BrandsBrandIdRoute
+  '/cat/$catId': typeof CatCatIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +114,8 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/brands/$brandId': typeof BrandsBrandIdRoute
+  '/cat/$catId': typeof CatCatIdRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -114,6 +130,8 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/brands/$brandId': typeof BrandsBrandIdRoute
+  '/cat/$catId': typeof CatCatIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -129,6 +147,8 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
+    | '/brands/$brandId'
+    | '/cat/$catId'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -141,6 +161,8 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
+    | '/brands/$brandId'
+    | '/cat/$catId'
     | '/admin'
   id:
     | '__root__'
@@ -154,6 +176,8 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
+    | '/brands/$brandId'
+    | '/cat/$catId'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -163,6 +187,8 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  BrandsBrandIdRoute: typeof BrandsBrandIdRoute
+  CatCatIdRoute: typeof CatCatIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -208,6 +234,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/cat/$catId': {
+      id: '/cat/$catId'
+      path: '/cat/$catId'
+      fullPath: '/cat/$catId'
+      preLoaderRoute: typeof CatCatIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brands/$brandId': {
+      id: '/brands/$brandId'
+      path: '/brands/$brandId'
+      fullPath: '/brands/$brandId'
+      preLoaderRoute: typeof BrandsBrandIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/settings': {
       id: '/admin/settings'
@@ -273,6 +313,8 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  BrandsBrandIdRoute: BrandsBrandIdRoute,
+  CatCatIdRoute: CatCatIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

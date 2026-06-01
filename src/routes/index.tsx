@@ -135,8 +135,8 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
         {categories.map((c) => (
           <Link
             key={c.id}
-            to="/products"
-            search={{ cat: c.id }}
+            to="/cat/$catId"
+            params={{ catId: c.id }}
             className="group snap-start shrink-0 basis-[calc(25%-0.6rem)] md:basis-[14%] flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
           >
             <div className="size-14 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
@@ -173,9 +173,12 @@ function useBrands() {
   return useQuery({
     queryKey: ["brands", "public"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("brands").select("id, name_bn").order("sort_order");
+      const { data, error } = await supabase
+        .from("brands")
+        .select("id,name_bn,image_url,slug")
+        .order("sort_order");
       if (error) throw error;
-      return (data as { id: string; name_bn: string }[]) ?? [];
+      return (data as { id: string; name_bn: string; image_url: string | null; slug: string }[]) ?? [];
     },
   });
 }
@@ -319,6 +322,12 @@ function Index() {
   const catCounts = useMemo(() => {
     const m: Record<string, number> = {};
     for (const p of products) if (p.category_id) m[p.category_id] = (m[p.category_id] ?? 0) + 1;
+    return m;
+  }, [products]);
+
+  const brandCounts = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const p of products) if (p.brand_id) m[p.brand_id] = (m[p.brand_id] ?? 0) + 1;
     return m;
   }, [products]);
 
@@ -589,6 +598,43 @@ function Index() {
           </section>
         );
       })}
+
+      {/* জনপ্রিয় ব্র্যান্ড section */}
+      {!prodLoading && brands.filter((b) => brandCounts[b.id]).length > 0 && (
+        <section className="py-8 md:py-12">
+          <div className="container mx-auto px-4 space-y-6">
+            <div className="flex flex-col items-center text-center">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ব্র্যান্ড</h2>
+              <p className="text-muted-foreground text-sm mt-1">আপনার পছন্দের ব্র্যান্ড বেছে নিন</p>
+            </div>
+            <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {brands
+                .filter((b) => brandCounts[b.id])
+                .map((b) => (
+                  <Link
+                    key={b.id}
+                    to="/brands/$brandId"
+                    params={{ brandId: b.id }}
+                    className="group shrink-0 flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary hover:shadow-[var(--shadow-pop)] transition min-w-[100px] md:min-w-[120px]"
+                  >
+                    <div
+                      className="size-16 md:size-20 rounded-2xl grid place-items-center overflow-hidden group-hover:scale-110 transition"
+                      style={{ background: "var(--gradient-warm)" }}
+                    >
+                      {b.image_url ? (
+                        <img src={b.image_url} alt={b.name_bn} className="size-full object-contain p-1" />
+                      ) : (
+                        <span className="text-3xl">🏷️</span>
+                      )}
+                    </div>
+                    <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
+                    <div className="text-[10px] text-muted-foreground">{brandCounts[b.id] ?? 0} পণ্য</div>
+                  </Link>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {!prodLoading && products.length > 0 && (
         <div className="container mx-auto px-4 text-center pb-10">
