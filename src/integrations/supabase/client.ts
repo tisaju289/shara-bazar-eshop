@@ -5,29 +5,13 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://cdctsoahehjohgfndsua.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY3Rzb2FoZWhqb2hnZm5kc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMzY2NjAsImV4cCI6MjA5NDgxMjY2MH0.ugKYoL6XP9i_TAqiAFFGQpsKXz4585oduL7-2c8oARU";
 
-const isBrowser = typeof window !== "undefined";
-
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: isBrowser ? window.localStorage : undefined,
-    persistSession: isBrowser,
-    autoRefreshToken: isBrowser,
-  },
-  realtime: {
-    transport: isBrowser ? undefined : (class NoopWebSocket {
-      static CONNECTING = 0;
-      static OPEN = 1;
-      static CLOSING = 2;
-      static CLOSED = 3;
-      readyState = 3;
-      constructor() {}
-      send() {}
-      close() {}
-      addEventListener() {}
-      removeEventListener() {}
-    }) as unknown as typeof WebSocket,
-  },
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
 });
