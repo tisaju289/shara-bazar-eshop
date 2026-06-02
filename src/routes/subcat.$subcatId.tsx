@@ -195,9 +195,9 @@ function SubcategoryProductPage() {
           <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[15rem_1fr] gap-6 items-start">
           {/* Sidebar — always visible on desktop, even with no products */}
-          <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4`}>
+          <aside className={`${filterOpen ? "block" : "hidden"} md:block space-y-4`}>
             {/* Price filter — only show when products exist */}
             {allProducts.length > 0 && (
               <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
@@ -233,7 +233,7 @@ function SubcategoryProductPage() {
           </aside>
 
           {/* Products */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0">
             {isLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (

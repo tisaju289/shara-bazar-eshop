@@ -263,8 +263,8 @@ function CategoryPage() {
               <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4`}>
+            <div className="grid grid-cols-1 md:grid-cols-[15rem_1fr] gap-6 items-start">
+              <aside className={`${filterOpen ? "block" : "hidden"} md:block space-y-4`}>
                 <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
                   <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
                   <div className="flex items-center gap-2">
@@ -294,7 +294,7 @@ function CategoryPage() {
                 </div>
               </aside>
 
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0">
                 {filtered.length === 0 ? (
                   <div className="text-center text-muted-foreground py-24">
                     <LayoutGrid className="size-10 mx-auto mb-3 opacity-30" />
