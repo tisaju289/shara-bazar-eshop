@@ -50,6 +50,7 @@ function AdminProducts() {
   const [saving, setSaving] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   const load = async () => {
     setLoading(true);
@@ -168,7 +169,20 @@ function AdminProducts() {
     await load();
   };
 
-  const filtered = items.filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()));
+  const filtered = items
+    .filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()))
+    .slice()
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "name_asc": return a.name_bn.localeCompare(b.name_bn, "bn");
+        case "name_desc": return b.name_bn.localeCompare(a.name_bn, "bn");
+        case "price_asc": return a.price - b.price;
+        case "price_desc": return b.price - a.price;
+        case "stock_asc": return a.stock - b.stock;
+        case "stock_desc": return b.stock - a.stock;
+        default: return 0;
+      }
+    });
 
   return (
     <div className="space-y-6">
@@ -191,10 +205,25 @@ function AdminProducts() {
         </div>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পণ্য খুঁজুন..."
-          className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-border outline-none focus:border-primary" />
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-md">
+          <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পণ্য খুঁজুন..."
+            className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-border outline-none focus:border-primary" />
+        </div>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="h-11 px-4 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium"
+        >
+          <option value="newest">সাজান: নতুন আগে</option>
+          <option value="name_asc">নাম (A-Z / অ-হ)</option>
+          <option value="name_desc">নাম (Z-A / হ-অ)</option>
+          <option value="price_asc">দাম (কম থেকে বেশি)</option>
+          <option value="price_desc">দাম (বেশি থেকে কম)</option>
+          <option value="stock_asc">স্টক (কম থেকে বেশি)</option>
+          <option value="stock_desc">স্টক (বেশি থেকে কম)</option>
+        </select>
       </div>
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
@@ -220,7 +249,7 @@ function AdminProducts() {
                   <th className="p-3 font-semibold">দাম</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">স্টক</th>
                   <th className="p-3 font-semibold">স্ট্যাটাস</th>
-                  <th className="p-3"></th>
+                  <th className="p-3 font-semibold text-right">অ্যাকশন</th>
                 </tr>
               </thead>
               <tbody>
