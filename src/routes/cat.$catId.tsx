@@ -9,13 +9,11 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
 import { openCartDrawer } from "@/hooks/useCartDrawer";
 import { trackEvent } from "@/lib/tracking";
-import { SlidersHorizontal, ChevronRight, Home, LayoutGrid, X } from "lucide-react";
+import { SlidersHorizontal, ChevronRight, Home, LayoutGrid, X, Layers } from "lucide-react";
 
 export const Route = createFileRoute("/cat/$catId")({
-  head: () => ({
-    meta: [{ title: "ক্যাটাগরি পণ্য — তাজা বাজার" }],
-  }),
-  component: CategoryProductPage,
+  head: () => ({ meta: [{ title: "ক্যাটাগরি — তাজা বাজার" }] }),
+  component: CategoryPage,
 });
 
 type DBProduct = {
@@ -26,18 +24,16 @@ type DBProduct = {
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 type DBBrand = { id: string; name_bn: string };
+type SubCat = { id: string; name_bn: string; slug: string; image_url: string | null; sort_order: number };
 
-function CategoryProductPage() {
+function CategoryPage() {
   const { catId } = Route.useParams();
   const { data: settings } = useSiteSettings();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", "public"],
     queryFn: async (): Promise<DBCategory[]> => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id,name_bn,slug,sort_order,image_url")
-        .order("sort_order");
+      const { data, error } = await supabase.from("categories").select("id,name_bn,slug,sort_order,image_url").order("sort_order");
       if (error) throw error;
       return (data as DBCategory[]) ?? [];
     },
@@ -46,37 +42,66 @@ function CategoryProductPage() {
   const { data: brands = [] } = useQuery({
     queryKey: ["brands", "public"],
     queryFn: async (): Promise<DBBrand[]> => {
-      const { data, error } = await supabase.from("brands").select("id,name_bn").order("sort_order");
-      if (error) throw error;
+      const { data } = await supabase.from("brands").select("id,name_bn").order("sort_order");
       return (data as DBBrand[]) ?? [];
     },
   });
 
-  const { data: allProducts = [], isLoading } = useQuery({
+  const { data: subCats = [], isLoading: subLoading } = useQuery({
+    queryKey: ["subcategories", catId],
+    queryFn: async (): Promise<SubCat[]> => {
+      const { data } = await supabase
+        .from("subcategories")
+        .select("id,name_bn,slug,image_url,sort_order")
+        .eq("category_id", catId)
+        .order("sort_order");
+      return (data as SubCat[]) ?? [];
+    },
+    enabled: !!catId,
+  });
+
+  const { data: allProducts = [], isLoading: prodLoading } = useQuery({
     queryKey: ["products", "cat", catId],
     queryFn: async (): Promise<DBProduct[]> => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
         .eq("category_id", catId)
         .order("created_at", { ascending: false });
-      if (error) throw error;
       return (data as DBProduct[]) ?? [];
+    },
+    enabled: !!catId,
+  });
+
+  const { data: subcatProductCounts = {} } = useQuery({
+    queryKey: ["products", "subcat-counts", catId],
+    queryFn: async (): Promise<Record<string, number>> => {
+      const { data } = await supabase
+        .from("products")
+        .select("subcategory_id")
+        .eq("is_active", true)
+        .eq("category_id", catId)
+        .not("subcategory_id", "is", null);
+      const m: Record<string, number> = {};
+      for (const p of (data ?? []) as { subcategory_id: string | null }[]) {
+        if (p.subcategory_id) m[p.subcategory_id] = (m[p.subcategory_id] ?? 0) + 1;
+      }
+      return m;
     },
     enabled: !!catId,
   });
 
   const { data: allCatProducts = [] } = useQuery({
     queryKey: ["products", "public", "cat-counts"],
-    queryFn: async (): Promise<{ id: string; category_id: string | null }[]> => {
-      const { data, error } = await supabase.from("products").select("id,category_id").eq("is_active", true);
-      if (error) throw error;
+    queryFn: async () => {
+      const { data } = await supabase.from("products").select("id,category_id").eq("is_active", true);
       return (data as { id: string; category_id: string | null }[]) ?? [];
     },
   });
 
   const currentCategory = categories.find((c) => c.id === catId);
+  const hasSubcats = !subLoading && subCats.length > 0;
 
   const [cart, setCart] = useCart();
   const add = (id: string) => {
@@ -126,6 +151,7 @@ function CategoryProductPage() {
   );
 
   const hasFilter = minPrice !== "" || maxPrice !== "";
+  const isLoading = subLoading || prodLoading;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -143,152 +169,164 @@ function CategoryProductPage() {
         {currentCategory && (
           <div className="flex items-center gap-4 mb-6 p-4 rounded-2xl bg-card border border-border">
             {currentCategory.image_url ? (
-              <img
-                src={currentCategory.image_url}
-                alt={currentCategory.name_bn}
+              <img src={currentCategory.image_url} alt={currentCategory.name_bn}
                 className="size-16 md:size-20 rounded-2xl object-cover shrink-0"
-                style={{ background: "var(--gradient-warm)" }}
-              />
+                style={{ background: "var(--gradient-warm)" }} />
             ) : (
-              <div
-                className="size-16 md:size-20 rounded-2xl grid place-items-center text-3xl shrink-0"
-                style={{ background: "var(--gradient-warm)" }}
-              >
+              <div className="size-16 md:size-20 rounded-2xl grid place-items-center text-3xl shrink-0"
+                style={{ background: "var(--gradient-warm)" }}>
                 <LayoutGrid className="size-7 text-primary" />
               </div>
             )}
             <div>
               <h1 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{currentCategory.name_bn}</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">{allProducts.length} টি পণ্য পাওয়া গেছে</p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {hasSubcats ? `${subCats.length} টি সাব-ক্যাটাগরি` : `${allProducts.length} টি পণ্য`}
+              </p>
             </div>
           </div>
         )}
 
-        <div className="md:hidden flex items-center gap-3 mb-4">
-          <button
-            onClick={() => setFilterOpen((v) => !v)}
-            className="flex items-center gap-2 h-10 px-4 rounded-xl bg-secondary text-secondary-foreground text-sm font-semibold"
-          >
-            <SlidersHorizontal className="size-4" />
-            ফিল্টার
-            {hasFilter && <span className="size-2 rounded-full bg-primary inline-block" />}
-          </button>
-          {hasFilter && (
-            <button
-              onClick={() => { setMinPrice(""); setMaxPrice(""); }}
-              className="flex items-center gap-1.5 h-10 px-4 rounded-xl bg-secondary text-xs text-muted-foreground hover:text-foreground"
-            >
-              <X className="size-3.5" /> রিসেট
-            </button>
-          )}
-          <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
-        </div>
-
-        <div className="flex gap-6 items-start">
-          <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4 md:sticky md:top-24`}>
-            <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-              <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    placeholder={`৳${minPossible}`}
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="w-full h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <span className="text-muted-foreground text-xs shrink-0">—</span>
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    placeholder={`৳${maxPossible}`}
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="w-full h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary"
-                  />
+        {/* Subcategory grid view */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-card border border-border aspect-square animate-pulse" />
+            ))}
+          </div>
+        ) : hasSubcats ? (
+          <div className="flex gap-6 items-start">
+            {/* Sidebar */}
+            <aside className="hidden md:block w-60 lg:w-64 shrink-0 sticky top-24">
+              <div className="bg-card border border-border rounded-2xl p-4">
+                <h3 className="font-bold text-sm mb-3">সব ক্যাটাগরি</h3>
+                <div className="space-y-1">
+                  {categories.map((c) => (
+                    <Link key={c.id} to="/cat/$catId" params={{ catId: c.id }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center justify-between ${c.id === catId ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}>
+                      <span className="truncate">{c.name_bn}</span>
+                      <span className={`text-xs shrink-0 ml-1 ${c.id === catId ? "opacity-80" : "opacity-60"}`}>{catCounts[c.id] ?? 0}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
-              {hasFilter && (
-                <button
-                  onClick={() => { setMinPrice(""); setMaxPrice(""); }}
-                  className="text-xs text-primary hover:underline"
-                >
-                  রিসেট
-                </button>
-              )}
-            </div>
+            </aside>
 
-            <div className="bg-card border border-border rounded-2xl p-4">
-              <h3 className="font-bold text-sm mb-3">সব ক্যাটাগরি</h3>
-              <div className="space-y-1">
-                {categories.map((c) => (
+            {/* Subcategory cards */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-muted-foreground mb-4">একটি সাব-ক্যাটাগরি বেছে নিন</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                {subCats.map((sc) => (
                   <Link
-                    key={c.id}
-                    to="/cat/$catId"
-                    params={{ catId: c.id }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center justify-between ${c.id === catId ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
+                    key={sc.id}
+                    to="/subcat/$subcatId"
+                    params={{ subcatId: sc.id }}
+                    className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary hover:shadow-[var(--shadow-soft)] transition-all duration-200"
                   >
-                    <span className="truncate">{c.name_bn}</span>
-                    <span className={`text-xs shrink-0 ml-1 ${c.id === catId ? "opacity-80" : "opacity-60"}`}>{catCounts[c.id] ?? 0}</span>
+                    <div className="aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+                      {sc.image_url ? (
+                        <img src={sc.image_url} alt={sc.name_bn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full grid place-items-center">
+                          <Layers className="size-10 text-primary/50" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="font-semibold text-sm text-center leading-tight">{sc.name_bn}</p>
+                      {subcatProductCounts[sc.id] !== undefined && (
+                        <p className="text-xs text-muted-foreground text-center mt-0.5">
+                          {subcatProductCounts[sc.id]} টি পণ্য
+                        </p>
+                      )}
+                    </div>
                   </Link>
                 ))}
               </div>
             </div>
-          </aside>
+          </div>
+        ) : (
+          /* Fallback: no subcategories — show products directly */
+          <>
+            <div className="md:hidden flex items-center gap-3 mb-4">
+              <button onClick={() => setFilterOpen((v) => !v)}
+                className="flex items-center gap-2 h-10 px-4 rounded-xl bg-secondary text-secondary-foreground text-sm font-semibold">
+                <SlidersHorizontal className="size-4" />ফিল্টার
+                {hasFilter && <span className="size-2 rounded-full bg-primary inline-block" />}
+              </button>
+              {hasFilter && (
+                <button onClick={() => { setMinPrice(""); setMaxPrice(""); }}
+                  className="flex items-center gap-1.5 h-10 px-4 rounded-xl bg-secondary text-xs text-muted-foreground hover:text-foreground">
+                  <X className="size-3.5" /> রিসেট
+                </button>
+              )}
+              <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
+            </div>
 
-          <div className="flex-1 min-w-0">
-            {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="rounded-3xl bg-card border border-border aspect-[3/4] animate-pulse" />
-                ))}
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="text-center text-muted-foreground py-24">
-                <LayoutGrid className="size-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">এই ক্যাটাগরিতে কোন পণ্য পাওয়া যায়নি</p>
-                {hasFilter && (
-                  <button
-                    onClick={() => { setMinPrice(""); setMaxPrice(""); }}
-                    className="mt-3 text-sm text-primary hover:underline"
-                  >
-                    ফিল্টার সরান
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="hidden md:flex items-center justify-between mb-4">
-                  <p className="text-sm text-muted-foreground">{filtered.length} টি পণ্য</p>
+            <div className="flex gap-6 items-start">
+              <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4 md:sticky md:top-24`}>
+                <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                  <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
+                  <div className="flex items-center gap-2">
+                    <input type="number" placeholder={`৳${minPossible}`} value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                      className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+                    <span className="text-muted-foreground text-xs">—</span>
+                    <input type="number" placeholder={`৳${maxPossible}`} value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                      className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  </div>
                   {hasFilter && (
-                    <button
-                      onClick={() => { setMinPrice(""); setMaxPrice(""); }}
-                      className="text-xs text-primary hover:underline flex items-center gap-1"
-                    >
-                      <X className="size-3" /> ফিল্টার সরান
-                    </button>
+                    <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="text-xs text-primary hover:underline">রিসেট</button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-                  {filtered.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      categoryName={currentCategory?.name_bn ?? ""}
-                      brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
-                      qty={cart[p.id] ?? 0}
-                      add={add}
-                      sub={sub}
-                      onBuyNow={() => { add(p.id); openCartDrawer(); }}
-                      settings={settings?.product_card}
-                    />
-                  ))}
+                <div className="bg-card border border-border rounded-2xl p-4">
+                  <h3 className="font-bold text-sm mb-3">সব ক্যাটাগরি</h3>
+                  <div className="space-y-1">
+                    {categories.map((c) => (
+                      <Link key={c.id} to="/cat/$catId" params={{ catId: c.id }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center justify-between ${c.id === catId ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}>
+                        <span className="truncate">{c.name_bn}</span>
+                        <span className={`text-xs shrink-0 ml-1 ${c.id === catId ? "opacity-80" : "opacity-60"}`}>{catCounts[c.id] ?? 0}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </>
-            )}
-          </div>
-        </div>
+              </aside>
+
+              <div className="flex-1 min-w-0">
+                {filtered.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-24">
+                    <LayoutGrid className="size-10 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">এই ক্যাটাগরিতে কোন পণ্য পাওয়া যায়নি</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="hidden md:flex items-center justify-between mb-4">
+                      <p className="text-sm text-muted-foreground">{filtered.length} টি পণ্য</p>
+                      {hasFilter && (
+                        <button onClick={() => { setMinPrice(""); setMaxPrice(""); }}
+                          className="text-xs text-primary hover:underline flex items-center gap-1">
+                          <X className="size-3" /> ফিল্টার সরান
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                      {filtered.map((p) => (
+                        <ProductCard key={p.id} product={p}
+                          categoryName={currentCategory?.name_bn ?? ""}
+                          brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
+                          qty={cart[p.id] ?? 0} add={add} sub={sub}
+                          onBuyNow={() => { add(p.id); openCartDrawer(); }}
+                          settings={settings?.product_card} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <MobileBottomNav />

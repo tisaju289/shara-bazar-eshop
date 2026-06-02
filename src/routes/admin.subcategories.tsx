@@ -35,7 +35,6 @@ function AdminSubcategories() {
     keywords: "",
   });
   const [saving, setSaving] = useState(false);
-  const [filterCat, setFilterCat] = useState<string>("");
 
   const load = async () => {
     setLoading(true);
@@ -52,7 +51,7 @@ function AdminSubcategories() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ category_id: filterCat || "", name_bn: "", slug: "", sort_order: items.length + 1, image_url: "", keywords: "" });
+    setForm({ category_id: "", name_bn: "", slug: "", sort_order: items.length + 1, image_url: "", keywords: "" });
     setOpen(true);
   };
   const openEdit = (s: SubCat) => {
@@ -102,7 +101,7 @@ function AdminSubcategories() {
   };
 
   const move = async (i: number, dir: -1 | 1) => {
-    const visible = filtered;
+    const visible = items;
     const j = i + dir;
     if (j < 0 || j >= visible.length) return;
     const a = visible[i], b = visible[j];
@@ -119,10 +118,6 @@ function AdminSubcategories() {
     if (r1.error || r2.error) { toast.error((r1.error || r2.error)!.message); await load(); }
   };
 
-  const filtered = filterCat
-    ? items.filter((s) => s.category_id === filterCat)
-    : items;
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -138,29 +133,10 @@ function AdminSubcategories() {
         </button>
       </div>
 
-      {/* Filter by category */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setFilterCat("")}
-          className={`h-9 px-4 rounded-xl text-sm font-semibold transition ${filterCat === "" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}
-        >
-          সব
-        </button>
-        {cats.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setFilterCat(c.id)}
-            className={`h-9 px-4 rounded-xl text-sm font-semibold transition ${filterCat === c.id ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}
-          >
-            {c.name_bn}
-          </button>
-        ))}
-      </div>
-
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-12 text-center"><Loader2 className="size-6 animate-spin inline text-primary" /></div>
-        ) : filtered.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground text-sm">
             কোনো সাব-ক্যাটাগরি নেই। উপরের বাটন থেকে নতুন সাব-ক্যাটাগরি যোগ করুন।
           </div>
@@ -177,7 +153,7 @@ function AdminSubcategories() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((s, i) => (
+                {items.map((s, i) => (
                   <tr key={s.id} className="border-t border-border hover:bg-secondary/30">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
@@ -210,7 +186,7 @@ function AdminSubcategories() {
                         <span className="text-xs text-muted-foreground w-5 text-center">{s.sort_order}</span>
                         <button
                           onClick={() => move(i, 1)}
-                          disabled={i === filtered.length - 1}
+                          disabled={i === items.length - 1}
                           className="size-7 rounded hover:bg-secondary grid place-items-center disabled:opacity-30"
                         >
                           <ChevronDown className="size-3.5" />

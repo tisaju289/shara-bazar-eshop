@@ -1,0 +1,1 @@
+- [Supabase DDL migration approach](supabase-migration.md) — can't run DDL via REST API or service role; user must paste SQL in Supabase dashboard SQL editor.
