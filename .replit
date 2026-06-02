@@ -2,6 +2,7 @@ modules = ["nodejs-20", "web", "postgresql-16"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
+integrations = ["javascript_database:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -12,6 +13,8 @@ channel = "stable-25_05"
 VITE_SUPABASE_URL = "https://cdctsoahehjohgfndsua.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY3Rzb2FoZWhqb2hnZm5kc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMzY2NjAsImV4cCI6MjA5NDgxMjY2MH0.ugKYoL6XP9i_TAqiAFFGQpsKXz4585oduL7-2c8oARU"
 VITE_SUPABASE_PROJECT_ID = "cdctsoahehjohgfndsua"
+SUPABASE_URL = "https://cdctsoahehjohgfndsua.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY3Rzb2FoZWhqb2hnZm5kc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMzY2NjAsImV4cCI6MjA5NDgxMjY2MH0.ugKYoL6XP9i_TAqiAFFGQpsKXz4585oduL7-2c8oARU"
 
 [workflows]
 runButton = "Project"
@@ -29,13 +32,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bun run dev"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
