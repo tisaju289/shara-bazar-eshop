@@ -8,11 +8,7 @@ export default defineConfig({
   plugins: [
     tsconfigPaths(),
     tailwindcss(),
-    tanstackStart({
-      server: {
-        preset: "node-server",
-      },
-    }),
+    tanstackStart(),
     react(),
   ],
   server: {

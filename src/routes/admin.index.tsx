@@ -87,7 +87,7 @@ function AdminDashboard() {
         <p className="text-muted-foreground text-sm mt-1">আপনার দোকানের সর্বশেষ অবস্থা এক নজরে</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((c) => (
           <div key={c.label} className="bg-card border border-border rounded-2xl p-5 hover:shadow-[var(--shadow-soft)] transition">
             <div className="size-10 rounded-xl grid place-items-center text-white" style={{ background: c.color }}>

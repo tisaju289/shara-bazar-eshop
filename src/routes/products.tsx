@@ -20,10 +20,12 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    q: typeof s.q === "string" ? s.q : undefined,
-    cat: typeof s.cat === "string" ? s.cat : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { q?: string; cat?: string } => {
+    const out: { q?: string; cat?: string } = {};
+    if (typeof s.q === "string") out.q = s.q;
+    if (typeof s.cat === "string") out.cat = s.cat;
+    return out;
+  },
   component: ProductsPage,
 });
 
