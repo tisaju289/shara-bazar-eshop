@@ -179,7 +179,7 @@ function SubcategoryProductPage() {
           </div>
         )}
 
-        {/* Mobile filter bar */}
+        {/* Mobile: filter toggle bar */}
         <div className="md:hidden flex items-center gap-3 mb-4">
           <button onClick={() => setFilterOpen((v) => !v)}
             className="flex items-center gap-2 h-10 px-4 rounded-xl bg-secondary text-secondary-foreground text-sm font-semibold">
@@ -195,29 +195,45 @@ function SubcategoryProductPage() {
           <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[15rem_1fr] gap-6 items-start">
-          {/* Sidebar — always visible on desktop, even with no products */}
-          <aside className={`${filterOpen ? "block" : "hidden"} md:block space-y-4`}>
-            {/* Price filter — only show when products exist */}
+        {/* Mobile: filter panel (full width, above products) */}
+        {filterOpen && allProducts.length > 0 && (
+          <div className="md:hidden bg-card border border-border rounded-2xl p-4 space-y-3 mb-4">
+            <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
+            <div className="flex items-center gap-2">
+              <input type="number" placeholder={`৳${minPossible}`} value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                className="w-0 flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+              <span className="text-muted-foreground text-xs shrink-0">—</span>
+              <input type="number" placeholder={`৳${maxPossible}`} value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                className="w-0 flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            {hasFilter && (
+              <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="text-xs text-primary hover:underline">রিসেট</button>
+            )}
+          </div>
+        )}
+
+        {/* Desktop: sidebar + products side by side */}
+        <div className="flex gap-6 items-start">
+          <aside className="hidden md:block w-60 shrink-0 space-y-4">
             {allProducts.length > 0 && (
               <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
                 <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
                 <div className="flex items-center gap-2">
                   <input type="number" placeholder={`৳${minPossible}`} value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
-                  <span className="text-muted-foreground text-xs">—</span>
+                    className="w-0 flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <span className="text-muted-foreground text-xs shrink-0">—</span>
                   <input type="number" placeholder={`৳${maxPossible}`} value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+                    className="w-0 flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 {hasFilter && (
                   <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="text-xs text-primary hover:underline">রিসেট</button>
                 )}
               </div>
             )}
-
-            {/* All categories — always visible */}
             <div className="bg-card border border-border rounded-2xl p-4">
               <h3 className="font-bold text-sm mb-3">সব ক্যাটাগরি</h3>
               <div className="space-y-1">
@@ -232,10 +248,9 @@ function SubcategoryProductPage() {
             </div>
           </aside>
 
-          {/* Products */}
-          <div className="min-w-0">
+          <div className="flex-1 min-w-0">
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="rounded-3xl bg-card border border-border aspect-[3/4] animate-pulse" />
                 ))}
@@ -243,10 +258,14 @@ function SubcategoryProductPage() {
             ) : filtered.length === 0 ? (
               <div className="text-center text-muted-foreground py-24">
                 <Layers className="size-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">এই সাব-ক্যাটাগরিতে কোন পণ্য পাওয়া যায়নি</p>
+                <p className="text-sm">
+                  {allProducts.length === 0
+                    ? "এই সাব-ক্যাটাগরিতে এখনো কোন পণ্য যোগ করা হয়নি"
+                    : "এই ফিল্টারে কোন পণ্য পাওয়া যায়নি"}
+                </p>
                 {hasFilter && (
                   <button onClick={() => { setMinPrice(""); setMaxPrice(""); }}
-                    className="mt-3 text-sm text-primary hover:underline">ফিল্টার সরান</button>
+                    className="mt-3 text-xs text-primary hover:underline">ফিল্টার সরান</button>
                 )}
               </div>
             ) : (
@@ -260,7 +279,7 @@ function SubcategoryProductPage() {
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                   {filtered.map((p) => (
                     <ProductCard key={p.id} product={p}
                       categoryName={currentSubcat?.name_bn ?? ""}
