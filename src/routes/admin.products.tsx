@@ -205,24 +205,24 @@ function AdminProducts() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <div className="flex items-center gap-2 sm:gap-3 w-full">
+        <div className="relative flex-1 min-w-0">
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পণ্য খুঁজুন..."
-            className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-border outline-none focus:border-primary" />
+            className="w-full h-11 pl-9 pr-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm" />
         </div>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="h-11 px-4 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium"
+          className="shrink-0 h-11 px-3 max-w-[45%] sm:max-w-none rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium truncate"
         >
-          <option value="newest">সাজান: নতুন আগে</option>
-          <option value="name_asc">নাম (A-Z / অ-হ)</option>
-          <option value="name_desc">নাম (Z-A / হ-অ)</option>
-          <option value="price_asc">দাম (কম থেকে বেশি)</option>
-          <option value="price_desc">দাম (বেশি থেকে কম)</option>
-          <option value="stock_asc">স্টক (কম থেকে বেশি)</option>
-          <option value="stock_desc">স্টক (বেশি থেকে কম)</option>
+          <option value="newest">নতুন আগে</option>
+          <option value="name_asc">নাম (A-Z)</option>
+          <option value="name_desc">নাম (Z-A)</option>
+          <option value="price_asc">দাম ↑</option>
+          <option value="price_desc">দাম ↓</option>
+          <option value="stock_asc">স্টক ↑</option>
+          <option value="stock_desc">স্টক ↓</option>
         </select>
       </div>
 
