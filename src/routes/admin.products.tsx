@@ -123,7 +123,11 @@ function AdminProducts() {
 
   const duplicate = async (p: Product) => {
     const { id, ...rest } = p;
-    const payload = { ...rest, name_bn: p.name_bn + " (কপি)" };
+    const payload = {
+      ...rest,
+      name_bn: p.name_bn + " (কপি)",
+      reviews_count: rest.reviews_count ?? 0,
+    };
     const { error } = await supabase.from("products").insert(payload);
     if (error) return toast.error("ডুপ্লিকেট ব্যর্থ: " + error.message);
     toast.success("পণ্য ডুপ্লিকেট হয়েছে");
