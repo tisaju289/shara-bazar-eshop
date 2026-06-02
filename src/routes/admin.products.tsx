@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
 import { toast } from "sonner";
 
@@ -48,6 +48,8 @@ function AdminProducts() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, "id">>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -119,6 +121,49 @@ function AdminProducts() {
     await load();
   };
 
+  const duplicate = async (p: Product) => {
+    const { id, ...rest } = p;
+    const payload = { ...rest, name_bn: p.name_bn + " (কপি)" };
+    const { error } = await supabase.from("products").insert(payload);
+    if (error) return toast.error("ডুপ্লিকেট ব্যর্থ: " + error.message);
+    toast.success("পণ্য ডুপ্লিকেট হয়েছে");
+    await load();
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
+
+  const toggleSelectAll = (ids: string[]) => {
+    setSelected((prev) => {
+      const allSelected = ids.every((id) => prev.has(id));
+      if (allSelected) {
+        const n = new Set(prev);
+        ids.forEach((id) => n.delete(id));
+        return n;
+      }
+      const n = new Set(prev);
+      ids.forEach((id) => n.add(id));
+      return n;
+    });
+  };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`${selected.size}টি পণ্য মুছে ফেলবেন?`)) return;
+    setBulkDeleting(true);
+    const { error } = await supabase.from("products").delete().in("id", Array.from(selected));
+    setBulkDeleting(false);
+    if (error) return toast.error("মুছতে ব্যর্থ: " + error.message);
+    toast.success(`${selected.size}টি পণ্য মুছে গেছে`);
+    setSelected(new Set());
+    await load();
+  };
+
   const filtered = items.filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -128,9 +173,18 @@ function AdminProducts() {
           <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">পণ্য ম্যানেজমেন্ট</h1>
           <p className="text-sm text-muted-foreground mt-1">মোট {items.length}টি পণ্য</p>
         </div>
-        <button onClick={openNew} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-soft)]">
-          <Plus className="size-4" /> নতুন পণ্য
-        </button>
+        <div className="flex items-center gap-2">
+          {selected.size > 0 && (
+            <button onClick={bulkDelete} disabled={bulkDeleting}
+              className="h-11 px-4 rounded-xl bg-destructive text-destructive-foreground font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+              {bulkDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {selected.size}টি মুছুন
+            </button>
+          )}
+          <button onClick={openNew} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-soft)]">
+            <Plus className="size-4" /> নতুন পণ্য
+          </button>
+        </div>
       </div>
 
       <div className="relative max-w-md">
@@ -149,6 +203,14 @@ function AdminProducts() {
             <table className="w-full text-sm">
               <thead className="bg-secondary/60 text-left">
                 <tr>
+                  <th className="p-3 w-10">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-[color:var(--primary)]"
+                      checked={filtered.length > 0 && filtered.every((p) => selected.has(p.id))}
+                      onChange={() => toggleSelectAll(filtered.map((p) => p.id))}
+                    />
+                  </th>
                   <th className="p-3 font-semibold">পণ্য</th>
                   <th className="p-3 font-semibold hidden md:table-cell">একক</th>
                   <th className="p-3 font-semibold">দাম</th>
@@ -160,6 +222,14 @@ function AdminProducts() {
               <tbody>
                 {filtered.map((p) => (
                   <tr key={p.id} className="border-t border-border hover:bg-secondary/30">
+                    <td className="p-3">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-[color:var(--primary)]"
+                        checked={selected.has(p.id)}
+                        onChange={() => toggleSelect(p.id)}
+                      />
+                    </td>
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg overflow-hidden bg-secondary grid place-items-center text-muted-foreground">
@@ -184,6 +254,7 @@ function AdminProducts() {
                     </td>
                     <td className="p-3">
                       <div className="flex justify-end gap-1">
+                        <button onClick={() => duplicate(p)} title="ডুপ্লিকেট" className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Copy className="size-4" /></button>
                         <button onClick={() => openEdit(p)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Pencil className="size-4" /></button>
                         <button onClick={() => remove(p.id)} className="size-8 rounded-lg hover:bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
                       </div>
