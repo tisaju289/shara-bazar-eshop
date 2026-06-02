@@ -263,7 +263,7 @@ function CategoryPage() {
               <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
             </div>
 
-            <div className="flex gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
               <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4 md:sticky md:top-24`}>
                 <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
                   <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
