@@ -576,7 +576,7 @@ function ProductsPage() {
             <LayoutGrid className="size-5" />
             <span className="text-[10px] font-medium">ক্যাটাগরি</span>
           </Link>
-          <Link to="/products" className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+          <Link to="/products" search={{}} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
             <Package className="size-5" />
             <span className="text-[10px] font-medium">পণ্য</span>
           </Link>
