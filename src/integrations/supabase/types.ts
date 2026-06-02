@@ -114,7 +114,6 @@ export type Database = {
         Row: {
           brand_id: string | null
           category_id: string | null
-          subcategory_id: string | null
           created_at: string
           id: string
           image_url: string | null
@@ -127,6 +126,7 @@ export type Database = {
           reviews_count: number
           reviews_rating: number | null
           stock: number
+          subcategory_id: string | null
           tag: string | null
           unit: string
           updated_at: string
@@ -134,7 +134,6 @@ export type Database = {
         Insert: {
           brand_id?: string | null
           category_id?: string | null
-          subcategory_id?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
@@ -147,6 +146,7 @@ export type Database = {
           reviews_count?: number
           reviews_rating?: number | null
           stock?: number
+          subcategory_id?: string | null
           tag?: string | null
           unit?: string
           updated_at?: string
@@ -154,7 +154,6 @@ export type Database = {
         Update: {
           brand_id?: string | null
           category_id?: string | null
-          subcategory_id?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
@@ -167,6 +166,7 @@ export type Database = {
           reviews_count?: number
           reviews_rating?: number | null
           stock?: number
+          subcategory_id?: string | null
           tag?: string | null
           unit?: string
           updated_at?: string
@@ -195,47 +195,6 @@ export type Database = {
           },
         ]
       }
-      subcategories: {
-        Row: {
-          category_id: string | null
-          created_at: string
-          id: string
-          image_url: string | null
-          keywords: string | null
-          name_bn: string
-          slug: string
-          sort_order: number
-        }
-        Insert: {
-          category_id?: string | null
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          keywords?: string | null
-          name_bn: string
-          slug?: string
-          sort_order?: number
-        }
-        Update: {
-          category_id?: string | null
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          keywords?: string | null
-          name_bn?: string
-          slug?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subcategories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       site_settings: {
         Row: {
           created_at: string
@@ -259,6 +218,47 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      subcategories: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          keywords: string | null
+          name_bn: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          keywords?: string | null
+          name_bn: string
+          slug?: string
+          sort_order?: number
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          keywords?: string | null
+          name_bn?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
