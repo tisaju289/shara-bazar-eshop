@@ -13,6 +13,7 @@ type Product = {
   id: string;
   name_bn: string;
   category_id: string | null;
+  subcategory_id: string | null;
   brand_id: string | null;
   unit: string;
   price: number;
@@ -28,9 +29,10 @@ type Product = {
 };
 type Category = { id: string; name_bn: string };
 type Brand = { id: string; name_bn: string };
+type SubCat = { id: string; category_id: string | null; name_bn: string };
 
 const emptyForm: Omit<Product, "id"> = {
-  name_bn: "", category_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
+  name_bn: "", category_id: null, subcategory_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
   image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
   reviews_rating: 0, reviews_count: 0, offer_badge: "",
 };
@@ -39,6 +41,7 @@ function AdminProducts() {
   const [items, setItems] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [subCats, setSubCats] = useState<SubCat[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -48,14 +51,16 @@ function AdminProducts() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: ps }, { data: cs }, { data: bs }] = await Promise.all([
+    const [{ data: ps }, { data: cs }, { data: bs }, scResult] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("categories").select("id, name_bn").order("sort_order"),
       supabase.from("brands").select("id, name_bn").order("sort_order"),
+      supabase.from("subcategories").select("id, category_id, name_bn").order("sort_order"),
     ]);
     setItems((ps as Product[]) ?? []);
     setCats((cs as Category[]) ?? []);
     setBrands((bs as Brand[]) ?? []);
+    setSubCats((scResult.data as SubCat[]) ?? []);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -65,6 +70,7 @@ function AdminProducts() {
     setEditing(p);
     setForm({
       ...p,
+      subcategory_id: p.subcategory_id ?? null,
       old_price: p.old_price ?? null,
       image_url: p.image_url ?? "",
       tag: p.tag ?? "",
@@ -75,6 +81,10 @@ function AdminProducts() {
     });
     setOpen(true);
   };
+
+  const filteredSubCats = form.category_id
+    ? subCats.filter((s) => s.category_id === form.category_id)
+    : [];
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,11 +209,27 @@ function AdminProducts() {
                 <input required value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} className="input" />
               </Field>
               <Field label="ক্যাটাগরি">
-                <select value={form.category_id ?? ""} onChange={(e) => setForm({ ...form, category_id: e.target.value || null })} className="input">
+                <select
+                  value={form.category_id ?? ""}
+                  onChange={(e) => setForm({ ...form, category_id: e.target.value || null, subcategory_id: null })}
+                  className="input"
+                >
                   <option value="">— নির্বাচন করুন —</option>
                   {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
                 </select>
               </Field>
+              {filteredSubCats.length > 0 && (
+                <Field label="সাব-ক্যাটাগরি">
+                  <select
+                    value={form.subcategory_id ?? ""}
+                    onChange={(e) => setForm({ ...form, subcategory_id: e.target.value || null })}
+                    className="input"
+                  >
+                    <option value="">— নির্বাচন করুন (ঐচ্ছিক) —</option>
+                    {filteredSubCats.map((s) => <option key={s.id} value={s.id}>{s.name_bn}</option>)}
+                  </select>
+                </Field>
+              )}
               <Field label="ব্র্যান্ড">
                 <select value={form.brand_id ?? ""} onChange={(e) => setForm({ ...form, brand_id: e.target.value || null })} className="input">
                   <option value="">— নির্বাচন করুন —</option>
