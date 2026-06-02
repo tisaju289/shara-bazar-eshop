@@ -24,7 +24,7 @@ type DBProduct = {
 };
 type DBBrand = { id: string; name_bn: string };
 type SubCat = { id: string; name_bn: string; slug: string; image_url: string | null; category_id: string | null; sort_order: number };
-type DBCategory = { id: string; name_bn: string };
+type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 function SubcategoryProductPage() {
   const { subcatId } = Route.useParams();
@@ -43,33 +43,24 @@ function SubcategoryProductPage() {
     enabled: !!subcatId,
   });
 
-  const { data: parentCategory } = useQuery({
-    queryKey: ["category", currentSubcat?.category_id],
-    queryFn: async (): Promise<DBCategory | null> => {
-      if (!currentSubcat?.category_id) return null;
-      const { data } = await supabase
-        .from("categories")
-        .select("id,name_bn")
-        .eq("id", currentSubcat.category_id)
-        .single();
-      return (data as DBCategory) ?? null;
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories", "public"],
+    queryFn: async (): Promise<DBCategory[]> => {
+      const { data, error } = await supabase.from("categories").select("id,name_bn,slug,sort_order,image_url").order("sort_order");
+      if (error) throw error;
+      return (data as DBCategory[]) ?? [];
     },
-    enabled: !!currentSubcat?.category_id,
   });
 
-  const { data: siblingSubcats = [] } = useQuery({
-    queryKey: ["subcategories", currentSubcat?.category_id],
-    queryFn: async (): Promise<SubCat[]> => {
-      if (!currentSubcat?.category_id) return [];
-      const { data } = await supabase
-        .from("subcategories")
-        .select("id,name_bn,slug,image_url,category_id,sort_order")
-        .eq("category_id", currentSubcat.category_id)
-        .order("sort_order");
-      return (data as SubCat[]) ?? [];
+  const { data: allCatProducts = [] } = useQuery({
+    queryKey: ["products", "public", "cat-counts"],
+    queryFn: async () => {
+      const { data } = await supabase.from("products").select("id,category_id").eq("is_active", true);
+      return (data as { id: string; category_id: string | null }[]) ?? [];
     },
-    enabled: !!currentSubcat?.category_id,
   });
+
+  const parentCategory = categories.find((c) => c.id === currentSubcat?.category_id) ?? null;
 
   const { data: brands = [] } = useQuery({
     queryKey: ["brands", "public"],
@@ -136,6 +127,12 @@ function SubcategoryProductPage() {
 
   const hasFilter = minPrice !== "" || maxPrice !== "";
 
+  const catCounts = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const p of allCatProducts) if (p.category_id) m[p.category_id] = (m[p.category_id] ?? 0) + 1;
+    return m;
+  }, [allCatProducts]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader cartCount={cartCount} cartTotal={cartTotal} onCartClick={openCartDrawer} />
@@ -198,43 +195,41 @@ function SubcategoryProductPage() {
           <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
         </div>
 
-        <div className="flex gap-6 items-start">
-          {/* Sidebar */}
-          <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4 md:sticky md:top-24`}>
-            {/* Price filter */}
-            <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-              <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
-              <div className="flex items-center gap-2">
-                <input type="number" placeholder={`৳${minPossible}`} value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                  className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
-                <span className="text-muted-foreground text-xs">—</span>
-                <input type="number" placeholder={`৳${maxPossible}`} value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                  className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
-              </div>
-              {hasFilter && (
-                <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="text-xs text-primary hover:underline">রিসেট</button>
-              )}
-            </div>
-
-            {/* Other subcategories in same category */}
-            {siblingSubcats.length > 1 && (
-              <div className="bg-card border border-border rounded-2xl p-4">
-                <h3 className="font-bold text-sm mb-3">অন্য সাব-ক্যাটাগরি</h3>
-                <div className="space-y-1">
-                  {siblingSubcats.map((s) => (
-                    <Link key={s.id} to="/subcat/$subcatId" params={{ subcatId: s.id }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center gap-2 ${s.id === subcatId ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}>
-                      {s.image_url && (
-                        <img src={s.image_url} alt="" className="size-5 rounded object-cover shrink-0" />
-                      )}
-                      <span className="truncate">{s.name_bn}</span>
-                    </Link>
-                  ))}
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          {/* Sidebar — always visible on desktop, even with no products */}
+          <aside className={`${filterOpen ? "block" : "hidden"} md:block w-full md:w-60 lg:w-64 shrink-0 space-y-4`}>
+            {/* Price filter — only show when products exist */}
+            {allProducts.length > 0 && (
+              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                <h3 className="font-bold text-sm">মূল্য পরিসীমা</h3>
+                <div className="flex items-center gap-2">
+                  <input type="number" placeholder={`৳${minPossible}`} value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                    className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
+                  <span className="text-muted-foreground text-xs">—</span>
+                  <input type="number" placeholder={`৳${maxPossible}`} value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                    className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary" />
                 </div>
+                {hasFilter && (
+                  <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="text-xs text-primary hover:underline">রিসেট</button>
+                )}
               </div>
             )}
+
+            {/* All categories — always visible */}
+            <div className="bg-card border border-border rounded-2xl p-4">
+              <h3 className="font-bold text-sm mb-3">সব ক্যাটাগরি</h3>
+              <div className="space-y-1">
+                {categories.map((c) => (
+                  <Link key={c.id} to="/cat/$catId" params={{ catId: c.id }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center justify-between ${c.id === currentSubcat?.category_id ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}>
+                    <span className="truncate">{c.name_bn}</span>
+                    <span className={`text-xs shrink-0 ml-1 ${c.id === currentSubcat?.category_id ? "opacity-80" : "opacity-60"}`}>{catCounts[c.id] ?? 0}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </aside>
 
           {/* Products */}
