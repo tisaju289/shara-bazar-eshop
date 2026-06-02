@@ -20,10 +20,12 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    q: typeof s.q === "string" ? s.q : undefined,
-    cat: typeof s.cat === "string" ? s.cat : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { q?: string; cat?: string } => {
+    const out: { q?: string; cat?: string } = {};
+    if (typeof s.q === "string") out.q = s.q;
+    if (typeof s.cat === "string") out.cat = s.cat;
+    return out;
+  },
   component: ProductsPage,
 });
 
@@ -576,7 +578,7 @@ function ProductsPage() {
             <LayoutGrid className="size-5" />
             <span className="text-[10px] font-medium">ক্যাটাগরি</span>
           </Link>
-          <Link to="/products" search={{}} className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
+          <Link to="/products" className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground hover:text-primary transition min-w-[64px]">
             <Package className="size-5" />
             <span className="text-[10px] font-medium">পণ্য</span>
           </Link>
