@@ -14,6 +14,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
+import { CategoryMarquee } from "@/components/CategoryMarquee";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -64,6 +65,82 @@ function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallb
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   truck: Truck, shield: ShieldCheck, clock: Clock, leaf: Leaf, star: Star,
 };
+
+type BrandItem = { id: string; name_bn: string; image_url: string | null; slug: string };
+
+function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    if (brands.length <= 4) return;
+    const t = setInterval(() => {
+      const el = ref.current;
+      if (!el || pausedRef.current) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
+      else el.scrollBy({ left: 140, behavior: "smooth" });
+    }, 2500);
+    return () => clearInterval(t);
+  }, [brands.length]);
+
+  const scroll = (dir: -1 | 1) => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: "smooth" });
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
+    >
+      <button
+        type="button"
+        onClick={() => scroll(-1)}
+        aria-label="prev brands"
+        className="grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 md:-translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary"
+      >
+        <ChevronLeft className="size-5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => scroll(1)}
+        aria-label="next brands"
+        className="grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/3 md:translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary"
+      >
+        <ChevronRight className="size-5" />
+      </button>
+      <div
+        ref={ref}
+        className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {brands.map((b) => (
+          <Link
+            key={b.id}
+            to="/brands/$brandId"
+            params={{ brandId: b.id }}
+            className="group shrink-0 flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary hover:shadow-[var(--shadow-pop)] transition min-w-[100px] md:min-w-[120px]"
+          >
+            <div
+              className="size-16 md:size-20 rounded-2xl grid place-items-center overflow-hidden group-hover:scale-110 transition"
+              style={{ background: "var(--gradient-warm)" }}
+            >
+              {b.image_url ? (
+                <img src={b.image_url} alt={b.name_bn} className="size-full object-contain p-1" />
+              ) : (
+                <span className="text-3xl">🏷️</span>
+              )}
+            </div>
+            <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
+            <div className="text-[10px] text-muted-foreground">{brandCounts[b.id] ?? 0} পণ্য</div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; catCounts: Record<string, number> }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -341,6 +418,26 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Top utility bar */}
+      {topbar?.enabled && (
+        <div className="hidden md:block bg-[var(--leaf-deep)] text-primary-foreground/90 text-xs">
+          <div className="container mx-auto px-4 flex items-center gap-4 py-2">
+            <span className="flex items-center gap-1.5 shrink-0"><MapPin className="size-3.5" /> {topbar.location_bn}</span>
+            {topbar.notice_enabled && topbar.notice_bn && (
+              <div className="flex-1 overflow-hidden text-right rounded-none">
+                <div className="marquee-track" style={{ animationDuration: `${topbar.notice_speed ?? 30}s` }}>
+                  <span className="px-8">📢 {topbar.notice_bn}</span>
+                  <span className="px-8">📢 {topbar.notice_bn}</span>
+                </div>
+              </div>
+            )}
+            <span className="flex items-center gap-4 shrink-0 ml-auto">
+              <span className="flex items-center gap-1.5"><Phone className="size-3.5" /> {topbar.phone}</span>
+              <span>সাহায্য</span>
+              <span>আমার অর্ডার</span>
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
@@ -497,7 +594,7 @@ function Index() {
                   <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
                   {sec.subtitle_bn && <p className="text-muted-foreground text-sm">{sec.subtitle_bn}</p>}
                 </div>
-                <CategorySlider categories={categories} catCounts={catCounts} />
+                <CategoryMarquee categories={categories} catCounts={catCounts} />
                 <div className="flex justify-center mt-6">
                   <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
                     সব দেখুন <ChevronRight className="size-4" />
@@ -600,39 +697,14 @@ function Index() {
       })}
 
       {/* জনপ্রিয় ব্র্যান্ড section */}
-      {!prodLoading && brands.filter((b) => brandCounts[b.id]).length > 0 && (
+      {!prodLoading && brands.length > 0 && (
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4 space-y-6">
             <div className="flex flex-col items-center text-center">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ব্র্যান্ড</h2>
               <p className="text-muted-foreground text-sm mt-1">আপনার পছন্দের ব্র্যান্ড বেছে নিন</p>
             </div>
-            <div className="brand-marquee">
-              <div className="brand-marquee-track gap-3 md:gap-4">
-                {[...brands.filter((b) => brandCounts[b.id]), ...brands.filter((b) => brandCounts[b.id])].map((b, idx) => (
-                  <Link
-                    key={`${b.id}-${idx}`}
-                    to="/brands/$brandId"
-                    params={{ brandId: b.id }}
-                    aria-hidden={idx >= brands.filter((x) => brandCounts[x.id]).length ? true : undefined}
-                    className="group shrink-0 flex flex-col items-center gap-2 p-3 md:p-4 mr-3 md:mr-4 rounded-2xl bg-card border border-border hover:border-primary hover:shadow-[var(--shadow-pop)] transition min-w-[100px] md:min-w-[120px]"
-                  >
-                    <div
-                      className="size-16 md:size-20 rounded-2xl grid place-items-center overflow-hidden group-hover:scale-110 transition"
-                      style={{ background: "var(--gradient-warm)" }}
-                    >
-                      {b.image_url ? (
-                        <img src={b.image_url} alt={b.name_bn} className="size-full object-contain p-1" />
-                      ) : (
-                        <span className="text-3xl">🏷️</span>
-                      )}
-                    </div>
-                    <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
-                    <div className="text-[10px] text-muted-foreground">{brandCounts[b.id] ?? 0} পণ্য</div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <BrandMarquee brands={brands} brandCounts={brandCounts} />
           </div>
         </section>
       )}
