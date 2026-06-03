@@ -66,6 +66,82 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   truck: Truck, shield: ShieldCheck, clock: Clock, leaf: Leaf, star: Star,
 };
 
+type BrandItem = { id: string; name_bn: string; image_url: string | null; slug: string };
+
+function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    if (brands.length <= 4) return;
+    const t = setInterval(() => {
+      const el = ref.current;
+      if (!el || pausedRef.current) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
+      else el.scrollBy({ left: 140, behavior: "smooth" });
+    }, 2500);
+    return () => clearInterval(t);
+  }, [brands.length]);
+
+  const scroll = (dir: -1 | 1) => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: "smooth" });
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
+    >
+      <button
+        type="button"
+        onClick={() => scroll(-1)}
+        aria-label="prev brands"
+        className="grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 md:-translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary"
+      >
+        <ChevronLeft className="size-5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => scroll(1)}
+        aria-label="next brands"
+        className="grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/3 md:translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary"
+      >
+        <ChevronRight className="size-5" />
+      </button>
+      <div
+        ref={ref}
+        className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {brands.map((b) => (
+          <Link
+            key={b.id}
+            to="/brands/$brandId"
+            params={{ brandId: b.id }}
+            className="group shrink-0 flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary hover:shadow-[var(--shadow-pop)] transition min-w-[100px] md:min-w-[120px]"
+          >
+            <div
+              className="size-16 md:size-20 rounded-2xl grid place-items-center overflow-hidden group-hover:scale-110 transition"
+              style={{ background: "var(--gradient-warm)" }}
+            >
+              {b.image_url ? (
+                <img src={b.image_url} alt={b.name_bn} className="size-full object-contain p-1" />
+              ) : (
+                <span className="text-3xl">🏷️</span>
+              )}
+            </div>
+            <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
+            <div className="text-[10px] text-muted-foreground">{brandCounts[b.id] ?? 0} পণ্য</div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; catCounts: Record<string, number> }) {
   const ref = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
