@@ -518,7 +518,7 @@ function Index() {
                   <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
                   {sec.subtitle_bn && <p className="text-muted-foreground text-sm">{sec.subtitle_bn}</p>}
                 </div>
-                <CategorySlider categories={categories} catCounts={catCounts} />
+                <CategoryMarquee categories={categories} catCounts={catCounts} />
                 <div className="flex justify-center mt-6">
                   <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
                     সব দেখুন <ChevronRight className="size-4" />
