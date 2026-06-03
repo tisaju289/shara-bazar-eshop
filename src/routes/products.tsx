@@ -12,6 +12,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
 import { ShoppingCart } from "lucide-react";
+import { CategoryMarquee } from "@/components/CategoryMarquee";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
