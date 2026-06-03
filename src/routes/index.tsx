@@ -73,15 +73,24 @@ function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCount
   const pausedRef = useRef(false);
 
   useEffect(() => {
-    if (brands.length <= 4) return;
-    const t = setInterval(() => {
-      const el = ref.current;
-      if (!el || pausedRef.current) return;
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
-      else el.scrollBy({ left: 140, behavior: "smooth" });
-    }, 2500);
-    return () => clearInterval(t);
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    let last = performance.now();
+    const speed = 30; // px per second — slow marquee
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      if (!pausedRef.current && el.scrollWidth > el.clientWidth + 4) {
+        const max = el.scrollWidth - el.clientWidth;
+        let next = el.scrollLeft + speed * dt;
+        if (next >= max - 1) next = 0;
+        el.scrollLeft = next;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [brands.length]);
 
   const scroll = (dir: -1 | 1) => {
