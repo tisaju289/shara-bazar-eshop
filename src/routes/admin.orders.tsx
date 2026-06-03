@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Phone, MapPin, Trash2, ChevronDown } from "lucide-react";
+import { Loader2, Phone, MapPin, Trash2, ChevronDown, Search, AlertTriangle, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/admin/orders")({
   component: AdminOrders,
@@ -32,6 +32,7 @@ function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("pending");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -64,6 +65,27 @@ function AdminOrders() {
     return acc;
   }, {});
 
+  const visible = filtered.filter((o) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      o.customer_name.toLowerCase().includes(q) ||
+      o.phone.toLowerCase().includes(q) ||
+      o.address.toLowerCase().includes(q)
+    );
+  });
+
+  // Phone-based history & duplicate detection (from internal orders)
+  const phoneStats = (phone: string, currentId: string) => {
+    const all = orders.filter((o) => o.phone === phone);
+    const delivered = all.filter((o) => o.status === "delivered").length;
+    const cancelled = all.filter((o) => o.status === "cancelled").length;
+    const total = delivered + cancelled;
+    const successPct = total > 0 ? Math.round((delivered / total) * 100) : null;
+    const duplicates = all.filter((o) => o.id !== currentId).length;
+    return { delivered, cancelled, successPct, duplicates, totalOrders: all.length };
+  };
+
   return (
     <div className="space-y-6 max-w-6xl">
       <div>
@@ -71,28 +93,32 @@ function AdminOrders() {
         <p className="text-muted-foreground text-sm mt-1">মোট {orders.length} টি অর্ডার</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {STATUSES.map((s) => (
-          <button
-            key={s.value}
-            onClick={() => setFilter(s.value)}
-            className={`h-9 px-4 rounded-full text-sm font-semibold border ${filter === s.value ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"}`}
-          >
-            {s.label} ({counts[s.value] ?? 0})
-          </button>
-        ))}
-        <button
-          onClick={() => setFilter("all")}
-          className={`h-9 px-4 rounded-full text-sm font-semibold border ${filter === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"}`}
+      <div className="flex items-center gap-2 sm:gap-3 w-full">
+        <div className="relative flex-1 min-w-0">
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="নাম, ফোন বা ঠিকানা খুঁজুন..."
+            className="w-full h-11 pl-9 pr-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm"
+          />
+        </div>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="shrink-0 h-11 px-3 max-w-[50%] sm:max-w-none rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium truncate"
         >
-          সব ({orders.length})
-        </button>
+          {STATUSES.map((s) => (
+            <option key={s.value} value={s.value}>{s.label} ({counts[s.value] ?? 0})</option>
+          ))}
+          <option value="all">সব ({orders.length})</option>
+        </select>
       </div>
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-12 text-center"><Loader2 className="size-6 animate-spin inline text-primary" /></div>
-        ) : filtered.length === 0 ? (
+        ) : visible.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground text-sm">কোনো অর্ডার নেই</div>
         ) : (
           <div className="overflow-x-auto">
@@ -105,19 +131,27 @@ function AdminOrders() {
                   <th className="p-3 font-semibold hidden sm:table-cell">পণ্য</th>
                   <th className="p-3 font-semibold">মোট</th>
                   <th className="p-3 font-semibold">স্ট্যাটাস</th>
-                  <th className="p-3"></th>
+                  <th className="p-3 font-semibold text-right">অ্যাকশন</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((o) => {
+                {visible.map((o) => {
                   const status = STATUSES.find((s) => s.value === o.status) ?? STATUSES[0];
                   const isOpen = expanded === o.id;
                   const items = Array.isArray(o.items) ? o.items : [];
+                  const stats = phoneStats(o.phone, o.id);
                   return (
                     <React.Fragment key={o.id}>
                       <tr className="border-t border-border hover:bg-secondary/30">
                         <td className="p-3">
-                          <div className="font-semibold">{o.customer_name}</div>
+                          <div className="font-semibold flex items-center gap-1.5 flex-wrap">
+                            {o.customer_name}
+                            {stats.duplicates > 0 && (
+                              <span title="এই নম্বরে আরও অর্ডার আছে" className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                                <AlertTriangle className="size-3" /> ডুপ্লিকেট ({stats.duplicates})
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[10px] text-muted-foreground mt-0.5">
                             {new Date(o.created_at).toLocaleString("bn-BD")}
                           </div>
@@ -126,6 +160,16 @@ function AdminOrders() {
                           <a href={`tel:${o.phone}`} className="inline-flex items-center gap-1 hover:text-primary">
                             <Phone className="size-3" /> {o.phone}
                           </a>
+                          {stats.successPct !== null && (
+                            <div className="text-[10px] mt-1 flex items-center gap-2 flex-wrap">
+                              <span className="inline-flex items-center gap-0.5 text-green-700">
+                                <TrendingUp className="size-3" /> {stats.successPct}% সফল
+                              </span>
+                              <span className="text-muted-foreground">
+                                ✓{stats.delivered} · ✕{stats.cancelled}
+                              </span>
+                            </div>
+                          )}
                         </td>
                         <td className="p-3 text-muted-foreground hidden lg:table-cell max-w-[220px]">
                           <span className="inline-flex items-start gap-1"><MapPin className="size-3 mt-0.5 shrink-0" /> <span className="truncate">{o.address}</span></span>
@@ -169,6 +213,20 @@ function AdminOrders() {
                               <div className="inline-flex items-center gap-1"><Phone className="size-3" /> {o.phone}</div>
                               <div className="flex items-start gap-1"><MapPin className="size-3 mt-0.5 shrink-0" /> {o.address}</div>
                               <div>{o.payment_method === "cod" ? "ক্যাশ অন ডেলিভারি" : o.payment_method}</div>
+                            </div>
+                            <div className="mb-3 p-3 rounded-lg bg-card border border-border text-xs">
+                              <div className="font-semibold mb-1.5">এই ফোন নম্বরের ইতিহাস ({o.phone})</div>
+                              <div className="flex flex-wrap gap-3">
+                                <span>মোট অর্ডার: <b>{stats.totalOrders}</b></span>
+                                <span className="text-green-700">ডেলিভারড: <b>{stats.delivered}</b></span>
+                                <span className="text-red-700">বাতিল: <b>{stats.cancelled}</b></span>
+                                <span>সফলতার হার: <b>{stats.successPct !== null ? `${stats.successPct}%` : "—"}</b></span>
+                                {stats.duplicates > 0 && (
+                                  <span className="text-amber-700 inline-flex items-center gap-1">
+                                    <AlertTriangle className="size-3" /> ডুপ্লিকেট অর্ডার: <b>{stats.duplicates}</b>
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <div className="space-y-2">
                               {items.map((it, idx) => (
