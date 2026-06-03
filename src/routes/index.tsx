@@ -14,6 +14,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
+import { CategoryMarquee } from "@/components/CategoryMarquee";
 
 export const Route = createFileRoute("/")({
   component: Index,
