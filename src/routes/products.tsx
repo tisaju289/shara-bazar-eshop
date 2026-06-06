@@ -246,8 +246,66 @@ function ProductsPage() {
             {q ? `"${q}" এর ফলাফল` : "সব পণ্য"}
           </h1>
 
-          <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-            <div className="min-w-0 order-2 lg:order-1">
+          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+            <aside className="order-1 lg:sticky lg:top-24 lg:self-start space-y-4">
+              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                <h3 className="font-bold text-sm text-[var(--leaf-deep)]">দামের পরিসর (৳)</h3>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="সর্বনিম্ন"
+                    value={priceMin}
+                    onChange={(e) => setPriceMin(e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg bg-secondary outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                  <span className="text-muted-foreground">—</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="সর্বোচ্চ"
+                    value={priceMax}
+                    onChange={(e) => setPriceMax(e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg bg-secondary outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                </div>
+                {(priceMin || priceMax || activeCat !== "all") && (
+                  <button
+                    onClick={() => { setPriceMin(""); setPriceMax(""); setActiveCat("all"); }}
+                    className="w-full h-9 rounded-lg bg-secondary text-sm font-semibold hover:bg-secondary/80"
+                  >
+                    ফিল্টার রিসেট
+                  </button>
+                )}
+              </div>
+
+              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                <h3 className="font-bold text-sm text-[var(--leaf-deep)]">ক্যাটাগরি</h3>
+                <div className="space-y-1 max-h-[420px] overflow-y-auto">
+                  <button
+                    onClick={() => setActiveCat("all")}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${activeCat === "all" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
+                  >
+                    সব ({products.length})
+                  </button>
+                  {categories.map((c) => {
+                    const count = products.filter((p) => p.category_id === c.id).length;
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => setActiveCat(c.id)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition flex items-center justify-between ${activeCat === c.id ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
+                      >
+                        <span className="truncate">{c.name_bn}</span>
+                        <span className="text-xs opacity-70 ml-2">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </aside>
+
+            <div className="min-w-0 order-2">
           {prodLoading ? (
             <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
           ) : filtered.length === 0 ? (
@@ -306,63 +364,6 @@ function ProductsPage() {
           )}
             </div>
 
-            <aside className="order-1 lg:order-2 lg:sticky lg:top-24 lg:self-start space-y-4">
-              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-                <h3 className="font-bold text-sm text-[var(--leaf-deep)]">ক্যাটাগরি</h3>
-                <div className="space-y-1 max-h-[320px] overflow-y-auto">
-                  <button
-                    onClick={() => setActiveCat("all")}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${activeCat === "all" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
-                  >
-                    সব ({products.length})
-                  </button>
-                  {categories.map((c) => {
-                    const count = products.filter((p) => p.category_id === c.id).length;
-                    return (
-                      <button
-                        key={c.id}
-                        onClick={() => setActiveCat(c.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition flex items-center justify-between ${activeCat === c.id ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
-                      >
-                        <span className="truncate">{c.name_bn}</span>
-                        <span className="text-xs opacity-70 ml-2">{count}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-                <h3 className="font-bold text-sm text-[var(--leaf-deep)]">দামের পরিসর (৳)</h3>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="সর্বনিম্ন"
-                    value={priceMin}
-                    onChange={(e) => setPriceMin(e.target.value)}
-                    className="w-full h-10 px-3 rounded-lg bg-secondary outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                  <span className="text-muted-foreground">—</span>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="সর্বোচ্চ"
-                    value={priceMax}
-                    onChange={(e) => setPriceMax(e.target.value)}
-                    className="w-full h-10 px-3 rounded-lg bg-secondary outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                </div>
-                {(priceMin || priceMax || activeCat !== "all") && (
-                  <button
-                    onClick={() => { setPriceMin(""); setPriceMax(""); setActiveCat("all"); }}
-                    className="w-full h-9 rounded-lg bg-secondary text-sm font-semibold hover:bg-secondary/80"
-                  >
-                    ফিল্টার রিসেট
-                  </button>
-                )}
-              </div>
-            </aside>
           </div>
         </div>
       </section>
