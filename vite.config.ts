@@ -4,13 +4,14 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
-  plugins: [
-    tsconfigPaths(),
-    tailwindcss(),
-    tanstackStart(),
-    react(),
-  ],
+  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), react(), cloudflare({
+    viteEnvironment: {
+      name: "ssr"
+    }
+  })],
   server: {
     host: "0.0.0.0",
     port: 5000,
