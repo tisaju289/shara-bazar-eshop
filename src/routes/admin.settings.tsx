@@ -516,6 +516,23 @@ function SectionEditor({ section: s, setItem, cats }: {
           <Field label="সর্বোচ্চ পণ্য সংখ্যা">
             <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 8) } as any)} />
           </Field>
+          <Field label="ডিসপ্লে স্টাইল">
+            <select className={inputCls} value={(s as any).display ?? "slider"} onChange={(e) => setItem({ display: e.target.value } as any)}>
+              <option value="slider">স্লাইডার (অ্যারো সহ)</option>
+              <option value="marquee">অটো মার্কি (অ্যারো ছাড়া)</option>
+              <option value="grid">গ্রিড (রো × কলাম)</option>
+            </select>
+          </Field>
+          {((s as any).display ?? "slider") === "grid" && (
+            <>
+              <Field label="রো (লাইন) সংখ্যা">
+                <input type="number" min={1} max={10} className={inputCls} value={(s as any).rows ?? 3} onChange={(e) => setItem({ rows: Math.max(1, Number(e.target.value) || 3) } as any)} />
+              </Field>
+              <Field label="কলাম সংখ্যা (প্রতি লাইনে)">
+                <input type="number" min={1} max={8} className={inputCls} value={(s as any).columns ?? 5} onChange={(e) => setItem({ columns: Math.max(1, Number(e.target.value) || 5) } as any)} />
+              </Field>
+            </>
+          )}
         </div>
       </Section>
     );
