@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, Plus, Minus, X, CheckCircle2,
-  Home, LayoutGrid, Package, ChevronLeft, ChevronRight,
+  Home, LayoutGrid, Package,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -77,7 +77,8 @@ function ProductsPage() {
   const { data: products = [], isLoading: prodLoading } = useProducts();
 
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
-  const catScrollRef = useRef<HTMLDivElement | null>(null);
+  const [priceMin, setPriceMin] = useState<string>("");
+  const [priceMax, setPriceMax] = useState<string>("");
 
   // Cart state
   const [cart, setCart] = useCart();
@@ -203,6 +204,9 @@ function ProductsPage() {
 
   const filtered = products.filter((p) => {
     const catOk = activeCat === "all" || p.category_id === activeCat;
+    const minOk = !priceMin || p.price >= Number(priceMin);
+    const maxOk = !priceMax || p.price <= Number(priceMax);
+    if (!minOk || !maxOk) return false;
     if (!q) return catOk;
     const cat = categories.find((c) => c.id === p.category_id);
     const haystack = [
