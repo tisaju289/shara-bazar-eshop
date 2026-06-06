@@ -223,7 +223,7 @@ function useCategories() {
   return useQuery({
     queryKey: ["categories", "public"],
     queryFn: async (): Promise<DBCategory[]> => {
-      const { data, error } = await supabase.from("categories").select("*").order("sort_order");
+      const { data, error } = await supabase.from("categories").select("*").eq("is_active", true).eq("is_active", true).order("sort_order");
       if (error) throw error;
       return data ?? [];
     },
@@ -236,7 +236,7 @@ function useBrands() {
       const { data, error } = await supabase
         .from("brands")
         .select("id,name_bn,image_url,slug")
-        .order("sort_order");
+        .eq("is_active", true).order("sort_order");
       if (error) throw error;
       return (data as { id: string; name_bn: string; image_url: string | null; slug: string }[]) ?? [];
     },
