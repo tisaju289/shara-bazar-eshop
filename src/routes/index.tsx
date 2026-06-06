@@ -508,63 +508,10 @@ function Index() {
         if (sec.type === "hero") {
           return (
             <section key={sec.id} className="relative overflow-hidden">
-              <div
-                className="container mx-auto px-4 py-10 md:py-16 grid hero-grid gap-4 md:gap-6 items-stretch"
-                style={{ ["--hero-side" as any]: `${sec.side_width_pct ?? 22}%` }}
-              >
-                <div className="space-y-6 hidden">
-                  {sec.badge_bn && (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--cream)] text-[var(--leaf-deep)] text-xs font-semibold border border-border">
-                      <Leaf className="size-3.5" /> {sec.badge_bn}
-                    </span>
-                  )}
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.05] text-[var(--leaf-deep)]">
-                    {sec.title_bn} <br />
-                    <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-hero)" }}>
-                      {sec.title_highlight_bn}
-                    </span>{" "}
-                    {sec.title_suffix_bn}
-                  </h1>
-                  <p className="text-base md:text-lg text-muted-foreground max-w-lg">{sec.subtitle_bn}</p>
-                  <div className="flex flex-wrap gap-3">
-                    {sec.cta_primary_enabled !== false && (
-                      <a href="#shop" className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-pop)] hover:opacity-95">
-                        {sec.cta_primary_bn} <ChevronRight className="size-4" />
-                      </a>
-                    )}
-                    {sec.cta_secondary_enabled !== false && (
-                      <a href="#categories" className="h-12 px-6 rounded-full bg-secondary text-secondary-foreground font-semibold inline-flex items-center hover:bg-secondary/80">
-                        {sec.cta_secondary_bn}
-                      </a>
-                    )}
-                  </div>
-                  {features.length > 0 && (
-                    <div className="flex flex-wrap gap-6 pt-4 text-sm">
-                      {features.map((f, i) => {
-                        const Icon = ICONS[f.icon] ?? Leaf;
-                        return <div key={i} className="flex items-center gap-2"><Icon className="size-5 text-primary" /> {f.text_bn}</div>;
-                      })}
-                    </div>
-                  )}
-                </div>
+              <div className="container mx-auto px-4 py-6 md:py-10">
                 <div className="relative">
-                  <div className="absolute -inset-6 rounded-[3rem] blur-3xl opacity-40" style={{ background: "var(--gradient-hero)" }} />
                   <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
                 </div>
-                {sec.side_image_url && (
-                  <div className="hidden md:flex items-center justify-center">
-                    <a
-                      href={sec.side_image_link || "#"}
-                      className="relative block rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white"
-                      style={{
-                        width: sec.side_width || "100%",
-                        height: sec.side_height || "100%",
-                      }}
-                    >
-                      <img src={sec.side_image_url} alt="offer" className="absolute inset-0 w-full h-full object-cover" />
-                    </a>
-                  </div>
-                )}
               </div>
             </section>
           );
