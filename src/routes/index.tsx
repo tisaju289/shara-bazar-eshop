@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
+import { ProductSlider } from "@/components/ProductSlider";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, X, Plus, Minus, ChevronLeft,
@@ -606,21 +607,16 @@ function Index() {
                 <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
                 {sec.subtitle_bn && <p className="text-muted-foreground text-sm mt-1">{sec.subtitle_bn}</p>}
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                {items.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    product={p}
-                    categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
-                    brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
-                    qty={cart[p.id] ?? 0}
-                    add={add}
-                    sub={sub}
-                    onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
-                    settings={settings?.product_card}
-                  />
-                ))}
-              </div>
+              <ProductSlider
+                products={items}
+                categories={categories}
+                brands={brands}
+                cart={cart}
+                add={add}
+                sub={sub}
+                onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+                settings={settings?.product_card}
+              />
             </div>
           </section>
         );
