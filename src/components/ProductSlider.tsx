@@ -11,6 +11,9 @@ export function ProductSlider({
   sub,
   onBuyNow,
   settings,
+  display = "slider",
+  rows = 3,
+  columns = 5,
 }: {
   products: ProductCardData[];
   categories: { id: string; name_bn: string }[];
@@ -20,6 +23,9 @@ export function ProductSlider({
   sub: (id: string) => void;
   onBuyNow: (id: string) => void;
   settings?: any;
+  display?: "slider" | "marquee" | "grid";
+  rows?: number;
+  columns?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
@@ -51,6 +57,63 @@ export function ProductSlider({
   };
 
   if (!products.length) return null;
+
+  // Grid mode: rows × columns, no arrows.
+  if (display === "grid") {
+    const limited = products.slice(0, rows * columns);
+    const colsClass = (() => {
+      const c = Math.max(1, Math.min(8, columns));
+      // explicit map so tailwind can pick them up
+      const map: Record<number, string> = {
+        1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3",
+        4: "lg:grid-cols-4", 5: "lg:grid-cols-5", 6: "lg:grid-cols-6",
+        7: "lg:grid-cols-7", 8: "lg:grid-cols-8",
+      };
+      return map[c] ?? "lg:grid-cols-5";
+    })();
+    return (
+      <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${colsClass} gap-3 md:gap-4`}>
+        {limited.map((p) => (
+          <ProductCard
+            key={p.id}
+            product={p}
+            categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
+            brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
+            qty={cart[p.id] ?? 0}
+            add={add}
+            sub={sub}
+            onBuyNow={() => onBuyNow(p.id)}
+            settings={settings}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Marquee mode: auto continuous horizontal scroll (CSS animation), no arrows.
+  if (display === "marquee") {
+    const loop = [...products, ...products];
+    return (
+      <div className="brand-marquee">
+        <div className="brand-marquee-track gap-3 md:gap-4" style={{ animationDuration: `${Math.max(20, products.length * 4)}s` }}>
+          {loop.map((p, i) => (
+            <div key={`${p.id}-${i}`} className="shrink-0 w-[180px] sm:w-[200px] md:w-[220px] mr-3 md:mr-4">
+              <ProductCard
+                product={p}
+                categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
+                brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
+                qty={cart[p.id] ?? 0}
+                add={add}
+                sub={sub}
+                onBuyNow={() => onBuyNow(p.id)}
+                settings={settings}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

@@ -598,7 +598,12 @@ function Index() {
               }
               return mixed;
             })()
-        ).slice(0, sec.limit);
+        ).slice(
+          0,
+          sec.display === "grid"
+            ? Math.max(sec.limit, (sec.rows ?? 3) * (sec.columns ?? 5))
+            : sec.limit,
+        );
         if (items.length === 0) return null;
         return (
           <section key={sec.id} id="shop" className="py-8 md:py-12">
@@ -616,6 +621,9 @@ function Index() {
                 sub={sub}
                 onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
                 settings={settings?.product_card}
+                display={sec.display ?? "slider"}
+                rows={sec.rows ?? 3}
+                columns={sec.columns ?? 5}
               />
             </div>
           </section>

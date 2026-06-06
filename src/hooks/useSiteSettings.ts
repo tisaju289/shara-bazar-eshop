@@ -112,6 +112,9 @@ export type ProductSection = Base & {
   subtitle_bn: string;
   category_id: string; // empty = all
   limit: number;
+  display?: "slider" | "marquee" | "grid";
+  rows?: number;    // grid mode
+  columns?: number; // grid mode (per row, desktop)
 };
 export type OfferSection = Base & {
   type: "offer";
