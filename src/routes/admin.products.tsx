@@ -135,6 +135,13 @@ function AdminProducts() {
     await load();
   };
 
+  const toggleActive = async (p: Product) => {
+    const next = !p.is_active;
+    setItems((arr) => arr.map((x) => (x.id === p.id ? { ...x, is_active: next } : x)));
+    const { error } = await supabase.from("products").update({ is_active: next }).eq("id", p.id);
+    if (error) { toast.error(error.message); await load(); }
+  };
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const n = new Set(prev);
@@ -281,9 +288,10 @@ function AdminProducts() {
                     </td>
                     <td className="p-3 hidden sm:table-cell">{p.stock}</td>
                     <td className="p-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.is_active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                        {p.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
-                      </span>
+                      <button onClick={() => toggleActive(p)} title={p.is_active ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${p.is_active ? "bg-primary" : "bg-muted"}`}>
+                        <span className={`inline-block size-5 transform rounded-full bg-white shadow transition ${p.is_active ? "translate-x-5" : "translate-x-0.5"}`} />
+                      </button>
                     </td>
                     <td className="p-3">
                       <div className="flex justify-end gap-1">

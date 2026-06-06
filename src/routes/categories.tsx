@@ -21,7 +21,7 @@ function CategoriesPage() {
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", "public"],
     queryFn: async (): Promise<DBCategory[]> => {
-      const { data, error } = await supabase.from("categories").select("*").order("sort_order");
+      const { data, error } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order");
       if (error) throw error;
       return data ?? [];
     },

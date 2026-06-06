@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_active: boolean
           keywords: string | null
           name_bn: string
           slug: string
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_active?: boolean
           keywords?: string | null
           name_bn: string
           slug: string
@@ -37,6 +39,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_active?: boolean
           keywords?: string | null
           name_bn?: string
           slug?: string
@@ -49,6 +52,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_active: boolean
           keywords: string | null
           name_bn: string
           slug: string
@@ -58,6 +62,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_active?: boolean
           keywords?: string | null
           name_bn: string
           slug: string
@@ -67,6 +72,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_active?: boolean
           keywords?: string | null
           name_bn?: string
           slug?: string
