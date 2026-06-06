@@ -483,31 +483,10 @@ function SectionEditor({ section: s, setItem, cats }: {
           </Field>
         </Section>
 
-        <Section title="সাইড ইমেজ ও লেয়াউট">
-          <div className="grid md:grid-cols-2 gap-3">
-            <Field label="ডেস্কটপ সাইড অফার ইমেজ" hint="ডেস্কটপ ভিউতে স্লাইডারের ডানপাশে দেখাবে (~25%)">
-              <ImageInput value={s.side_image_url ?? ""} onChange={(url) => setItem({ side_image_url: url } as any)} folder="hero" />
-            </Field>
-            <Field label="সাইড ইমেজ লিংক (ঐচ্ছিক)" hint="ক্লিক করলে এই URL এ যাবে">
-              <input className={inputCls} value={s.side_image_link ?? ""} onChange={(e) => setItem({ side_image_link: e.target.value } as any)} placeholder="/products?cat=…" />
-            </Field>
-          </div>
-          <div className="grid md:grid-cols-2 gap-3">
-            <Field label="হিরো অ্যাসপেক্ট রেশিও (ডেস্কটপ)" hint="যেমন: 21/9 (চিকন), 16/9, 4/3 (লম্বা)। মোবাইলে সবসময় 4/3।">
-              <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
-            </Field>
-            <Field label="সাইড ইমেজ চওড়া (%)" hint="ডেস্কটপে সাইড ইমেজের চওড়া, ডিফল্ট 22">
-              <input type="number" min={10} max={50} className={inputCls} value={s.side_width_pct ?? 22} onChange={(e) => setItem({ side_width_pct: Number(e.target.value) || 22 } as any)} />
-            </Field>
-          </div>
-          <div className="grid md:grid-cols-2 gap-3">
-            <Field label="সাইড ইমেজ Width (কাস্টম)" hint="যেকোনো CSS ভ্যালু, যেমন: 300px, 80%, 20rem। খালি = পুরো কলাম।">
-              <input className={inputCls} value={s.side_width ?? ""} onChange={(e) => setItem({ side_width: e.target.value } as any)} placeholder="যেমন: 300px বা 100%" />
-            </Field>
-            <Field label="সাইড ইমেজ Height (কাস্টম)" hint="যেকোনো CSS ভ্যালু, যেমন: 400px, 100%, 50vh। খালি = স্লাইডারের সমান হাইট।">
-              <input className={inputCls} value={s.side_height ?? ""} onChange={(e) => setItem({ side_height: e.target.value } as any)} placeholder="যেমন: 400px বা 100%" />
-            </Field>
-          </div>
+        <Section title="হিরো লেয়াউট">
+          <Field label="হিরো অ্যাসপেক্ট রেশিও (ডেস্কটপ)" hint="যেমন: 21/9 (চিকন), 16/9, 4/3 (লম্বা)। মোবাইলে সবসময় 4/3।">
+            <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
+          </Field>
         </Section>
       </div>
     );
