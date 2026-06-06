@@ -9,7 +9,7 @@ export const Route = createFileRoute("/admin/categories")({
   component: AdminCategories,
 });
 
-type Cat = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null };
+type Cat = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null; is_active: boolean };
 
 function AdminCategories() {
   const [items, setItems] = useState<Cat[]>([]);
@@ -20,6 +20,8 @@ function AdminCategories() {
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("sort_asc");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -50,6 +52,32 @@ function AdminCategories() {
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) return toast.error("মুছতে ব্যর্থ: " + error.message);
     toast.success("ক্যাটাগরি মুছে গেছে");
+    await load();
+  };
+
+  const toggleActive = async (c: Cat) => {
+    const next = !c.is_active;
+    setItems((arr) => arr.map((x) => (x.id === c.id ? { ...x, is_active: next } : x)));
+    const { error } = await supabase.from("categories").update({ is_active: next }).eq("id", c.id);
+    if (error) { toast.error(error.message); await load(); }
+  };
+
+  const toggleSelect = (id: string) => setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleSelectAll = (ids: string[]) => setSelected((p) => {
+    const all = ids.every((id) => p.has(id));
+    const n = new Set(p);
+    if (all) ids.forEach((id) => n.delete(id)); else ids.forEach((id) => n.add(id));
+    return n;
+  });
+  const bulkDelete = async () => {
+    if (!selected.size) return;
+    if (!confirm(`${selected.size}টি ক্যাটাগরি মুছবেন?`)) return;
+    setBulkDeleting(true);
+    const { error } = await supabase.from("categories").delete().in("id", Array.from(selected));
+    setBulkDeleting(false);
+    if (error) return toast.error("মুছতে ব্যর্থ: " + error.message);
+    toast.success(`${selected.size}টি মুছে গেছে`);
+    setSelected(new Set());
     await load();
   };
 
@@ -102,9 +130,18 @@ function AdminCategories() {
           <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">ক্যাটাগরি</h1>
           <p className="text-sm text-muted-foreground mt-1">মোট {items.length}টি ক্যাটাগরি</p>
         </div>
-        <button onClick={openNew} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-soft)]">
-          <Plus className="size-4" /> নতুন ক্যাটাগরি
-        </button>
+        <div className="flex items-center gap-2">
+          {selected.size > 0 && (
+            <button onClick={bulkDelete} disabled={bulkDeleting}
+              className="h-11 px-4 rounded-xl bg-destructive text-destructive-foreground font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+              {bulkDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {selected.size}টি মুছুন
+            </button>
+          )}
+          <button onClick={openNew} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-soft)]">
+            <Plus className="size-4" /> নতুন ক্যাটাগরি
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3 w-full">
@@ -132,15 +169,25 @@ function AdminCategories() {
             <table className="w-full text-sm">
               <thead className="bg-secondary/60 text-left">
                 <tr>
+                  <th className="p-3 w-10">
+                    <input type="checkbox" className="size-4 accent-[color:var(--primary)]"
+                      checked={filtered.length > 0 && filtered.every((c) => selected.has(c.id))}
+                      onChange={() => toggleSelectAll(filtered.map((c) => c.id))} />
+                  </th>
                   <th className="p-3 font-semibold">ক্যাটাগরি</th>
                   <th className="p-3 font-semibold hidden md:table-cell">Slug</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">Sort</th>
+                  <th className="p-3 font-semibold">স্ট্যাটাস</th>
                   <th className="p-3 font-semibold text-right">অ্যাকশন</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((c, i) => (
                   <tr key={c.id} className="border-t border-border hover:bg-secondary/30">
+                    <td className="p-3">
+                      <input type="checkbox" className="size-4 accent-[color:var(--primary)]"
+                        checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} />
+                    </td>
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg grid place-items-center text-2xl overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
@@ -151,6 +198,12 @@ function AdminCategories() {
                     </td>
                     <td className="p-3 text-muted-foreground hidden md:table-cell">/{c.slug}</td>
                     <td className="p-3 hidden sm:table-cell">{c.sort_order}</td>
+                    <td className="p-3">
+                      <button onClick={() => toggleActive(c)} title={c.is_active ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${c.is_active ? "bg-primary" : "bg-muted"}`}>
+                        <span className={`inline-block size-5 transform rounded-full bg-white shadow transition ${c.is_active ? "translate-x-5" : "translate-x-0.5"}`} />
+                      </button>
+                    </td>
                     <td className="p-3">
                       <div className="flex justify-end gap-1">
                         <button onClick={() => move(i, -1)} disabled={i === 0} className="size-8 rounded-lg hover:bg-secondary grid place-items-center disabled:opacity-30 disabled:hover:bg-transparent" title="উপরে"><ChevronUp className="size-4" /></button>
