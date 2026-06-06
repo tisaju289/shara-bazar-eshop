@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
+import { ProductSlider } from "@/components/ProductSlider";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, X, Plus, Minus, ChevronLeft,
