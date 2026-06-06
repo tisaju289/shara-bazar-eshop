@@ -616,6 +616,9 @@ function Index() {
                 sub={sub}
                 onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
                 settings={settings?.product_card}
+                display={sec.display ?? "slider"}
+                rows={sec.rows ?? 3}
+                columns={sec.columns ?? 5}
               />
             </div>
           </section>
