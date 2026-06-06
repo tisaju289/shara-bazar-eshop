@@ -1,44 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type Cat = { id: string; name_bn: string; image_url: string | null };
 
 /**
- * Slow auto-scrolling horizontal row of category circles
- * with prev/next arrows. Pauses on hover.
+ * Horizontal row of category circles with prev/next arrows.
+ * Manual slide only — no auto marquee.
  */
 export function CategoryMarquee({
   categories,
   catCounts,
-  speedPxPerSec = 30,
 }: {
   categories: Cat[];
   catCounts?: Record<string, number>;
-  speedPxPerSec?: number;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    let raf = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      const dt = (now - last) / 1000;
-      last = now;
-      if (!pausedRef.current && el.scrollWidth > el.clientWidth + 4) {
-        const max = el.scrollWidth - el.clientWidth;
-        let next = el.scrollLeft + speedPxPerSec * dt;
-        if (next >= max - 1) next = 0;
-        el.scrollLeft = next;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [speedPxPerSec, categories.length]);
 
   const scroll = (dir: -1 | 1) => {
     const el = ref.current;
@@ -48,11 +25,7 @@ export function CategoryMarquee({
 
   if (!categories.length) return null;
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => { pausedRef.current = true; }}
-      onMouseLeave={() => { pausedRef.current = false; }}
-    >
+    <div className="relative">
       <button
         type="button"
         onClick={() => scroll(-1)}

@@ -70,28 +70,6 @@ type BrandItem = { id: string; name_bn: string; image_url: string | null; slug: 
 
 function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
   const ref = useRef<HTMLDivElement>(null);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    let raf = 0;
-    let last = performance.now();
-    const speed = 30; // px per second — slow marquee
-    const tick = (now: number) => {
-      const dt = (now - last) / 1000;
-      last = now;
-      if (!pausedRef.current && el.scrollWidth > el.clientWidth + 4) {
-        const max = el.scrollWidth - el.clientWidth;
-        let next = el.scrollLeft + speed * dt;
-        if (next >= max - 1) next = 0;
-        el.scrollLeft = next;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [brands.length]);
 
   const scroll = (dir: -1 | 1) => {
     const el = ref.current;
@@ -100,11 +78,7 @@ function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCount
   };
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => { pausedRef.current = true; }}
-      onMouseLeave={() => { pausedRef.current = false; }}
-    >
+    <div className="relative">
       <button
         type="button"
         onClick={() => scroll(-1)}
