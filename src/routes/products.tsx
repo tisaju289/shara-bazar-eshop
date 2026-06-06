@@ -246,76 +246,8 @@ function ProductsPage() {
             {q ? `"${q}" এর ফলাফল` : "সব পণ্য"}
           </h1>
 
-          {(() => {
-            const allItem = { id: "all" as const, name_bn: "সব", image_url: null as string | null };
-            const items: Array<{ id: string; name_bn: string; image_url: string | null }> = [
-              allItem,
-              ...categories.map((c) => ({ id: c.id, name_bn: c.name_bn, image_url: c.image_url })),
-            ];
-            const onPick = (id: string) => {
-              setActiveCat("all");
-              if (id === "all") {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                return;
-              }
-              setTimeout(() => {
-                document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }, 50);
-            };
-            const scrollByDir = (dir: 1 | -1) => {
-              const el = catScrollRef.current;
-              if (!el) return;
-              const amount = el.clientWidth * 0.8 * dir;
-              el.scrollBy({ left: amount, behavior: "smooth" });
-            };
-            return (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => scrollByDir(-1)}
-                  aria-label="Previous"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-card border border-border shadow grid place-items-center hover:border-primary"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollByDir(1)}
-                  aria-label="Next"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-card border border-border shadow grid place-items-center hover:border-primary"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-                <div
-                  ref={catScrollRef}
-                  className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth snap-x px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                >
-                  {items.map((c) => {
-                    const isActive = activeCat === c.id || (c.id === "all" && activeCat === "all");
-                    return (
-                      <button
-                        key={c.id}
-                        onClick={() => onPick(c.id)}
-                        className="flex flex-col items-center gap-1.5 group shrink-0 snap-start w-20"
-                      >
-                        <div className={`size-16 md:size-20 rounded-full grid place-items-center overflow-hidden border-2 transition ${isActive ? "border-primary shadow-[var(--shadow-pop)]" : "border-border group-hover:border-primary"}`} style={{ background: "var(--gradient-warm)" }}>
-                          {c.image_url ? (
-                            <img src={c.image_url} alt={c.name_bn} className="w-full h-full object-cover" />
-                          ) : c.id === "all" ? (
-                            <LayoutGrid className="size-7 text-[var(--leaf-deep)]" />
-                          ) : (
-                            <Package className="size-7 text-[var(--leaf-deep)]" />
-                          )}
-                        </div>
-                        <span className={`text-[11px] md:text-xs font-medium leading-tight text-center line-clamp-2 ${isActive ? "text-primary" : "text-foreground"}`}>{c.name_bn}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
-
+          <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+            <div className="min-w-0 order-2 lg:order-1">
           {prodLoading ? (
             <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
           ) : filtered.length === 0 ? (
@@ -331,7 +263,7 @@ function ProductsPage() {
                       <div className="flex items-center justify-center mb-4">
                         <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] text-center">{cat?.name_bn ?? "অন্যান্য"}</h2>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                         {items.map((p) => (
                           <ProductCard
                             key={p.id}
@@ -350,7 +282,7 @@ function ProductsPage() {
                   );
                 })
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                   {filtered.map((p) => {
                     const catName = categories.find((c) => c.id === p.category_id)?.name_bn ?? "";
                     const brandName = brands.find((b) => b.id === p.brand_id)?.name_bn ?? "";
@@ -372,6 +304,66 @@ function ProductsPage() {
               )}
             </div>
           )}
+            </div>
+
+            <aside className="order-1 lg:order-2 lg:sticky lg:top-24 lg:self-start space-y-4">
+              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                <h3 className="font-bold text-sm text-[var(--leaf-deep)]">ক্যাটাগরি</h3>
+                <div className="space-y-1 max-h-[320px] overflow-y-auto">
+                  <button
+                    onClick={() => setActiveCat("all")}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${activeCat === "all" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
+                  >
+                    সব ({products.length})
+                  </button>
+                  {categories.map((c) => {
+                    const count = products.filter((p) => p.category_id === c.id).length;
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => setActiveCat(c.id)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition flex items-center justify-between ${activeCat === c.id ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary"}`}
+                      >
+                        <span className="truncate">{c.name_bn}</span>
+                        <span className="text-xs opacity-70 ml-2">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                <h3 className="font-bold text-sm text-[var(--leaf-deep)]">দামের পরিসর (৳)</h3>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="সর্বনিম্ন"
+                    value={priceMin}
+                    onChange={(e) => setPriceMin(e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg bg-secondary outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                  <span className="text-muted-foreground">—</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="সর্বোচ্চ"
+                    value={priceMax}
+                    onChange={(e) => setPriceMax(e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg bg-secondary outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                </div>
+                {(priceMin || priceMax || activeCat !== "all") && (
+                  <button
+                    onClick={() => { setPriceMin(""); setPriceMax(""); setActiveCat("all"); }}
+                    className="w-full h-9 rounded-lg bg-secondary text-sm font-semibold hover:bg-secondary/80"
+                  >
+                    ফিল্টার রিসেট
+                  </button>
+                )}
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 
