@@ -2,6 +2,18 @@ import { useEffect, useState } from "react";
 import { Leaf } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
+const BRAND_CACHE_KEY = "ff_brand_cache_v1";
+
+function readCachedBrand(): { name_bn?: string; logo_url?: string } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(BRAND_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Full-screen preloader shown while site settings (brand/logo) load on
  * the very first paint. Fades out once data is ready.
@@ -10,6 +22,18 @@ export function Preloader() {
   const { data, isLoading } = useSiteSettings();
   const [hidden, setHidden] = useState(false);
   const [fading, setFading] = useState(false);
+  const [cachedBrand] = useState(() => readCachedBrand());
+
+  useEffect(() => {
+    if (data?.brand) {
+      try {
+        window.localStorage.setItem(
+          BRAND_CACHE_KEY,
+          JSON.stringify({ name_bn: data.brand.name_bn, logo_url: data.brand.logo_url }),
+        );
+      } catch {}
+    }
+  }, [data]);
 
   useEffect(() => {
     const minDelay = setTimeout(() => {
@@ -33,7 +57,7 @@ export function Preloader() {
   }, [fading]);
 
   if (hidden) return null;
-  const brand = data?.brand;
+  const brand = data?.brand ?? cachedBrand;
 
   return (
     <div
