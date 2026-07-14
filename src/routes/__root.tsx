@@ -15,7 +15,6 @@ import { TrackingScripts } from "@/components/TrackingScripts";
 import { useEffect } from "react";
 import { CartDrawer } from "@/components/CartDrawer";
 import { supabase } from "@/integrations/supabase/client";
-import { Preloader } from "@/components/Preloader";
 
 async function loadSeo() {
   try {
@@ -153,7 +152,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <DynamicHead />
       <TrackingScripts />
-      <Preloader />
       <Outlet />
       <CartDrawer />
       <Toaster richColors position="top-center" />
