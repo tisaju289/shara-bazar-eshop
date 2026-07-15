@@ -209,15 +209,17 @@ function ProductsPage() {
     if (!minOk || !maxOk) return false;
     if (!q) return catOk;
     const cat = categories.find((c) => c.id === p.category_id);
+    const brand = brands.find((b) => b.id === p.brand_id);
     const haystack = [
       p.name_bn,
       p.keywords ?? "",
       p.tag ?? "",
       cat?.name_bn ?? "",
       cat?.keywords ?? "",
+      brand?.name_bn ?? "",
     ].join(" ").toLowerCase();
     const tokens = q.toLowerCase().trim().split(/[\s,]+/).filter(Boolean);
-    return catOk && tokens.every((t: string) => haystack.includes(t));
+    return catOk && tokens.some((t: string) => haystack.includes(t));
   });
 
   const grouped = useMemo(() => {
