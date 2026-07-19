@@ -501,6 +501,54 @@ function AdminProducts() {
         </div>
       )}
 
+      {bulkOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => !bulkImporting && setBulkOpen(false)} />
+          <div className="relative bg-background rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-background flex items-center justify-between p-5 border-b border-border">
+              <h2 className="font-bold text-lg">বাল্ক প্রোডাক্ট ইম্পোর্ট (CSV)</h2>
+              <button type="button" onClick={() => !bulkImporting && setBulkOpen(false)}><X /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>কলাম: <code className="text-xs">{CSV_HEADERS.join(", ")}</code></p>
+                <p>ক্যাটাগরি/ব্র্যান্ড/সাব-ক্যাটাগরি অবশ্যই বাংলা নাম ঠিক মিল থাকতে হবে (আগে থেকে তৈরি থাকা দরকার)।</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={downloadTemplate} className="h-10 px-4 rounded-xl bg-secondary font-semibold text-sm inline-flex items-center gap-2">
+                  <Download className="size-4" /> টেমপ্লেট ডাউনলোড
+                </button>
+                <label className="h-10 px-4 rounded-xl bg-secondary font-semibold text-sm inline-flex items-center gap-2 cursor-pointer">
+                  <Upload className="size-4" /> CSV ফাইল আপলোড
+                  <input type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && onCsvFile(e.target.files[0])} />
+                </label>
+              </div>
+              <textarea value={bulkCsv} onChange={(e) => setBulkCsv(e.target.value)}
+                placeholder="এখানে CSV পেস্ট করুন..."
+                className="w-full h-56 p-3 rounded-xl bg-secondary border border-transparent focus:border-primary outline-none text-xs font-mono" />
+              {bulkResult && (
+                <div className="text-sm space-y-1 p-3 rounded-xl bg-secondary/60">
+                  <div>✅ সফল: <b>{bulkResult.ok}</b> • ❌ ব্যর্থ: <b>{bulkResult.fail}</b></div>
+                  {bulkResult.errors.length > 0 && (
+                    <ul className="text-xs text-destructive list-disc pl-5 max-h-32 overflow-y-auto">
+                      {bulkResult.errors.map((e, i) => <li key={i}>{e}</li>)}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="sticky bottom-0 bg-background p-5 border-t border-border flex gap-2">
+              <button type="button" disabled={bulkImporting} onClick={() => setBulkOpen(false)} className="flex-1 h-11 rounded-xl bg-secondary font-semibold">বন্ধ</button>
+              <button disabled={bulkImporting || !bulkCsv.trim()} onClick={runBulkImport}
+                className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60">
+                {bulkImporting && <Loader2 className="size-4 animate-spin" />}
+                ইম্পোর্ট শুরু
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`.input{width:100%;height:44px;padding:0 14px;border-radius:12px;background:var(--secondary);border:1px solid transparent;outline:none;font-size:14px}.input:focus{border-color:var(--primary)}`}</style>
     </div>
   );
