@@ -312,6 +312,9 @@ function AdminProducts() {
               {selected.size}টি মুছুন
             </button>
           )}
+          <button onClick={() => { setBulkOpen(true); setBulkResult(null); }} className="h-11 px-4 rounded-xl bg-secondary font-semibold inline-flex items-center gap-2">
+            <Upload className="size-4" /> বাল্ক ইম্পোর্ট
+          </button>
           <button onClick={openNew} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-soft)]">
             <Plus className="size-4" /> নতুন পণ্য
           </button>
