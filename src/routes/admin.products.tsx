@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy, Upload, Download } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
 import { toast } from "sonner";
 
@@ -51,6 +51,10 @@ function AdminProducts() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkCsv, setBulkCsv] = useState("");
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ ok: number; fail: number; errors: string[] } | null>(null);
 
   const load = async () => {
     setLoading(true);
