@@ -180,6 +180,108 @@ function AdminProducts() {
     await load();
   };
 
+  // ===== Bulk import (CSV) =====
+  const CSV_HEADERS = ["name_bn","category","subcategory","brand","unit","price","old_price","stock","tag","image_url","offer_badge","reviews_rating","reviews_count","keywords","is_active"];
+
+  const downloadTemplate = () => {
+    const sample = [
+      CSV_HEADERS.join(","),
+      `"আলু","সবজি","","","১ কেজি",60,70,100,"নতুন","","10 TK OFF",4.5,20,"aloo, potato",true`,
+    ].join("\n");
+    const blob = new Blob([sample], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "products-template.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const parseCsv = (text: string): Record<string, string>[] => {
+    const rows: string[][] = [];
+    let cur: string[] = [];
+    let field = "";
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ",") { cur.push(field); field = ""; }
+        else if (c === "\n" || c === "\r") {
+          if (field !== "" || cur.length) { cur.push(field); rows.push(cur); cur = []; field = ""; }
+          if (c === "\r" && text[i + 1] === "\n") i++;
+        } else field += c;
+      }
+    }
+    if (field !== "" || cur.length) { cur.push(field); rows.push(cur); }
+    if (!rows.length) return [];
+    const headers = rows[0].map((h) => h.trim());
+    return rows.slice(1).filter((r) => r.some((v) => v.trim() !== "")).map((r) => {
+      const o: Record<string, string> = {};
+      headers.forEach((h, i) => { o[h] = (r[i] ?? "").trim(); });
+      return o;
+    });
+  };
+
+  const runBulkImport = async () => {
+    if (!bulkCsv.trim()) return toast.error("CSV খালি");
+    setBulkImporting(true);
+    setBulkResult(null);
+    const rows = parseCsv(bulkCsv);
+    const catMap = new Map(cats.map((c) => [c.name_bn.trim().toLowerCase(), c.id]));
+    const brandMap = new Map(brands.map((b) => [b.name_bn.trim().toLowerCase(), b.id]));
+    const subMap = new Map(subCats.map((s) => [s.name_bn.trim().toLowerCase(), s.id]));
+    const errors: string[] = [];
+    const payload: any[] = [];
+    rows.forEach((r, idx) => {
+      if (!r.name_bn) { errors.push(`লাইন ${idx + 2}: name_bn নেই`); return; }
+      const catId = r.category ? catMap.get(r.category.toLowerCase()) ?? null : null;
+      if (r.category && !catId) errors.push(`লাইন ${idx + 2}: ক্যাটাগরি "${r.category}" পাওয়া যায়নি`);
+      const brandId = r.brand ? brandMap.get(r.brand.toLowerCase()) ?? null : null;
+      if (r.brand && !brandId) errors.push(`লাইন ${idx + 2}: ব্র্যান্ড "${r.brand}" পাওয়া যায়নি`);
+      const subId = r.subcategory ? subMap.get(r.subcategory.toLowerCase()) ?? null : null;
+      payload.push({
+        name_bn: r.name_bn,
+        category_id: catId,
+        subcategory_id: subId,
+        brand_id: brandId,
+        unit: r.unit || "১ কেজি",
+        price: Number(r.price) || 0,
+        old_price: r.old_price ? Number(r.old_price) : null,
+        stock: Number(r.stock) || 0,
+        tag: r.tag || null,
+        image_url: r.image_url || null,
+        offer_badge: r.offer_badge || null,
+        reviews_rating: r.reviews_rating ? Number(r.reviews_rating) : 0,
+        reviews_count: r.reviews_count ? Number(r.reviews_count) : 0,
+        keywords: r.keywords || null,
+        is_active: r.is_active ? !["false","0","no","না"].includes(r.is_active.toLowerCase()) : true,
+      });
+    });
+    let ok = 0, fail = 0;
+    // batch insert 100 at a time
+    for (let i = 0; i < payload.length; i += 100) {
+      const batch = payload.slice(i, i + 100);
+      const { error, data } = await supabase.from("products").insert(batch).select("id");
+      if (error) { fail += batch.length; errors.push(`ব্যাচ ${Math.floor(i / 100) + 1}: ${error.message}`); }
+      else ok += data?.length ?? batch.length;
+    }
+    setBulkImporting(false);
+    setBulkResult({ ok, fail, errors });
+    if (ok) toast.success(`${ok}টি পণ্য যোগ হয়েছে`);
+    if (fail || errors.length) toast.error(`${errors.length}টি সমস্যা`);
+    await load();
+  };
+
+  const onCsvFile = (f: File) => {
+    const reader = new FileReader();
+    reader.onload = () => setBulkCsv(String(reader.result || ""));
+    reader.readAsText(f);
+  };
+
   const filtered = items
     .filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()))
     .slice()
