@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy, Upload, Download } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
 import { toast } from "sonner";
 
@@ -51,6 +51,10 @@ function AdminProducts() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkCsv, setBulkCsv] = useState("");
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ ok: number; fail: number; errors: string[] } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -176,6 +180,108 @@ function AdminProducts() {
     await load();
   };
 
+  // ===== Bulk import (CSV) =====
+  const CSV_HEADERS = ["name_bn","category","subcategory","brand","unit","price","old_price","stock","tag","image_url","offer_badge","reviews_rating","reviews_count","keywords","is_active"];
+
+  const downloadTemplate = () => {
+    const sample = [
+      CSV_HEADERS.join(","),
+      `"আলু","সবজি","","","১ কেজি",60,70,100,"নতুন","","10 TK OFF",4.5,20,"aloo, potato",true`,
+    ].join("\n");
+    const blob = new Blob([sample], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "products-template.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const parseCsv = (text: string): Record<string, string>[] => {
+    const rows: string[][] = [];
+    let cur: string[] = [];
+    let field = "";
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ",") { cur.push(field); field = ""; }
+        else if (c === "\n" || c === "\r") {
+          if (field !== "" || cur.length) { cur.push(field); rows.push(cur); cur = []; field = ""; }
+          if (c === "\r" && text[i + 1] === "\n") i++;
+        } else field += c;
+      }
+    }
+    if (field !== "" || cur.length) { cur.push(field); rows.push(cur); }
+    if (!rows.length) return [];
+    const headers = rows[0].map((h) => h.trim());
+    return rows.slice(1).filter((r) => r.some((v) => v.trim() !== "")).map((r) => {
+      const o: Record<string, string> = {};
+      headers.forEach((h, i) => { o[h] = (r[i] ?? "").trim(); });
+      return o;
+    });
+  };
+
+  const runBulkImport = async () => {
+    if (!bulkCsv.trim()) return toast.error("CSV খালি");
+    setBulkImporting(true);
+    setBulkResult(null);
+    const rows = parseCsv(bulkCsv);
+    const catMap = new Map(cats.map((c) => [c.name_bn.trim().toLowerCase(), c.id]));
+    const brandMap = new Map(brands.map((b) => [b.name_bn.trim().toLowerCase(), b.id]));
+    const subMap = new Map(subCats.map((s) => [s.name_bn.trim().toLowerCase(), s.id]));
+    const errors: string[] = [];
+    const payload: any[] = [];
+    rows.forEach((r, idx) => {
+      if (!r.name_bn) { errors.push(`লাইন ${idx + 2}: name_bn নেই`); return; }
+      const catId = r.category ? catMap.get(r.category.toLowerCase()) ?? null : null;
+      if (r.category && !catId) errors.push(`লাইন ${idx + 2}: ক্যাটাগরি "${r.category}" পাওয়া যায়নি`);
+      const brandId = r.brand ? brandMap.get(r.brand.toLowerCase()) ?? null : null;
+      if (r.brand && !brandId) errors.push(`লাইন ${idx + 2}: ব্র্যান্ড "${r.brand}" পাওয়া যায়নি`);
+      const subId = r.subcategory ? subMap.get(r.subcategory.toLowerCase()) ?? null : null;
+      payload.push({
+        name_bn: r.name_bn,
+        category_id: catId,
+        subcategory_id: subId,
+        brand_id: brandId,
+        unit: r.unit || "১ কেজি",
+        price: Number(r.price) || 0,
+        old_price: r.old_price ? Number(r.old_price) : null,
+        stock: Number(r.stock) || 0,
+        tag: r.tag || null,
+        image_url: r.image_url || null,
+        offer_badge: r.offer_badge || null,
+        reviews_rating: r.reviews_rating ? Number(r.reviews_rating) : 0,
+        reviews_count: r.reviews_count ? Number(r.reviews_count) : 0,
+        keywords: r.keywords || null,
+        is_active: r.is_active ? !["false","0","no","না"].includes(r.is_active.toLowerCase()) : true,
+      });
+    });
+    let ok = 0, fail = 0;
+    // batch insert 100 at a time
+    for (let i = 0; i < payload.length; i += 100) {
+      const batch = payload.slice(i, i + 100);
+      const { error, data } = await supabase.from("products").insert(batch).select("id");
+      if (error) { fail += batch.length; errors.push(`ব্যাচ ${Math.floor(i / 100) + 1}: ${error.message}`); }
+      else ok += data?.length ?? batch.length;
+    }
+    setBulkImporting(false);
+    setBulkResult({ ok, fail, errors });
+    if (ok) toast.success(`${ok}টি পণ্য যোগ হয়েছে`);
+    if (fail || errors.length) toast.error(`${errors.length}টি সমস্যা`);
+    await load();
+  };
+
+  const onCsvFile = (f: File) => {
+    const reader = new FileReader();
+    reader.onload = () => setBulkCsv(String(reader.result || ""));
+    reader.readAsText(f);
+  };
+
   const filtered = items
     .filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()))
     .slice()
@@ -206,6 +312,9 @@ function AdminProducts() {
               {selected.size}টি মুছুন
             </button>
           )}
+          <button onClick={() => { setBulkOpen(true); setBulkResult(null); }} className="h-11 px-4 rounded-xl bg-secondary font-semibold inline-flex items-center gap-2">
+            <Upload className="size-4" /> বাল্ক ইম্পোর্ট
+          </button>
           <button onClick={openNew} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[var(--shadow-soft)]">
             <Plus className="size-4" /> নতুন পণ্য
           </button>
@@ -389,6 +498,54 @@ function AdminProducts() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {bulkOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => !bulkImporting && setBulkOpen(false)} />
+          <div className="relative bg-background rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-background flex items-center justify-between p-5 border-b border-border">
+              <h2 className="font-bold text-lg">বাল্ক প্রোডাক্ট ইম্পোর্ট (CSV)</h2>
+              <button type="button" onClick={() => !bulkImporting && setBulkOpen(false)}><X /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>কলাম: <code className="text-xs">{CSV_HEADERS.join(", ")}</code></p>
+                <p>ক্যাটাগরি/ব্র্যান্ড/সাব-ক্যাটাগরি অবশ্যই বাংলা নাম ঠিক মিল থাকতে হবে (আগে থেকে তৈরি থাকা দরকার)।</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={downloadTemplate} className="h-10 px-4 rounded-xl bg-secondary font-semibold text-sm inline-flex items-center gap-2">
+                  <Download className="size-4" /> টেমপ্লেট ডাউনলোড
+                </button>
+                <label className="h-10 px-4 rounded-xl bg-secondary font-semibold text-sm inline-flex items-center gap-2 cursor-pointer">
+                  <Upload className="size-4" /> CSV ফাইল আপলোড
+                  <input type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && onCsvFile(e.target.files[0])} />
+                </label>
+              </div>
+              <textarea value={bulkCsv} onChange={(e) => setBulkCsv(e.target.value)}
+                placeholder="এখানে CSV পেস্ট করুন..."
+                className="w-full h-56 p-3 rounded-xl bg-secondary border border-transparent focus:border-primary outline-none text-xs font-mono" />
+              {bulkResult && (
+                <div className="text-sm space-y-1 p-3 rounded-xl bg-secondary/60">
+                  <div>✅ সফল: <b>{bulkResult.ok}</b> • ❌ ব্যর্থ: <b>{bulkResult.fail}</b></div>
+                  {bulkResult.errors.length > 0 && (
+                    <ul className="text-xs text-destructive list-disc pl-5 max-h-32 overflow-y-auto">
+                      {bulkResult.errors.map((e, i) => <li key={i}>{e}</li>)}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="sticky bottom-0 bg-background p-5 border-t border-border flex gap-2">
+              <button type="button" disabled={bulkImporting} onClick={() => setBulkOpen(false)} className="flex-1 h-11 rounded-xl bg-secondary font-semibold">বন্ধ</button>
+              <button disabled={bulkImporting || !bulkCsv.trim()} onClick={runBulkImport}
+                className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60">
+                {bulkImporting && <Loader2 className="size-4 animate-spin" />}
+                ইম্পোর্ট শুরু
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
