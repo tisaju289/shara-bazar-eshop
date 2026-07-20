@@ -3,7 +3,7 @@
   "name": "shara-bazar-eshop",
   "compatibility_date": "2026-07-20",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "dist/server/index.js",
+  "main": "dist/server/server.js",
   "assets": {
     "directory": "dist/client",
     "binding": "ASSETS"
