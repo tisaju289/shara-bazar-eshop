@@ -12,9 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CategoriesRouteImport } from './routes/categories'
-import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BrandsIndexRouteImport } from './routes/brands.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SubcatSubcatIdRouteImport } from './routes/subcat.$subcatId'
 import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
@@ -41,11 +41,6 @@ const CategoriesRoute = CategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BrandsRoute = BrandsRouteImport.update({
-  id: '/brands',
-  path: '/brands',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -54,6 +49,11 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandsIndexRoute = BrandsIndexRouteImport.update({
+  id: '/brands/',
+  path: '/brands/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -110,7 +110,6 @@ const AdminBrandsRoute = AdminBrandsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/brands': typeof BrandsRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
@@ -124,10 +123,10 @@ export interface FileRoutesByFullPath {
   '/cat/$catId': typeof CatCatIdRoute
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/brands/': typeof BrandsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/brands': typeof BrandsRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
@@ -141,12 +140,12 @@ export interface FileRoutesByTo {
   '/cat/$catId': typeof CatCatIdRoute
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin': typeof AdminIndexRoute
+  '/brands': typeof BrandsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/brands': typeof BrandsRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
@@ -160,13 +159,13 @@ export interface FileRoutesById {
   '/cat/$catId': typeof CatCatIdRoute
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/brands/': typeof BrandsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
-    | '/brands'
     | '/categories'
     | '/login'
     | '/products'
@@ -180,10 +179,10 @@ export interface FileRouteTypes {
     | '/cat/$catId'
     | '/subcat/$subcatId'
     | '/admin/'
+    | '/brands/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/brands'
     | '/categories'
     | '/login'
     | '/products'
@@ -197,11 +196,11 @@ export interface FileRouteTypes {
     | '/cat/$catId'
     | '/subcat/$subcatId'
     | '/admin'
+    | '/brands'
   id:
     | '__root__'
     | '/'
     | '/admin'
-    | '/brands'
     | '/categories'
     | '/login'
     | '/products'
@@ -215,17 +214,18 @@ export interface FileRouteTypes {
     | '/cat/$catId'
     | '/subcat/$subcatId'
     | '/admin/'
+    | '/brands/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
-  BrandsRoute: typeof BrandsRouteWithChildren
   CategoriesRoute: typeof CategoriesRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   CatCatIdRoute: typeof CatCatIdRoute
   SubcatSubcatIdRoute: typeof SubcatSubcatIdRoute
+  BrandsIndexRoute: typeof BrandsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -251,13 +251,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/brands': {
-      id: '/brands'
-      path: '/brands'
-      fullPath: '/brands'
-      preLoaderRoute: typeof BrandsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -270,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brands/': {
+      id: '/brands/'
+      path: '/brands'
+      fullPath: '/brands/'
+      preLoaderRoute: typeof BrandsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -367,26 +367,15 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface BrandsRouteChildren {
-  BrandsBrandIdRoute: typeof BrandsBrandIdRoute
-}
-
-const BrandsRouteChildren: BrandsRouteChildren = {
-  BrandsBrandIdRoute: BrandsBrandIdRoute,
-}
-
-const BrandsRouteWithChildren =
-  BrandsRoute._addFileChildren(BrandsRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
-  BrandsRoute: BrandsRouteWithChildren,
   CategoriesRoute: CategoriesRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   CatCatIdRoute: CatCatIdRoute,
   SubcatSubcatIdRoute: SubcatSubcatIdRoute,
+  BrandsIndexRoute: BrandsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
