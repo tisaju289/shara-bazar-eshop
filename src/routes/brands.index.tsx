@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 
-export const Route = createFileRoute("/brands")({
+export const Route = createFileRoute("/brands/")({
   head: () => ({
     meta: [
       { title: "সব ব্র্যান্ড — তাজা বাজার" },
