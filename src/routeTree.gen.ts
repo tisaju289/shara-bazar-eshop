@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -40,6 +41,11 @@ const CategoriesRoute = CategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrandsRoute = BrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -66,9 +72,9 @@ const CatCatIdRoute = CatCatIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandsBrandIdRoute = BrandsBrandIdRouteImport.update({
-  id: '/brands/$brandId',
-  path: '/brands/$brandId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$brandId',
+  path: '/$brandId',
+  getParentRoute: () => BrandsRoute,
 } as any)
 const AdminSubcategoriesRoute = AdminSubcategoriesRouteImport.update({
   id: '/subcategories',
@@ -104,6 +110,7 @@ const AdminBrandsRoute = AdminBrandsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/brands': typeof BrandsRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/brands': typeof BrandsRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/brands': typeof BrandsRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/brands'
     | '/categories'
     | '/login'
     | '/products'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/brands'
     | '/categories'
     | '/login'
     | '/products'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/brands'
     | '/categories'
     | '/login'
     | '/products'
@@ -208,10 +220,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BrandsRoute: typeof BrandsRouteWithChildren
   CategoriesRoute: typeof CategoriesRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
-  BrandsBrandIdRoute: typeof BrandsBrandIdRoute
   CatCatIdRoute: typeof CatCatIdRoute
   SubcatSubcatIdRoute: typeof SubcatSubcatIdRoute
 }
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/categories'
       preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brands': {
+      id: '/brands'
+      path: '/brands'
+      fullPath: '/brands'
+      preLoaderRoute: typeof BrandsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -276,10 +295,10 @@ declare module '@tanstack/react-router' {
     }
     '/brands/$brandId': {
       id: '/brands/$brandId'
-      path: '/brands/$brandId'
+      path: '/$brandId'
       fullPath: '/brands/$brandId'
       preLoaderRoute: typeof BrandsBrandIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof BrandsRoute
     }
     '/admin/subcategories': {
       id: '/admin/subcategories'
@@ -348,13 +367,24 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface BrandsRouteChildren {
+  BrandsBrandIdRoute: typeof BrandsBrandIdRoute
+}
+
+const BrandsRouteChildren: BrandsRouteChildren = {
+  BrandsBrandIdRoute: BrandsBrandIdRoute,
+}
+
+const BrandsRouteWithChildren =
+  BrandsRoute._addFileChildren(BrandsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  BrandsRoute: BrandsRouteWithChildren,
   CategoriesRoute: CategoriesRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
-  BrandsBrandIdRoute: BrandsBrandIdRoute,
   CatCatIdRoute: CatCatIdRoute,
   SubcatSubcatIdRoute: SubcatSubcatIdRoute,
 }
