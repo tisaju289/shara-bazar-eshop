@@ -648,13 +648,7 @@ function Index() {
         </section>
       )}
 
-      {!prodLoading && products.length > 0 && (
-        <div className="container mx-auto px-4 text-center pb-10">
-          <Link to="/products" className="inline-flex items-center gap-2 h-12 px-8 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
-            সব পণ্য দেখুন <ChevronRight className="size-4" />
-          </Link>
-        </div>
-      )}
+      {/* "সব পণ্য দেখুন" button removed per request */}
 
       {/* Footer */}
       <footer
