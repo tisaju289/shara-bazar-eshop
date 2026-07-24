@@ -72,9 +72,9 @@ const CatCatIdRoute = CatCatIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandsBrandIdRoute = BrandsBrandIdRouteImport.update({
-  id: '/$brandId',
-  path: '/$brandId',
-  getParentRoute: () => BrandsRoute,
+  id: '/brands/$brandId',
+  path: '/brands/$brandId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSubcategoriesRoute = AdminSubcategoriesRouteImport.update({
   id: '/subcategories',
@@ -223,6 +223,7 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  BrandsBrandIdRoute: typeof BrandsBrandIdRoute
   CatCatIdRoute: typeof CatCatIdRoute
   SubcatSubcatIdRoute: typeof SubcatSubcatIdRoute
   BrandsIndexRoute: typeof BrandsIndexRoute
@@ -295,10 +296,10 @@ declare module '@tanstack/react-router' {
     }
     '/brands/$brandId': {
       id: '/brands/$brandId'
-      path: '/$brandId'
+      path: '/brands/$brandId'
       fullPath: '/brands/$brandId'
       preLoaderRoute: typeof BrandsBrandIdRouteImport
-      parentRoute: typeof BrandsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/subcategories': {
       id: '/admin/subcategories'
@@ -373,6 +374,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  BrandsBrandIdRoute: BrandsBrandIdRoute,
   CatCatIdRoute: CatCatIdRoute,
   SubcatSubcatIdRoute: SubcatSubcatIdRoute,
   BrandsIndexRoute: BrandsIndexRoute,
