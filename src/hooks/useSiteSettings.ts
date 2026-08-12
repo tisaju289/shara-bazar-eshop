@@ -79,7 +79,15 @@ export type CustomField = {
   required: boolean;
 };
 
-export type HomeSectionType = "hero" | "category" | "product" | "offer" | "banner";
+export type HomeSectionType =
+  | "hero"
+  | "category"
+  | "product"
+  | "offer"
+  | "banner"
+  | "banner_grid"
+  | "feature"
+  | "brand";
 type Base = { id: string; enabled: boolean };
 export type HeroSection = Base & {
   type: "hero";
@@ -131,12 +139,33 @@ export type BannerSection = Base & {
   link: string;
   caption_bn: string;
 };
+export type BannerGridItem = { image_url: string; link: string };
+export type BannerGridSection = Base & {
+  type: "banner_grid";
+  title_bn: string;
+  columns: number; // desktop columns (2-4)
+  items: BannerGridItem[];
+};
+export type FeatureItem = { image_url: string; title_bn: string; subtitle_bn: string };
+export type FeatureSection = Base & {
+  type: "feature";
+  items: FeatureItem[];
+};
+export type BrandSection = Base & {
+  type: "brand";
+  title_bn: string;
+  subtitle_bn: string;
+  show_all_link: boolean;
+};
 export type HomeSection =
   | HeroSection
   | CategorySection
   | ProductSection
   | OfferSection
-  | BannerSection;
+  | BannerSection
+  | BannerGridSection
+  | FeatureSection
+  | BrandSection;
 
 export type Tracking = {
   // Meta (Facebook) Pixel + Conversions API
