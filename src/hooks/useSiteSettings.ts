@@ -371,6 +371,17 @@ function normalizeHomeSections(
         title_bn: s.sections.categories_title_bn,
         subtitle_bn: s.sections.categories_subtitle_bn,
       },
+      {
+        id: "seed-feature",
+        enabled: true,
+        type: "feature",
+        items: [
+          { image_url: "", title_bn: "দ্রুত ডেলিভারি", subtitle_bn: "৬০ মিনিটের মধ্যে" },
+          { image_url: "", title_bn: "অথেন্টিক পণ্য", subtitle_bn: "১০০% আসল গ্যারান্টি" },
+          { image_url: "", title_bn: "কাস্টমার সাপোর্ট", subtitle_bn: "সকাল ৮টা - রাত ১০টা" },
+          { image_url: "", title_bn: "সহজ পেমেন্ট", subtitle_bn: "ক্যাশ অন ডেলিভারি" },
+        ],
+      },
       ...(s.offer.enabled
         ? [
             {
@@ -394,6 +405,14 @@ function normalizeHomeSections(
         subtitle_bn: s.sections.products_subtitle_bn,
         category_id: "",
         limit: 12,
+      },
+      {
+        id: "seed-brand",
+        enabled: true,
+        type: "brand",
+        title_bn: "জনপ্রিয় ব্র্যান্ড",
+        subtitle_bn: "আপনার পছন্দের ব্র্যান্ড বেছে নিন",
+        show_all_link: true,
       },
     ];
     return seed;

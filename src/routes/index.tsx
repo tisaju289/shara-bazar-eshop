@@ -521,16 +521,16 @@ function Index() {
           return (
             <section key={sec.id} id="categories" className="py-10 md:py-14">
               <div className="container mx-auto px-4">
-                <div className="flex flex-col items-center mb-6 gap-2 text-center">
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
-                  {sec.subtitle_bn && <p className="text-muted-foreground text-sm">{sec.subtitle_bn}</p>}
-                </div>
-                <CategoryMarquee categories={categories} catCounts={catCounts} />
-                <div className="flex justify-center mt-6">
-                  <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 mb-4">
+                  <div className="min-w-0">
+                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
+                    {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
+                  </div>
+                  <Link to="/categories" className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
                     সব দেখুন <ChevronRight className="size-4" />
                   </Link>
                 </div>
+                <CategoryMarquee categories={categories} catCounts={catCounts} />
               </div>
             </section>
           );
@@ -682,11 +682,20 @@ function Index() {
         );
         if (items.length === 0) return null;
         return (
-          <section key={sec.id} id="shop" className="py-8 md:py-12">
-            <div className="container mx-auto px-4 space-y-6">
-              <div className="flex flex-col items-center text-center">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
-                {sec.subtitle_bn && <p className="text-muted-foreground text-sm mt-1">{sec.subtitle_bn}</p>}
+          <section key={sec.id} id="shop" className="py-6 md:py-10">
+            <div className="container mx-auto px-4 space-y-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                <div className="min-w-0">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn}</h2>
+                  {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
+                </div>
+                <Link
+                  to="/products"
+                  search={(sec.category_id ? { cat: sec.category_id } : {}) as any}
+                  className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  সব দেখুন <ChevronRight className="size-4" />
+                </Link>
               </div>
               <ProductSlider
                 products={items}
