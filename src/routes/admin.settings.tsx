@@ -261,6 +261,12 @@ function HomeSectionsTab({ v, on }: {
       next = { id, enabled: true, type, title_bn: "নতুন পণ্য সেকশন", subtitle_bn: "", category_id: "", limit: 8 };
     } else if (type === "offer") {
       next = { id, enabled: true, type, label_bn: "অফার", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "অর্ডার করুন" };
+    } else if (type === "banner_grid") {
+      next = { id, enabled: true, type, title_bn: "", columns: 3, items: [{ image_url: "", link: "" }] };
+    } else if (type === "feature") {
+      next = { id, enabled: true, type, items: [{ image_url: "", title_bn: "দ্রুত ডেলিভারি", subtitle_bn: "৬০ মিনিটে পৌঁছে যাবে" }] };
+    } else if (type === "brand") {
+      next = { id, enabled: true, type, title_bn: "জনপ্রিয় ব্র্যান্ড", subtitle_bn: "আপনার পছন্দের ব্র্যান্ড বেছে নিন", show_all_link: true };
     } else {
       next = { id, enabled: true, type: "banner", image_url: "", link: "", caption_bn: "" };
     }
@@ -275,6 +281,7 @@ function HomeSectionsTab({ v, on }: {
   };
   const TYPE_LABEL: Record<HomeSectionType, string> = {
     hero: "হিরো", category: "ক্যাটাগরি", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
+    banner_grid: "ব্যানার গ্রিড", feature: "সুবিধা/ট্রাস্ট", brand: "ব্র্যান্ড",
   };
   return (
     <div className="space-y-4">
