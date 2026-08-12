@@ -706,8 +706,8 @@ function Index() {
         );
       })}
 
-      {/* জনপ্রিয় ব্র্যান্ড section */}
-      {!prodLoading && brands.length > 0 && (
+      {/* জনপ্রিয় ব্র্যান্ড (fallback — শুধু যদি অ্যাডমিনে ব্র্যান্ড সেকশন যোগ করা না থাকে) */}
+      {!prodLoading && brands.length > 0 && !homeSections.some((s) => s.type === "brand") && (
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4 space-y-6">
             <div className="flex flex-col items-center text-center">
