@@ -521,16 +521,16 @@ function Index() {
           return (
             <section key={sec.id} id="categories" className="py-10 md:py-14">
               <div className="container mx-auto px-4">
-                <div className="flex flex-col items-center mb-6 gap-2 text-center">
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
-                  {sec.subtitle_bn && <p className="text-muted-foreground text-sm">{sec.subtitle_bn}</p>}
-                </div>
-                <CategoryMarquee categories={categories} catCounts={catCounts} />
-                <div className="flex justify-center mt-6">
-                  <Link to="/categories" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 mb-4">
+                  <div className="min-w-0">
+                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
+                    {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
+                  </div>
+                  <Link to="/categories" className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
                     সব দেখুন <ChevronRight className="size-4" />
                   </Link>
                 </div>
+                <CategoryMarquee categories={categories} catCounts={catCounts} />
               </div>
             </section>
           );
@@ -576,6 +576,82 @@ function Index() {
             </section>
           );
         }
+        if (sec.type === "banner_grid") {
+          const items = (sec.items ?? []).filter((b) => b.image_url);
+          if (items.length === 0) return null;
+          const cols = Math.max(1, Math.min(4, sec.columns || 3));
+          const colMap: Record<number, string> = {
+            1: "md:grid-cols-1", 2: "md:grid-cols-2", 3: "md:grid-cols-3", 4: "md:grid-cols-4",
+          };
+          return (
+            <section key={sec.id} className="py-4 md:py-6">
+              <div className="container mx-auto px-4 space-y-4">
+                {sec.title_bn && (
+                  <h2 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                )}
+                <div className={`grid grid-cols-2 ${colMap[cols]} gap-3 md:gap-4`}>
+                  {items.map((b, i) => {
+                    const el = (
+                      <img src={b.image_url} alt={`banner-${i + 1}`}
+                        className="w-full h-full object-cover rounded-2xl border border-border hover:opacity-95 transition" />
+                    );
+                    return b.link
+                      ? <a key={i} href={b.link} className="block">{el}</a>
+                      : <div key={i}>{el}</div>;
+                  })}
+                </div>
+              </div>
+            </section>
+          );
+        }
+        if (sec.type === "feature") {
+          const items = (sec.items ?? []).filter((f) => f.title_bn || f.image_url);
+          if (items.length === 0) return null;
+          return (
+            <section key={sec.id} className="py-4 md:py-8">
+              <div className="container mx-auto px-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  {items.map((f, i) => (
+                    <div key={i} className="flex items-center gap-3 rounded-2xl bg-card border border-border p-3 md:p-4">
+                      {f.image_url ? (
+                        <img src={f.image_url} alt={f.title_bn} className="size-10 md:size-12 object-contain shrink-0" />
+                      ) : (
+                        <div className="size-10 md:size-12 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gradient-warm)" }}>
+                          <ShieldCheck className="size-5 text-[var(--leaf-deep)]" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-xs md:text-sm font-bold text-[var(--leaf-deep)] leading-tight">{f.title_bn}</div>
+                        {f.subtitle_bn && <div className="text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">{f.subtitle_bn}</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        }
+        if (sec.type === "brand") {
+          if (brands.length === 0) return null;
+          return (
+            <section key={sec.id} className="py-6 md:py-10">
+              <div className="container mx-auto px-4 space-y-4">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn || "জনপ্রিয় ব্র্যান্ড"}</h2>
+                    {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
+                  </div>
+                  {sec.show_all_link !== false && (
+                    <Link to="/brands" className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                      সব দেখুন <ChevronRight className="size-4" />
+                    </Link>
+                  )}
+                </div>
+                <BrandMarquee brands={brands} brandCounts={brandCounts} />
+              </div>
+            </section>
+          );
+        }
         // product
         const items = (sec.category_id
           ? products.filter((p) => p.category_id === sec.category_id)
@@ -606,11 +682,20 @@ function Index() {
         );
         if (items.length === 0) return null;
         return (
-          <section key={sec.id} id="shop" className="py-8 md:py-12">
-            <div className="container mx-auto px-4 space-y-6">
-              <div className="flex flex-col items-center text-center">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
-                {sec.subtitle_bn && <p className="text-muted-foreground text-sm mt-1">{sec.subtitle_bn}</p>}
+          <section key={sec.id} id="shop" className="py-6 md:py-10">
+            <div className="container mx-auto px-4 space-y-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                <div className="min-w-0">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn}</h2>
+                  {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
+                </div>
+                <Link
+                  to="/products"
+                  search={(sec.category_id ? { cat: sec.category_id } : {}) as any}
+                  className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  সব দেখুন <ChevronRight className="size-4" />
+                </Link>
               </div>
               <ProductSlider
                 products={items}
@@ -630,8 +715,8 @@ function Index() {
         );
       })}
 
-      {/* জনপ্রিয় ব্র্যান্ড section */}
-      {!prodLoading && brands.length > 0 && (
+      {/* জনপ্রিয় ব্র্যান্ড (fallback — শুধু যদি অ্যাডমিনে ব্র্যান্ড সেকশন যোগ করা না থাকে) */}
+      {!prodLoading && brands.length > 0 && !homeSections.some((s) => s.type === "brand") && (
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4 space-y-6">
             <div className="flex flex-col items-center text-center">
