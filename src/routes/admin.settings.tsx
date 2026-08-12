@@ -562,6 +562,91 @@ function SectionEditor({ section: s, setItem, cats }: {
       </Section>
     );
   }
+  if (s.type === "banner_grid") {
+    const items = s.items ?? [];
+    const setItems = (next: typeof items) => setItem({ items: next } as any);
+    return (
+      <Section
+        title="ব্যানার গ্রিড সেটিং"
+        right={
+          <button type="button" onClick={() => setItems([...items, { image_url: "", link: "" }])}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+            <Plus className="size-3.5" /> ব্যানার
+          </button>
+        }
+      >
+        <div className="space-y-3">
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="টাইটেল (ঐচ্ছিক)"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+            <Field label="কলাম সংখ্যা (ডেস্কটপ)">
+              <input type="number" min={1} max={4} className={inputCls} value={s.columns ?? 3}
+                onChange={(e) => setItem({ columns: Math.max(1, Math.min(4, Number(e.target.value) || 3)) } as any)} />
+            </Field>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {items.map((b, i) => (
+              <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold">ব্যানার {i + 1}</span>
+                  <button type="button" onClick={() => setItems(items.filter((_, j) => j !== i))}
+                    className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                </div>
+                <ImageInput value={b.image_url} onChange={(url) => setItems(items.map((x, j) => (j === i ? { ...x, image_url: url } : x)))} folder="banner" />
+                <input className={inputCls} placeholder="লিংক (ঐচ্ছিক)" value={b.link}
+                  onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, link: e.target.value } : x)))} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+    );
+  }
+  if (s.type === "feature") {
+    const items = s.items ?? [];
+    const setItems = (next: typeof items) => setItem({ items: next } as any);
+    return (
+      <Section
+        title="সুবিধা / ট্রাস্ট ব্যাজ"
+        right={
+          <button type="button" onClick={() => setItems([...items, { image_url: "", title_bn: "", subtitle_bn: "" }])}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+            <Plus className="size-3.5" /> আইটেম
+          </button>
+        }
+      >
+        <div className="grid md:grid-cols-2 gap-3">
+          {items.map((f, i) => (
+            <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold">আইটেম {i + 1}</span>
+                <button type="button" onClick={() => setItems(items.filter((_, j) => j !== i))}
+                  className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+              </div>
+              <ImageInput value={f.image_url} onChange={(url) => setItems(items.map((x, j) => (j === i ? { ...x, image_url: url } : x)))} folder="feature" />
+              <input className={inputCls} placeholder="টাইটেল" value={f.title_bn}
+                onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, title_bn: e.target.value } : x)))} />
+              <input className={inputCls} placeholder="সাবটাইটেল" value={f.subtitle_bn}
+                onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, subtitle_bn: e.target.value } : x)))} />
+            </div>
+          ))}
+        </div>
+      </Section>
+    );
+  }
+  if (s.type === "brand") {
+    return (
+      <Section title="ব্র্যান্ড সেকশন সেটিং">
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+          <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+        </div>
+        <label className="flex items-center gap-2 text-xs cursor-pointer mt-2">
+          <input type="checkbox" checked={s.show_all_link !== false} onChange={(e) => setItem({ show_all_link: e.target.checked } as any)} className="size-4 accent-primary" />
+          "সব দেখুন" লিংক দেখান
+        </label>
+      </Section>
+    );
+  }
   // banner
   return (
     <Section title="ব্যানার সেটিং">
