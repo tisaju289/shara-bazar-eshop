@@ -79,28 +79,29 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
   const rating = Number(p.reviews_rating ?? 0);
   const reviewCount = Number(p.reviews_count ?? 0);
   return (
-    <article className="group relative rounded-3xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] hover:-translate-y-1 transition-all duration-300">
-      <div className="relative aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
+    <article className="group relative flex flex-col h-full rounded-xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] transition-all duration-300">
+      <div className="relative aspect-square overflow-hidden bg-white">
         {p.image_url ? (
-          <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500" />
+          <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
         ) : (
           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
         )}
         {s.show_tag && p.tag && (
-          <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-1 rounded-full">{p.tag}</span>
+          <span className="absolute top-2 left-2 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-0.5 rounded">{p.tag}</span>
         )}
         {s.show_wishlist && (
-          <button className="absolute bottom-3 right-3 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
+          <button className="absolute top-2 right-2 size-8 rounded-full bg-background/80 grid place-items-center backdrop-blur hover:text-[var(--chili)]" aria-label="Wishlist">
             <Heart className="size-4" />
           </button>
         )}
         {s.show_offer_badge && p.offer_badge && <OfferBadge text={p.offer_badge} settings={s} />}
       </div>
-      <div className="p-3 md:p-4 space-y-1.5 text-center">
-        {meta && <div className="text-[11px] text-muted-foreground">{meta}</div>}
-        {s.show_name && <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2 min-h-[2.5rem]">{p.name_bn}</h3>}
+      <div className="p-2.5 md:p-3 space-y-1 text-left flex flex-col flex-1 border-t border-border">
+        <div className="text-[10px] md:text-[11px] italic text-muted-foreground">ডেলিভারি ১-২ ঘণ্টা</div>
+        {s.show_name && <h3 className="font-semibold text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.3rem]">{p.name_bn}</h3>}
+        {meta && <div className="text-[10px] md:text-[11px] text-muted-foreground line-clamp-1">{meta}</div>}
         {s.show_reviews && reviewCount > 0 && (
-          <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <div className="flex">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star key={i} className={`size-3 ${i <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
@@ -110,20 +111,20 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
           </div>
         )}
         {s.show_price && (
-          <div className="flex items-baseline gap-1.5 pt-1 justify-center">
-            <span className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
+          <div className="flex items-baseline gap-1.5 pt-0.5">
+            <span className="text-base md:text-lg font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
             {s.show_old_price && p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
           </div>
         )}
         {(s.show_add_to_cart || s.show_buy_now) && (
-          <div className={`grid ${s.show_add_to_cart && s.show_buy_now ? "grid-cols-2" : "grid-cols-1"} gap-2 pt-1`}>
+          <div className={`grid ${s.show_add_to_cart && s.show_buy_now ? "grid-cols-2" : "grid-cols-1"} gap-1.5 pt-1.5 mt-auto`}>
             {s.show_add_to_cart && (
               qty === 0 ? (
-                <button onClick={() => add(p.id)} className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold inline-flex items-center justify-center gap-1 hover:bg-secondary/80">
+                <button onClick={() => add(p.id)} className="h-8 rounded-lg border border-primary bg-transparent text-primary text-xs font-bold inline-flex items-center justify-center gap-1 hover:bg-primary hover:text-primary-foreground transition">
                   <Plus className="size-3.5" /> {s.add_to_cart_text_bn}
                 </button>
               ) : (
-                <div className="flex items-center justify-between bg-secondary rounded-xl text-secondary-foreground h-9 px-1">
+                <div className="flex items-center justify-between border border-primary text-primary rounded-lg h-8 px-1">
                   <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
                   <span className="text-xs font-bold">{qty}</span>
                   <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
@@ -131,7 +132,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
               )
             )}
             {s.show_buy_now && (
-              <button onClick={onBuyNow} className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90 shadow-[var(--shadow-soft)]">
+              <button onClick={onBuyNow} className="h-8 rounded-lg bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90">
                 {s.buy_now_text_bn}
               </button>
             )}
