@@ -507,11 +507,65 @@ function Index() {
       )}
       {!prodLoading && homeSections.map((sec) => {
         if (sec.type === "hero") {
+          const sideCards = (sec.side_cards ?? []).filter((c) => c.image_url);
           return (
             <section key={sec.id} className="relative overflow-hidden">
               <div className="container mx-auto px-4 py-6 md:py-10">
-                <div className="relative">
-                  <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                {sideCards.length > 0 ? (
+                  <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+                    <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                      {sideCards.slice(0, 2).map((c, i) => {
+                        const el = (
+                          <img src={c.image_url} alt={`offer-${i + 1}`}
+                            className="w-full h-full object-cover rounded-2xl border border-border hover:opacity-95 transition" />
+                        );
+                        return c.link
+                          ? <a key={i} href={c.link} className="block min-h-0">{el}</a>
+                          : <div key={i} className="min-h-0">{el}</div>;
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        }
+        if (sec.type === "category_tiles") {
+          const tiles = (sec.items ?? []).filter((t) => t.image_url || t.label_bn);
+          if (tiles.length === 0) return null;
+          const cols = Math.max(3, Math.min(6, sec.columns || 5));
+          const colMap: Record<number, string> = {
+            3: "md:grid-cols-3", 4: "md:grid-cols-4", 5: "md:grid-cols-5", 6: "md:grid-cols-6",
+          };
+          return (
+            <section key={sec.id} className="py-4 md:py-6">
+              <div className="container mx-auto px-4 space-y-4">
+                {sec.title_bn && (
+                  <h2 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                )}
+                <div className={`grid grid-cols-2 ${colMap[cols]} gap-3 md:gap-4`}>
+                  {tiles.map((t, i) => {
+                    const el = (
+                      <div className="relative rounded-2xl overflow-hidden border border-border bg-card">
+                        <div className="aspect-[4/3] w-full">
+                          {t.image_url
+                            ? <img src={t.image_url} alt={t.label_bn} className="w-full h-full object-cover" />
+                            : <div className="w-full h-full grid place-items-center text-4xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>}
+                        </div>
+                        {t.label_bn && (
+                          <div className="absolute inset-x-3 bottom-3 rounded-full bg-[var(--mango,theme(colors.amber.400))] bg-amber-400 text-center text-[11px] md:text-sm font-bold py-1.5 text-[var(--leaf-deep)] shadow">
+                            {t.label_bn}
+                          </div>
+                        )}
+                      </div>
+                    );
+                    return t.link ? <a key={i} href={t.link}>{el}</a> : <div key={i}>{el}</div>;
+                  })}
                 </div>
               </div>
             </section>

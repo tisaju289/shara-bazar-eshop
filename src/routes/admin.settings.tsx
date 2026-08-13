@@ -257,6 +257,8 @@ function HomeSectionsTab({ v, on }: {
       next = { id, enabled: true, type, badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "", subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_primary_enabled: true, cta_secondary_bn: "দেখুন", cta_secondary_enabled: true, image_url: "", images: [] };
     } else if (type === "category") {
       next = { id, enabled: true, type, title_bn: "জনপ্রিয় ক্যাটাগরি", subtitle_bn: "" };
+    } else if (type === "category_tiles") {
+      next = { id, enabled: true, type, title_bn: "", columns: 5, items: [{ image_url: "", label_bn: "", link: "" }] };
     } else if (type === "product") {
       next = { id, enabled: true, type, title_bn: "নতুন পণ্য সেকশন", subtitle_bn: "", category_id: "", limit: 8 };
     } else if (type === "offer") {
@@ -280,7 +282,7 @@ function HomeSectionsTab({ v, on }: {
     on(n);
   };
   const TYPE_LABEL: Record<HomeSectionType, string> = {
-    hero: "হিরো", category: "ক্যাটাগরি", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
+    hero: "হিরো", category: "ক্যাটাগরি", category_tiles: "ক্যাটাগরি টাইল", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
     banner_grid: "ব্যানার গ্রিড", feature: "সুবিধা/ট্রাস্ট", brand: "ব্র্যান্ড",
   };
   return (
@@ -495,6 +497,36 @@ function SectionEditor({ section: s, setItem, cats }: {
             <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
           </Field>
         </Section>
+
+        <Section
+          title="পাশের অফার কার্ড (২টি)"
+          right={
+            <button type="button"
+              onClick={() => setItem({ side_cards: [...(s.side_cards ?? []), { image_url: "", link: "" }].slice(0, 2) } as any)}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+              <Plus className="size-3.5" /> কার্ড
+            </button>
+          }
+        >
+          <p className="text-[11px] text-muted-foreground">স্লাইডারের ডান পাশে সর্বোচ্চ ২টি অফার কার্ড দেখাবে (Shwapno স্টাইল)। খালি রাখলে স্লাইডার ফুল-উইথ থাকবে।</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            {(s.side_cards ?? []).map((c, i) => (
+              <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold">কার্ড {i + 1}</span>
+                  <button type="button"
+                    onClick={() => setItem({ side_cards: (s.side_cards ?? []).filter((_, j) => j !== i) } as any)}
+                    className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                </div>
+                <ImageInput value={c.image_url}
+                  onChange={(u) => setItem({ side_cards: (s.side_cards ?? []).map((x, j) => (j === i ? { ...x, image_url: u } : x)) } as any)}
+                  folder="banner" />
+                <input className={inputCls} value={c.link} placeholder="লিংক (ঐচ্ছিক)"
+                  onChange={(e) => setItem({ side_cards: (s.side_cards ?? []).map((x, j) => (j === i ? { ...x, link: e.target.value } : x)) } as any)} />
+              </div>
+            ))}
+          </div>
+        </Section>
       </div>
     );
   }
@@ -644,6 +676,46 @@ function SectionEditor({ section: s, setItem, cats }: {
           <input type="checkbox" checked={s.show_all_link !== false} onChange={(e) => setItem({ show_all_link: e.target.checked } as any)} className="size-4 accent-primary" />
           "সব দেখুন" লিংক দেখান
         </label>
+      </Section>
+    );
+  }
+  if (s.type === "category_tiles") {
+    const items = s.items ?? [];
+    const setItems = (n: typeof items) => setItem({ items: n } as any);
+    return (
+      <Section
+        title="ক্যাটাগরি টাইল সেটিং"
+        right={
+          <button type="button" onClick={() => setItems([...items, { image_url: "", label_bn: "", link: "" }])}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+            <Plus className="size-3.5" /> টাইল
+          </button>
+        }
+      >
+        <div className="grid md:grid-cols-2 gap-3">
+          <Field label="টাইটেল (ঐচ্ছিক)"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+          <Field label="কলাম (ডেস্কটপ)">
+            <select className={inputCls} value={s.columns ?? 5} onChange={(e) => setItem({ columns: Number(e.target.value) } as any)}>
+              {[3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </Field>
+        </div>
+        <div className="grid md:grid-cols-2 gap-3 mt-3">
+          {items.map((t, i) => (
+            <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold">টাইল {i + 1}</span>
+                <button type="button" onClick={() => setItems(items.filter((_, j) => j !== i))}
+                  className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+              </div>
+              <ImageInput value={t.image_url} onChange={(u) => setItems(items.map((x, j) => (j === i ? { ...x, image_url: u } : x)))} folder="banner" />
+              <input className={inputCls} value={t.label_bn} placeholder="লেবেল (যেমন: ডিম)"
+                onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, label_bn: e.target.value } : x)))} />
+              <input className={inputCls} value={t.link} placeholder="/products?cat=…"
+                onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, link: e.target.value } : x)))} />
+            </div>
+          ))}
+        </div>
       </Section>
     );
   }

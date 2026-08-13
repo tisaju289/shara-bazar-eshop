@@ -82,6 +82,7 @@ export type CustomField = {
 export type HomeSectionType =
   | "hero"
   | "category"
+  | "category_tiles"
   | "product"
   | "offer"
   | "banner"
@@ -89,6 +90,7 @@ export type HomeSectionType =
   | "feature"
   | "brand";
 type Base = { id: string; enabled: boolean };
+export type HeroSideCard = { image_url: string; link: string };
 export type HeroSection = Base & {
   type: "hero";
   badge_bn: string;
@@ -108,11 +110,19 @@ export type HeroSection = Base & {
   side_width_pct?: number; // e.g. 22
   side_width?: string; // CSS value e.g. "300px" or "25%" — overrides side_width_pct grid track if set
   side_height?: string; // CSS value e.g. "400px" or "100%" — default stretches to slider height
+  side_cards?: HeroSideCard[]; // Shwapno-style: up to 2 offer cards stacked beside the slider
 };
 export type CategorySection = Base & {
   type: "category";
   title_bn: string;
   subtitle_bn: string;
+};
+export type CategoryTileItem = { image_url: string; label_bn: string; link: string };
+export type CategoryTilesSection = Base & {
+  type: "category_tiles";
+  title_bn: string;
+  columns: number; // desktop columns (3-6)
+  items: CategoryTileItem[];
 };
 export type ProductSection = Base & {
   type: "product";
@@ -160,6 +170,7 @@ export type BrandSection = Base & {
 export type HomeSection =
   | HeroSection
   | CategorySection
+  | CategoryTilesSection
   | ProductSection
   | OfferSection
   | BannerSection
