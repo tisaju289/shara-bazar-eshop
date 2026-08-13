@@ -497,6 +497,36 @@ function SectionEditor({ section: s, setItem, cats }: {
             <input className={inputCls} value={s.aspect_ratio ?? "21/9"} onChange={(e) => setItem({ aspect_ratio: e.target.value } as any)} placeholder="21/9" />
           </Field>
         </Section>
+
+        <Section
+          title="পাশের অফার কার্ড (২টি)"
+          right={
+            <button type="button"
+              onClick={() => setItem({ side_cards: [...(s.side_cards ?? []), { image_url: "", link: "" }].slice(0, 2) } as any)}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+              <Plus className="size-3.5" /> কার্ড
+            </button>
+          }
+        >
+          <p className="text-[11px] text-muted-foreground">স্লাইডারের ডান পাশে সর্বোচ্চ ২টি অফার কার্ড দেখাবে (Shwapno স্টাইল)। খালি রাখলে স্লাইডার ফুল-উইথ থাকবে।</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            {(s.side_cards ?? []).map((c, i) => (
+              <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold">কার্ড {i + 1}</span>
+                  <button type="button"
+                    onClick={() => setItem({ side_cards: (s.side_cards ?? []).filter((_, j) => j !== i) } as any)}
+                    className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                </div>
+                <ImageInput value={c.image_url}
+                  onChange={(u) => setItem({ side_cards: (s.side_cards ?? []).map((x, j) => (j === i ? { ...x, image_url: u } : x)) } as any)}
+                  folder="banner" />
+                <input className={inputCls} value={c.link} placeholder="লিংক (ঐচ্ছিক)"
+                  onChange={(e) => setItem({ side_cards: (s.side_cards ?? []).map((x, j) => (j === i ? { ...x, link: e.target.value } : x)) } as any)} />
+              </div>
+            ))}
+          </div>
+        </Section>
       </div>
     );
   }
