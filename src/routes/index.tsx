@@ -843,6 +843,22 @@ function Index() {
             </section>
           );
         }
+        if (sec.type === "deal") {
+          return (
+            <DealBlock
+              key={sec.id}
+              sec={sec}
+              products={products}
+              categories={categories}
+              brands={brands}
+              cart={cart}
+              add={add}
+              sub={sub}
+              onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+              cardSettings={settings?.product_card}
+            />
+          );
+        }
         // product
         const items = (sec.category_id
           ? products.filter((p) => p.category_id === sec.category_id)
