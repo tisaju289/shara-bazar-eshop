@@ -551,6 +551,14 @@ function SectionEditor({ section: s, setItem, cats }: {
   if (s.type === "product") {
     return (
       <Section title="পণ্য সেকশন সেটিং">
+        <div className="grid md:grid-cols-2 gap-3 mb-3">
+          <Field label="হেডার ব্যানার ইমেজ (ঐচ্ছিক)" hint="সেকশনের উপরে চওড়া ব্যানার দেখাবে">
+            <ImageInput value={(s as any).banner_image_url ?? ""} onChange={(u) => setItem({ banner_image_url: u } as any)} folder="banner" />
+          </Field>
+          <Field label="ব্যানার লিংক (ঐচ্ছিক)">
+            <input className={inputCls} value={(s as any).banner_link ?? ""} onChange={(e) => setItem({ banner_link: e.target.value } as any)} />
+          </Field>
+        </div>
         <div className="grid md:grid-cols-2 gap-3">
           <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
           <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
