@@ -84,6 +84,7 @@ export type HomeSectionType =
   | "category"
   | "category_tiles"
   | "product"
+  | "deal"
   | "offer"
   | "banner"
   | "banner_grid"
@@ -133,6 +134,23 @@ export type ProductSection = Base & {
   display?: "slider" | "marquee" | "grid";
   rows?: number;    // grid mode
   columns?: number; // grid mode (per row, desktop)
+  banner_image_url?: string; // wide banner strip above the products
+  banner_link?: string;
+  sort?: "newest" | "price_asc" | "price_desc" | "discount" | "random";
+};
+export type DealTab = { label_bn: string; category_id: string };
+export type DealSection = Base & {
+  type: "deal";
+  title_bn: string;
+  side_image_url: string;
+  side_link: string;
+  side_position?: "left" | "right";
+  countdown_enabled?: boolean;
+  end_at?: string; // ISO datetime
+  daily_reset?: boolean; // restart countdown every day
+  tabs: DealTab[];
+  limit: number;
+  bg_color?: string;
 };
 export type OfferSection = Base & {
   type: "offer";
@@ -172,6 +190,7 @@ export type HomeSection =
   | CategorySection
   | CategoryTilesSection
   | ProductSection
+  | DealSection
   | OfferSection
   | BannerSection
   | BannerGridSection
