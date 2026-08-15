@@ -891,6 +891,15 @@ function Index() {
         return (
           <section key={sec.id} id="shop" className="py-6 md:py-10">
             <div className="container mx-auto px-4 space-y-4">
+              {sec.banner_image_url && (
+                sec.banner_link ? (
+                  <a href={sec.banner_link} className="block rounded-2xl overflow-hidden">
+                    <img src={sec.banner_image_url} alt={sec.title_bn} className="w-full object-cover" loading="lazy" />
+                  </a>
+                ) : (
+                  <img src={sec.banner_image_url} alt={sec.title_bn} className="w-full rounded-2xl object-cover" loading="lazy" />
+                )
+              )}
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
                 <div className="min-w-0">
                   <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn}</h2>
