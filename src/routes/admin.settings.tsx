@@ -269,6 +269,14 @@ function HomeSectionsTab({ v, on }: {
       next = { id, enabled: true, type, items: [{ image_url: "", title_bn: "দ্রুত ডেলিভারি", subtitle_bn: "৬০ মিনিটে পৌঁছে যাবে" }] };
     } else if (type === "brand") {
       next = { id, enabled: true, type, title_bn: "জনপ্রিয় ব্র্যান্ড", subtitle_bn: "আপনার পছন্দের ব্র্যান্ড বেছে নিন", show_all_link: true };
+    } else if (type === "deal") {
+      next = {
+        id, enabled: true, type,
+        title_bn: "HAPPY HOUR!!!",
+        side_image_url: "", side_link: "", side_position: "left",
+        countdown_enabled: true, end_at: "", daily_reset: true,
+        tabs: [], limit: 12, bg_color: "",
+      };
     } else {
       next = { id, enabled: true, type: "banner", image_url: "", link: "", caption_bn: "" };
     }
@@ -283,7 +291,7 @@ function HomeSectionsTab({ v, on }: {
   };
   const TYPE_LABEL: Record<HomeSectionType, string> = {
     hero: "হিরো", category: "ক্যাটাগরি", category_tiles: "ক্যাটাগরি টাইল", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
-    banner_grid: "ব্যানার গ্রিড", feature: "সুবিধা/ট্রাস্ট", brand: "ব্র্যান্ড",
+    banner_grid: "ব্যানার গ্রিড", feature: "সুবিধা/ট্রাস্ট", brand: "ব্র্যান্ড", deal: "ডিল (কাউন্টডাউন)",
   };
   return (
     <div className="space-y-4">
@@ -543,6 +551,14 @@ function SectionEditor({ section: s, setItem, cats }: {
   if (s.type === "product") {
     return (
       <Section title="পণ্য সেকশন সেটিং">
+        <div className="grid md:grid-cols-2 gap-3 mb-3">
+          <Field label="হেডার ব্যানার ইমেজ (ঐচ্ছিক)" hint="সেকশনের উপরে চওড়া ব্যানার দেখাবে">
+            <ImageInput value={(s as any).banner_image_url ?? ""} onChange={(u) => setItem({ banner_image_url: u } as any)} folder="banner" />
+          </Field>
+          <Field label="ব্যানার লিংক (ঐচ্ছিক)">
+            <input className={inputCls} value={(s as any).banner_link ?? ""} onChange={(e) => setItem({ banner_link: e.target.value } as any)} />
+          </Field>
+        </div>
         <div className="grid md:grid-cols-2 gap-3">
           <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
           <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
@@ -715,6 +731,76 @@ function SectionEditor({ section: s, setItem, cats }: {
                 onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, link: e.target.value } : x)))} />
             </div>
           ))}
+        </div>
+      </Section>
+    );
+  }
+  if (s.type === "deal") {
+    const tabs = s.tabs ?? [];
+    const setTabs = (n: typeof tabs) => setItem({ tabs: n } as any);
+    return (
+      <Section
+        title="ডিল সেকশন সেটিং"
+        right={
+          <button type="button" onClick={() => setTabs([...tabs, { label_bn: "", category_id: "" }])}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
+            <Plus className="size-3.5" /> ট্যাব
+          </button>
+        }
+      >
+        <div className="space-y-3">
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} placeholder="HAPPY HOUR!!!" /></Field>
+            <Field label="ব্যাকগ্রাউন্ড কালার (ঐচ্ছিক)"><input className={inputCls} value={s.bg_color ?? ""} onChange={(e) => setItem({ bg_color: e.target.value } as any)} placeholder="#f3f4f6" /></Field>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="সাইড ব্যানার ইমেজ"><ImageInput value={s.side_image_url} onChange={(u) => setItem({ side_image_url: u } as any)} folder="banner" /></Field>
+            <div className="space-y-2">
+              <Field label="সাইড ব্যানার লিংক (ঐচ্ছিক)"><input className={inputCls} value={s.side_link} onChange={(e) => setItem({ side_link: e.target.value } as any)} /></Field>
+              <Field label="ব্যানার পজিশন">
+                <select className={inputCls} value={s.side_position ?? "left"} onChange={(e) => setItem({ side_position: e.target.value } as any)}>
+                  <option value="left">বাম পাশে</option>
+                  <option value="right">ডান পাশে</option>
+                </select>
+              </Field>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-3">
+            <Field label="কাউন্টডাউন শেষ সময়" hint="খালি রাখলে আজ রাত ১২টা পর্যন্ত">
+              <input type="datetime-local" className={inputCls} value={s.end_at ?? ""} onChange={(e) => setItem({ end_at: e.target.value } as any)} />
+            </Field>
+            <Field label="পণ্য সংখ্যা">
+              <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 12) } as any)} />
+            </Field>
+            <div className="space-y-2 pt-5">
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" checked={s.countdown_enabled !== false} onChange={(e) => setItem({ countdown_enabled: e.target.checked } as any)} className="size-4 accent-primary" />
+                কাউন্টডাউন দেখান
+              </label>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" checked={!!s.daily_reset} onChange={(e) => setItem({ daily_reset: e.target.checked } as any)} className="size-4 accent-primary" />
+                প্রতিদিন রিসেট হবে
+              </label>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {tabs.map((t, i) => (
+              <div key={i} className="rounded-xl border border-border p-2 space-y-2 bg-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold">ট্যাব {i + 1}</span>
+                  <button type="button" onClick={() => setTabs(tabs.filter((_, j) => j !== i))}
+                    className="size-6 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3" /></button>
+                </div>
+                <input className={inputCls} placeholder="ট্যাব নাম" value={t.label_bn}
+                  onChange={(e) => setTabs(tabs.map((x, j) => (j === i ? { ...x, label_bn: e.target.value } : x)))} />
+                <select className={inputCls} value={t.category_id}
+                  onChange={(e) => setTabs(tabs.map((x, j) => (j === i ? { ...x, category_id: e.target.value } : x)))}>
+                  <option value="">— সব ক্যাটাগরি —</option>
+                  {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
         </div>
       </Section>
     );
