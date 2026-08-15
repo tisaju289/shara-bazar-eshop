@@ -98,6 +98,115 @@ function CountdownBox({ value, label }: { value: number; label: string }) {
 type BrandItem = { id: string; name_bn: string; image_url: string | null; slug: string };
 
 function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
+  return <BrandMarqueeInner brands={brands} brandCounts={brandCounts} />;
+}
+
+function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow, cardSettings }: {
+  sec: any;
+  products: any[];
+  categories: any[];
+  brands: any[];
+  cart: Record<string, number>;
+  add: (id: string) => void;
+  sub: (id: string) => void;
+  onBuyNow: (id: string) => void;
+  cardSettings: any;
+}) {
+  const tabs: { label_bn: string; category_id: string }[] = Array.isArray(sec.tabs) ? sec.tabs : [];
+  const [active, setActive] = useState(0);
+  const target = useMemo(() => {
+    if (sec.countdown_enabled === false) return null;
+    if (sec.end_at) {
+      const d = new Date(sec.end_at);
+      if (isNaN(d.getTime())) return null;
+      if (sec.daily_reset) {
+        const now = new Date();
+        const next = new Date(now);
+        next.setHours(d.getHours(), d.getMinutes(), d.getSeconds(), 0);
+        if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
+        return next;
+      }
+      return d;
+    }
+    const end = new Date();
+    end.setHours(23, 59, 59, 0);
+    return end;
+  }, [sec.end_at, sec.daily_reset, sec.countdown_enabled]);
+  const cd = useCountdown(target);
+
+  const catId = tabs[active]?.category_id ?? "";
+  const items = (catId ? products.filter((p) => p.category_id === catId) : products).slice(0, sec.limit || 12);
+  if (items.length === 0) return null;
+  const left = (sec.side_position ?? "left") === "left";
+
+  const banner = sec.side_image_url ? (
+    <div className="md:w-[240px] lg:w-[280px] shrink-0">
+      {sec.side_link ? (
+        <a href={sec.side_link} className="block rounded-2xl overflow-hidden">
+          <img src={sec.side_image_url} alt={sec.title_bn || ""} className="w-full h-full object-cover" loading="lazy" />
+        </a>
+      ) : (
+        <img src={sec.side_image_url} alt={sec.title_bn || ""} className="w-full rounded-2xl object-cover" loading="lazy" />
+      )}
+    </div>
+  ) : null;
+
+  return (
+    <section className="py-6 md:py-10">
+      <div className="container mx-auto px-4">
+        <div className="rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+            {cd && (
+              <div className="flex items-end gap-1.5">
+                <CountdownBox value={cd.hours} label="HRS" />
+                <CountdownBox value={cd.minutes} label="MIN" />
+                <CountdownBox value={cd.seconds} label="SEC" />
+              </div>
+            )}
+            {tabs.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto no-scrollbar ml-auto">
+                {tabs.map((t, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActive(i)}
+                    className={`h-8 px-3 rounded-full text-xs font-semibold whitespace-nowrap border transition ${
+                      i === active
+                        ? "bg-primary text-primary-foreground border-transparent"
+                        : "bg-background text-foreground border-border hover:border-primary"
+                    }`}
+                  >
+                    {t.label_bn}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col md:flex-row gap-4">
+            {left && banner}
+            <div className="min-w-0 flex-1">
+              <ProductSlider
+                products={items}
+                categories={categories}
+                brands={brands}
+                cart={cart}
+                add={add}
+                sub={sub}
+                onBuyNow={onBuyNow}
+                settings={cardSettings}
+                display="slider"
+              />
+            </div>
+            {!left && banner}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BrandMarqueeInner({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
   const ref = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: -1 | 1) => {
