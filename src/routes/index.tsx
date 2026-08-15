@@ -67,6 +67,34 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   truck: Truck, shield: ShieldCheck, clock: Clock, leaf: Leaf, star: Star,
 };
 
+function useCountdown(target: Date | null) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!target) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [target?.getTime()]);
+  if (!target) return null;
+  const diff = Math.max(0, target.getTime() - now);
+  const totalSec = Math.floor(diff / 1000);
+  return {
+    hours: Math.floor(totalSec / 3600),
+    minutes: Math.floor((totalSec % 3600) / 60),
+    seconds: totalSec % 60,
+  };
+}
+
+function CountdownBox({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center leading-none">
+      <span className="min-w-[2.2rem] rounded-md bg-[var(--chili,#e11d48)] bg-red-600 text-white text-sm md:text-base font-extrabold px-1.5 py-1 text-center tabular-nums">
+        {String(value).padStart(2, "0")}
+      </span>
+      <span className="text-[8px] md:text-[9px] font-bold text-muted-foreground mt-0.5 tracking-wide">{label}</span>
+    </div>
+  );
+}
+
 type BrandItem = { id: string; name_bn: string; image_url: string | null; slug: string };
 
 function BrandMarquee({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
