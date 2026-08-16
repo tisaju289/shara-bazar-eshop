@@ -358,6 +358,11 @@ export function useSiteSettings() {
       for (const row of (data ?? []) as { key: string; value: any }[]) {
         map[row.key] = row.value;
       }
+      // The Meta CAPI token lives in a private row that only admins can read.
+      if (map.tracking_secret?.meta_capi_token) {
+        map.tracking = { ...map.tracking, meta_capi_token: map.tracking_secret.meta_capi_token };
+      }
+      delete map.tracking_secret;
       const settings = map as SiteSettings;
       settings.home_sections = normalizeHomeSections(
         settings.home_sections,
