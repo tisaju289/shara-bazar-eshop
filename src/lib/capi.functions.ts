@@ -29,17 +29,23 @@ function sha256(v?: string) {
 export const sendMetaCapi = createServerFn({ method: "POST" })
   .inputValidator((input: CapiInput) => input)
   .handler(async ({ data }) => {
-    // Load tracking config from site_settings (publishable key is fine; the
-    // row is publicly readable but the token only powers server-side calls).
+    // The access token lives in a private row readable only with the service
+    // role, so it never reaches the browser.
     const url = process.env.SUPABASE_URL!;
-    const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-    const sb = createClient(url, key);
-    const { data: row } = await sb
+    const key =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY!;
+    const sb = createClient(url, key, { auth: { persistSession: false } });
+    const { data: rows } = await sb
       .from("site_settings")
-      .select("value")
-      .eq("key", "tracking")
-      .maybeSingle();
-    const cfg = (row?.value ?? {}) as {
+      .select("key,value")
+      .in("key", ["tracking", "tracking_secret"]);
+    const byKey = Object.fromEntries(
+      ((rows ?? []) as { key: string; value: any }[]).map((r) => [r.key, r.value ?? {}]),
+    );
+    const cfg = {
+      ...(byKey["tracking"] ?? {}),
+      ...(byKey["tracking_secret"] ?? {}),
+    } as {
       enabled?: boolean;
       meta_pixel_id?: string;
       meta_capi_token?: string;
