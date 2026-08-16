@@ -51,6 +51,12 @@ function SettingsPage() {
       ? ["checkout", "delivery"]
       : [tab];
     const rows = keys.map((k) => ({ key: k, value: (draft as any)[k] }));
+    if (tab === "tracking") {
+      // Keep the CAPI access token out of the publicly readable row.
+      const { meta_capi_token, ...publicTracking } = (draft as any).tracking ?? {};
+      rows[0] = { key: "tracking", value: publicTracking };
+      rows.push({ key: "tracking_secret", value: { meta_capi_token: meta_capi_token ?? "" } });
+    }
     const { error } = await (supabase as any)
       .from("site_settings")
       .upsert(rows, { onConflict: "key" });
