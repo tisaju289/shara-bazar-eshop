@@ -135,7 +135,8 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   const cd = useCountdown(target);
 
   const catId = tabs[active]?.category_id ?? "";
-  const items = (catId ? products.filter((p) => p.category_id === catId) : products).slice(0, sec.limit || 12);
+  const filtered = catId ? products.filter((p) => p.category_id === catId) : products;
+  const items = (filtered.length ? filtered : products).slice(0, sec.limit || 12);
   if (items.length === 0) return null;
   const left = (sec.side_position ?? "left") === "left";
 
