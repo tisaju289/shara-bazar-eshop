@@ -119,10 +119,6 @@ export function CartDrawer() {
       }
     }
     setPlacing(true);
-    const items = Object.entries(checkoutItems).map(([id, q]) => {
-      const p = products.find((x) => x.id === id);
-      return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
-    });
     const extras = customFields
       .map((cf) => {
         const val = (customValues[cf.id] ?? "").trim();
