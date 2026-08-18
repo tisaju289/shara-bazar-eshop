@@ -95,7 +95,7 @@ function CategoryPage() {
   const { data: allCatProducts = [] } = useQuery({
     queryKey: ["products", "public", "cat-counts"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("id,category_id").eq("is_active", true);
+      const { data } = await supabase.from("products").select("id,category_id").eq("is_active", true).range(0, 9999);
       return (data as { id: string; category_id: string | null }[]) ?? [];
     },
   });
