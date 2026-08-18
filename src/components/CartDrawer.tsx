@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Loader2, Minus, Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { placeOrder as placeOrderFn } from "@/lib/orders.functions";
 import { useCart } from "@/hooks/useCart";
 import { useCartDrawerController } from "@/hooks/useCartDrawer";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -34,6 +36,7 @@ export function CartDrawer() {
   const { open: cartOpen, setOpen: setCartOpen } = useCartDrawerController();
   const [cart, setCart] = useCart();
   const { data: products = [] } = useProductsForCart();
+  const submitOrder = useServerFn(placeOrderFn);
   const { data: settings } = useSiteSettings();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
@@ -116,10 +119,6 @@ export function CartDrawer() {
       }
     }
     setPlacing(true);
-    const items = Object.entries(checkoutItems).map(([id, q]) => {
-      const p = products.find((x) => x.id === id);
-      return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
-    });
     const extras = customFields
       .map((cf) => {
         const val = (customValues[cf.id] ?? "").trim();
@@ -128,21 +127,22 @@ export function CartDrawer() {
       .filter(Boolean)
       .join("\n");
     const fullAddress = extras ? `${orderForm.address.trim()}\n\n${extras}` : orderForm.address.trim();
-    const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
-      .from("orders")
-      .insert({
-        customer_name: orderForm.name.trim(),
-        phone: orderForm.phone.trim(),
-        address: fullAddress,
-        items,
-        total: grandTotal,
-        payment_method: "cod",
+    try {
+      await submitOrder({
+        data: {
+          name: orderForm.name.trim(),
+          phone: orderForm.phone.trim(),
+          address: fullAddress,
+          items: Object.entries(checkoutItems).map(([id, q]) => ({ id, qty: q })),
+          delivery_index: deliveryIdx,
+        },
       });
-    setPlacing(false);
-    if (error) {
-      setOrderError(error.message);
+    } catch (e) {
+      setPlacing(false);
+      setOrderError(e instanceof Error ? e.message : "অর্ডার করা যায়নি");
       return;
     }
+    setPlacing(false);
     setCart((c) => {
       const next = { ...c };
       for (const id of Object.keys(checkoutItems)) delete next[id];

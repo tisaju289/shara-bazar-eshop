@@ -1,5 +1,6 @@
 import { Plus, Minus, Heart, Star } from "lucide-react";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
+import { thumb } from "@/lib/img";
 
 export type ProductCardData = {
   id: string;
@@ -82,7 +83,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
     <article className="group relative flex flex-col h-full rounded-xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] transition-all duration-300">
       <div className="relative aspect-square overflow-hidden bg-white">
         {p.image_url ? (
-          <img src={p.image_url} alt={p.name_bn} loading="lazy" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
+          <img src={thumb(p.image_url, 400)} alt={p.name_bn} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
         ) : (
           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
         )}

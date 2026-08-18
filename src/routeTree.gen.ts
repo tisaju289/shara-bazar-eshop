@@ -9,36 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProductsRouteImport } from './routes/products'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as CategoriesRouteImport } from './routes/categories'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as BrandsIndexRouteImport } from './routes/brands.index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ProductsRouteImport } from './routes/products'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as SubcatSubcatIdRouteImport } from './routes/subcat.$subcatId'
-import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
-import { Route as BrandsBrandIdRouteImport } from './routes/brands.$brandId'
-import { Route as AdminSubcategoriesRouteImport } from './routes/admin.subcategories'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminProductsRouteImport } from './routes/admin.products'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
-import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSubcategoriesRouteImport } from './routes/admin.subcategories'
+import { Route as BrandsIndexRouteImport } from './routes/brands.index'
+import { Route as BrandsBrandIdRouteImport } from './routes/brands.$brandId'
+import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
+import { Route as SubcatSubcatIdRouteImport } from './routes/subcat.$subcatId'
 
-const ProductsRoute = ProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriesRoute = CategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -46,14 +36,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BrandsIndexRoute = BrandsIndexRouteImport.update({
-  id: '/brands/',
-  path: '/brands/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -61,39 +56,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const SubcatSubcatIdRoute = SubcatSubcatIdRouteImport.update({
-  id: '/subcat/$subcatId',
-  path: '/subcat/$subcatId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatCatIdRoute = CatCatIdRouteImport.update({
-  id: '/cat/$catId',
-  path: '/cat/$catId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BrandsBrandIdRoute = BrandsBrandIdRouteImport.update({
-  id: '/brands/$brandId',
-  path: '/brands/$brandId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSubcategoriesRoute = AdminSubcategoriesRouteImport.update({
-  id: '/subcategories',
-  path: '/subcategories',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProductsRoute = AdminProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
+const AdminBrandsRoute = AdminBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
@@ -101,10 +66,45 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminBrandsRoute = AdminBrandsRouteImport.update({
-  id: '/brands',
-  path: '/brands',
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSubcategoriesRoute = AdminSubcategoriesRouteImport.update({
+  id: '/subcategories',
+  path: '/subcategories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const BrandsIndexRoute = BrandsIndexRouteImport.update({
+  id: '/brands/',
+  path: '/brands/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandsBrandIdRoute = BrandsBrandIdRouteImport.update({
+  id: '/brands/$brandId',
+  path: '/brands/$brandId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatCatIdRoute = CatCatIdRouteImport.update({
+  id: '/cat/$catId',
+  path: '/cat/$catId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubcatSubcatIdRoute = SubcatSubcatIdRouteImport.update({
+  id: '/subcat/$subcatId',
+  path: '/subcat/$subcatId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -231,25 +231,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/products': {
-      id: '/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof ProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/categories': {
-      id: '/categories'
-      path: '/categories'
-      fullPath: '/categories'
-      preLoaderRoute: typeof CategoriesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -259,18 +245,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/brands/': {
-      id: '/brands/'
-      path: '/brands'
-      fullPath: '/brands/'
-      preLoaderRoute: typeof BrandsIndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -280,53 +273,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/subcat/$subcatId': {
-      id: '/subcat/$subcatId'
-      path: '/subcat/$subcatId'
-      fullPath: '/subcat/$subcatId'
-      preLoaderRoute: typeof SubcatSubcatIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cat/$catId': {
-      id: '/cat/$catId'
-      path: '/cat/$catId'
-      fullPath: '/cat/$catId'
-      preLoaderRoute: typeof CatCatIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/brands/$brandId': {
-      id: '/brands/$brandId'
-      path: '/brands/$brandId'
-      fullPath: '/brands/$brandId'
-      preLoaderRoute: typeof BrandsBrandIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/subcategories': {
-      id: '/admin/subcategories'
-      path: '/subcategories'
-      fullPath: '/admin/subcategories'
-      preLoaderRoute: typeof AdminSubcategoriesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/products': {
-      id: '/admin/products'
-      path: '/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AdminProductsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
+    '/admin/brands': {
+      id: '/admin/brands'
+      path: '/brands'
+      fullPath: '/admin/brands'
+      preLoaderRoute: typeof AdminBrandsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories': {
@@ -336,12 +287,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/brands': {
-      id: '/admin/brands'
-      path: '/brands'
-      fullPath: '/admin/brands'
-      preLoaderRoute: typeof AdminBrandsRouteImport
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/subcategories': {
+      id: '/admin/subcategories'
+      path: '/subcategories'
+      fullPath: '/admin/subcategories'
+      preLoaderRoute: typeof AdminSubcategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/brands/': {
+      id: '/brands/'
+      path: '/brands'
+      fullPath: '/brands/'
+      preLoaderRoute: typeof BrandsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brands/$brandId': {
+      id: '/brands/$brandId'
+      path: '/brands/$brandId'
+      fullPath: '/brands/$brandId'
+      preLoaderRoute: typeof BrandsBrandIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cat/$catId': {
+      id: '/cat/$catId'
+      path: '/cat/$catId'
+      fullPath: '/cat/$catId'
+      preLoaderRoute: typeof CatCatIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subcat/$subcatId': {
+      id: '/subcat/$subcatId'
+      path: '/subcat/$subcatId'
+      fullPath: '/subcat/$subcatId'
+      preLoaderRoute: typeof SubcatSubcatIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
