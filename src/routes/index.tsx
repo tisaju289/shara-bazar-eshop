@@ -358,11 +358,19 @@ type DBProduct = {
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
+const PRODUCT_COLUMNS =
+  "id,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,created_at";
+const MAX_PUBLIC_PRODUCTS = 5000;
+
 function useCategories() {
   return useQuery({
     queryKey: ["categories", "public"],
     queryFn: async (): Promise<DBCategory[]> => {
-      const { data, error } = await supabase.from("categories").select("*").eq("is_active", true).eq("is_active", true).order("sort_order");
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id,name_bn,slug,sort_order,image_url")
+        .eq("is_active", true)
+        .order("sort_order");
       if (error) throw error;
       return data ?? [];
     },
@@ -385,9 +393,14 @@ function useProducts() {
   return useQuery({
     queryKey: ["products", "public"],
     queryFn: async (): Promise<DBProduct[]> => {
-      const { data, error } = await supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("products")
+        .select(PRODUCT_COLUMNS)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .range(0, MAX_PUBLIC_PRODUCTS - 1);
       if (error) throw error;
-      return data ?? [];
+      return (data as unknown as DBProduct[]) ?? [];
     },
   });
 }
