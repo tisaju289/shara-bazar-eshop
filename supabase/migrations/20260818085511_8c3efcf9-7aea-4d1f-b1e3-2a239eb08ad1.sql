@@ -1,0 +1,10 @@
+CREATE INDEX IF NOT EXISTS idx_products_active_created ON public.products (is_active, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_category_active ON public.products (category_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_products_subcategory_active ON public.products (subcategory_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_products_brand_active ON public.products (brand_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_active_sort ON public.categories (is_active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_brands_active_sort ON public.brands (is_active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_subcategories_category_sort ON public.subcategories (category_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_orders_phone_created ON public.orders (phone, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_created ON public.orders (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_site_settings_key ON public.site_settings (key);
