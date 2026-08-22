@@ -1,225 +1,96 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { SiteHeader } from "@/components/SiteHeader";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { ProductCard } from "@/components/ProductCard";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
-import { openCartDrawer } from "@/hooks/useCartDrawer";
-import { ProductImage } from "@/components/ProductImage";
-import { Home, ChevronRight, Plus, Minus, Star, Truck, ShieldCheck } from "lucide-react";
+import { thumb } from "@/lib/img";
+import { Loader2, X, Plus, Minus, ShoppingCart, Star } from "lucide-react";
 
 export const Route = createFileRoute("/product/$slug")({
-  head: () => ({
-    meta: [
-      { title: "পণ্যের বিবরণ — Fresh Feni" },
-      { name: "description", content: "পণ্যের দাম, ছবি ও বিস্তারিত দেখে সরাসরি অর্ডার করুন Fresh Feni থেকে।" },
-      { property: "og:title", content: "পণ্যের বিবরণ — Fresh Feni" },
-      { property: "og:description", content: "পণ্যের দাম, ছবি ও বিস্তারিত দেখে সরাসরি অর্ডার করুন Fresh Feni থেকে।" },
-      { property: "og:type", content: "product" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: ProductDetailPage,
+  head: () => ({ meta: [{ title: "পণ্যের বিস্তারিত — তাজা বাজার" }] }),
+  component: ProductDetailModal,
 });
 
-type DBProduct = {
+type Product = {
   id: string; slug: string; name_bn: string; unit: string; price: number; old_price: number | null;
-  image_url: string | null; tag: string | null; stock: number; is_active: boolean;
-  category_id: string | null; brand_id: string | null; subcategory_id: string | null;
-  keywords: string | null; reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
+  image_url: string | null; tag: string | null; stock: number; category_id: string | null;
+  brand_id: string | null; keywords: string | null; reviews_rating: number | null;
+  reviews_count: number | null; offer_badge: string | null;
 };
+type Named = { id: string; name_bn: string };
 
-const COLS =
-  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,keywords,reviews_rating,reviews_count,offer_badge";
-
-function ProductDetailPage() {
+function ProductDetailModal() {
   const { slug } = Route.useParams();
-  const { data: settings } = useSiteSettings();
+  const navigate = useNavigate();
   const [cart, setCart] = useCart();
-
-  const { data: product, isLoading } = useQuery({
-    queryKey: ["product", slug],
-    queryFn: async (): Promise<DBProduct | null> => {
-      const { data } = await supabase.from("products").select(COLS).eq("slug", slug).eq("is_active", true).maybeSingle();
-      return (data as DBProduct) ?? null;
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["product", "slug", slug],
+    queryFn: async (): Promise<{ product: Product; category: Named | null; brand: Named | null }> => {
+      const { data: product, error: productError } = await supabase
+        .from("products").select("*").eq("slug", slug).eq("is_active", true).maybeSingle();
+      if (productError) throw productError;
+      if (!product) throw new Error("পণ্যটি পাওয়া যায়নি");
+      const [categoryResult, brandResult] = await Promise.all([
+        product.category_id ? supabase.from("categories").select("id,name_bn").eq("id", product.category_id).maybeSingle() : Promise.resolve({ data: null }),
+        product.brand_id ? supabase.from("brands").select("id,name_bn").eq("id", product.brand_id).maybeSingle() : Promise.resolve({ data: null }),
+      ]);
+      return { product: product as Product, category: categoryResult.data as Named | null, brand: brandResult.data as Named | null };
     },
+    enabled: !!slug,
   });
-
-  const { data: category } = useQuery({
-    queryKey: ["category-of", product?.category_id],
-    enabled: !!product?.category_id,
-    queryFn: async () => {
-      const { data } = await supabase.from("categories").select("id,name_bn").eq("id", product!.category_id!).maybeSingle();
-      return data as { id: string; name_bn: string } | null;
-    },
-  });
-
-  const { data: brand } = useQuery({
-    queryKey: ["brand-of", product?.brand_id],
-    enabled: !!product?.brand_id,
-    queryFn: async () => {
-      const { data } = await supabase.from("brands").select("id,name_bn").eq("id", product!.brand_id!).maybeSingle();
-      return data as { id: string; name_bn: string } | null;
-    },
-  });
-
-  const { data: related = [] } = useQuery({
-    queryKey: ["related", product?.category_id, product?.id],
-    enabled: !!product?.category_id,
-    queryFn: async (): Promise<DBProduct[]> => {
-      const { data } = await supabase
-        .from("products")
-        .select(COLS)
-        .eq("is_active", true)
-        .eq("category_id", product!.category_id!)
-        .neq("id", product!.id)
-        .limit(12);
-      return (data as DBProduct[]) ?? [];
-    },
-  });
-
-  const qty = product ? cart[product.id] ?? 0 : 0;
-  const add = (id: string) => setCart((p) => ({ ...p, [id]: (p[id] ?? 0) + 1 }));
-  const sub = (id: string) =>
-    setCart((p) => {
-      const n = (p[id] ?? 0) - 1;
-      const next = { ...p };
-      if (n <= 0) delete next[id];
-      else next[id] = n;
-      return next;
-    });
-
-  const buyNow = () => {
-    if (!product) return;
-    if (!cart[product.id]) add(product.id);
-    openCartDrawer();
+  const product = data?.product;
+  const qty = product ? (cart[product.id] ?? 0) : 0;
+  const close = () => {
+    if (window.history.length > 1) window.history.back();
+    else navigate({ to: "/products" });
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <SiteHeader />
-      <main className="max-w-6xl mx-auto px-3 md:px-4 py-4">
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-label="পণ্যের বিস্তারিত">
+      <button aria-label="বন্ধ করুন" className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={close} />
+      <section className="relative w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-background shadow-2xl">
+        <button onClick={close} aria-label="বন্ধ করুন" className="absolute right-3 top-3 z-10 size-10 rounded-full bg-background/90 border border-border grid place-items-center hover:bg-secondary">
+          <X className="size-5" />
+        </button>
         {isLoading ? (
-          <div className="grid md:grid-cols-2 gap-6 animate-pulse">
-            <div className="aspect-square rounded-xl bg-muted" />
-            <div className="space-y-3">
-              <div className="h-6 bg-muted rounded w-2/3" />
-              <div className="h-4 bg-muted rounded w-1/3" />
-              <div className="h-10 bg-muted rounded w-1/2" />
-            </div>
-          </div>
-        ) : !product ? (
-          <div className="py-20 text-center space-y-3">
-            <p className="text-lg font-bold">পণ্যটি পাওয়া যায়নি</p>
-            <Link to="/products" className="inline-block h-10 px-5 rounded-lg bg-primary text-primary-foreground font-bold leading-10">
-              সব পণ্য দেখুন
-            </Link>
+          <div className="min-h-[360px] grid place-items-center"><Loader2 className="size-7 animate-spin text-primary" /></div>
+        ) : error || !product ? (
+          <div className="min-h-[360px] grid place-items-center text-center p-8">
+            <div><p className="font-semibold">পণ্যটি পাওয়া যায়নি</p><Link to="/products" className="text-primary text-sm mt-2 inline-block">সব পণ্য দেখুন</Link></div>
           </div>
         ) : (
-          <>
-            <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-3 flex-wrap">
-              <Link to="/" className="inline-flex items-center gap-1 hover:text-primary"><Home className="size-3.5" /> হোম</Link>
-              <ChevronRight className="size-3" />
-              {category ? (
-                <>
-                  <Link to="/cat/$catId" params={{ catId: product.category_id! }} className="hover:text-primary">{category.name_bn}</Link>
-                  <ChevronRight className="size-3" />
-                </>
-              ) : null}
-              <span className="text-foreground line-clamp-1">{product.name_bn}</span>
-            </nav>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="relative rounded-xl border border-border bg-white overflow-hidden">
-                <div className="aspect-square grid place-items-center">
-                  <ProductImage
-                    url={product.image_url}
-                    alt={product.name_bn}
-                    width={700}
-                    sizes="(max-width: 768px) 100vw, 500px"
-                    loading="eager"
-                    fetchPriority="high"
-                    className="w-full h-full object-cover"
-                    fallback={<div className="w-full h-full grid place-items-center text-7xl">🛒</div>}
-                  />
-                </div>
-                {product.tag && (
-                  <span className="absolute top-3 left-3 text-[11px] font-bold uppercase bg-[var(--chili)] text-white px-2 py-0.5 rounded">{product.tag}</span>
-                )}
+          <div className="grid md:grid-cols-2 gap-0">
+            <div className="aspect-square bg-white rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none overflow-hidden p-6">
+              {product.image_url ? <img src={thumb(product.image_url, 800)} alt={product.name_bn} className="w-full h-full object-contain" /> : <div className="h-full grid place-items-center text-7xl">🛒</div>}
+            </div>
+            <div className="p-6 md:p-8 flex flex-col">
+              <div className="flex flex-wrap gap-2 mb-3">
+                {product.tag && <span className="text-[10px] font-bold uppercase bg-[var(--chili)] text-white px-2 py-1 rounded">{product.tag}</span>}
+                {product.offer_badge && <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded">{product.offer_badge}</span>}
               </div>
-
-              <div className="space-y-3">
-                <h1 className="text-xl md:text-2xl font-extrabold leading-snug">{product.name_bn}</h1>
-                <div className="text-sm text-muted-foreground">
-                  {[brand?.name_bn, category?.name_bn, product.unit].filter(Boolean).join(" · ")}
-                </div>
-                {Number(product.reviews_count ?? 0) > 0 && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} className={`size-4 ${i <= Math.round(Number(product.reviews_rating ?? 0)) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
-                      ))}
-                    </div>
-                    <span>({product.reviews_count})</span>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">{product.name_bn}</h1>
+              <p className="text-sm text-muted-foreground mt-2">{[data.category?.name_bn, data.brand?.name_bn, product.unit].filter(Boolean).join(" · ")}</p>
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-3xl font-extrabold text-[var(--leaf-deep)]">৳{product.price}</span>
+                {product.old_price && <span className="text-sm text-muted-foreground line-through">৳{product.old_price}</span>}
+              </div>
+              {Number(product.reviews_count) > 0 && <div className="flex items-center gap-1 mt-3 text-sm text-muted-foreground"><Star className="size-4 fill-amber-400 text-amber-400" /> {product.reviews_rating ?? 0} ({product.reviews_count} রিভিউ)</div>}
+              {product.keywords && <p className="text-sm leading-7 text-muted-foreground mt-5 border-t border-border pt-4">{product.keywords}</p>}
+              <div className="mt-auto pt-7 flex gap-2">
+                {qty > 0 ? (
+                  <div className="flex items-center justify-between h-12 px-2 rounded-xl border border-primary text-primary min-w-32">
+                    <button onClick={() => setCart((c) => qty > 1 ? { ...c, [product.id]: qty - 1 } : Object.fromEntries(Object.entries(c).filter(([id]) => id !== product.id)))} className="size-9 grid place-items-center"><Minus className="size-4" /></button>
+                    <b>{qty}</b>
+                    <button onClick={() => setCart((c) => ({ ...c, [product.id]: qty + 1 }))} className="size-9 grid place-items-center"><Plus className="size-4" /></button>
                   </div>
+                ) : (
+                  <button onClick={() => setCart((c) => ({ ...c, [product.id]: 1 }))} className="h-12 flex-1 rounded-xl border border-primary text-primary font-bold inline-flex items-center justify-center gap-2 hover:bg-primary/10"><ShoppingCart className="size-5" /> কার্টে যোগ করুন</button>
                 )}
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-[var(--leaf-deep)]">৳{product.price}</span>
-                  {product.old_price ? <span className="text-base text-muted-foreground line-through">৳{product.old_price}</span> : null}
-                </div>
-                <div className="text-sm">
-                  {product.stock > 0 ? <span className="text-primary font-semibold">স্টকে আছে</span> : <span className="text-destructive font-semibold">স্টক শেষ</span>}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 pt-2">
-                  {qty === 0 ? (
-                    <button onClick={() => add(product.id)} className="h-11 px-5 rounded-lg border border-primary text-primary font-bold inline-flex items-center gap-1 hover:bg-primary hover:text-primary-foreground transition">
-                      <Plus className="size-4" /> কার্টে যোগ করুন
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-3 border border-primary text-primary rounded-lg h-11 px-2">
-                      <button onClick={() => sub(product.id)} className="size-8 grid place-items-center"><Minus className="size-4" /></button>
-                      <span className="font-bold min-w-6 text-center">{qty}</span>
-                      <button onClick={() => add(product.id)} className="size-8 grid place-items-center"><Plus className="size-4" /></button>
-                    </div>
-                  )}
-                  <button onClick={buyNow} className="h-11 px-6 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90">
-                    এখনই কিনুন
-                  </button>
-                </div>
-
-                <div className="grid gap-2 pt-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2"><Truck className="size-4 text-primary" /> ১-২ ঘণ্টায় ডেলিভারি</div>
-                  <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-primary" /> ১০০% ফ্রেশ পণ্যের নিশ্চয়তা</div>
-                </div>
+                <button onClick={() => { if (!qty) setCart((c) => ({ ...c, [product.id]: 1 })); navigate({ to: "/products" }); }} className="h-12 flex-1 rounded-xl bg-primary text-primary-foreground font-bold">এখনই কিনুন</button>
               </div>
             </div>
-
-            {related.length > 0 && (
-              <section className="mt-10">
-                <h2 className="text-lg font-extrabold mb-3 text-center">একই ক্যাটাগরির পণ্য</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3">
-                  {related.map((r) => (
-                    <ProductCard
-                      key={r.id}
-                      product={r}
-                      categoryName={category?.name_bn}
-                      qty={cart[r.id] ?? 0}
-                      add={add}
-                      sub={sub}
-                      onBuyNow={() => { if (!cart[r.id]) add(r.id); openCartDrawer(); }}
-                      settings={settings?.product_card}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
+          </div>
         )}
-      </main>
-      <MobileBottomNav />
+      </section>
     </div>
   );
 }

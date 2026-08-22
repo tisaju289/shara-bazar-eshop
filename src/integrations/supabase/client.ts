@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { cachedRestGet, REST_PREFIX, ANON_BEARER } from '@/lib/rest-cache';
+import ws from 'ws';
 
 const SUPABASE_URL = "https://cdctsoahehjohgfndsua.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY3Rzb2FoZWhqb2hnZm5kc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMzY2NjAsImV4cCI6MjA5NDgxMjY2MH0.ugKYoL6XP9i_TAqiAFFGQpsKXz4585oduL7-2c8oARU";
@@ -62,5 +63,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: typeof window !== "undefined" ? window.localStorage : undefined,
     persistSession: typeof window !== "undefined",
     autoRefreshToken: true,
-  }
+  },
+  realtime: {
+    transport: typeof window === "undefined" ? ws : undefined,
+  },
 });

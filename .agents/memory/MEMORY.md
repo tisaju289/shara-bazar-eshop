@@ -1,1 +1,2 @@
 - [Supabase DDL migration approach](supabase-migration.md) — can't run DDL via REST API or service role; user must paste SQL in Supabase dashboard SQL editor.
+- [Supabase SSR WebSocket compatibility](supabase-ssr-websocket.md) — Node 20 SSR needs an explicit ws transport for Supabase Realtime.
