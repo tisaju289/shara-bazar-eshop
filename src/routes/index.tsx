@@ -362,7 +362,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
 }
 
 type DBProduct = {
-  id: string; name_bn: string; unit: string; price: number; old_price: number | null;
+  id: string; slug?: string; name_bn: string; unit: string; price: number; old_price: number | null;
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
@@ -370,7 +370,7 @@ type DBProduct = {
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 const PRODUCT_COLUMNS =
-  "id,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,created_at";
+  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,created_at";
 const MAX_PUBLIC_PRODUCTS = 5000;
 
 function useCategories() {
