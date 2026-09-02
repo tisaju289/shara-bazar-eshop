@@ -38,9 +38,19 @@ function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallb
         style={{ ["--hero-ar" as any]: (aspectRatio || "21/9").replace("/", " / ") }}
       >
         {slides.map((src, i) => (
-          <img key={i} src={src} alt={`hero-${i}`}
+          <img
+            key={i}
+            src={thumb(src, 1200)}
+            srcSet={thumbSrcSet(src, 900)}
+            sizes="100vw"
+            alt={`hero-${i}`}
+            loading={i === 0 ? "eager" : "lazy"}
+            // @ts-expect-error fetchpriority is valid HTML
+            fetchpriority={i === 0 ? "high" : "low"}
+            decoding="async"
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
         ))}
+
       </div>
       {slides.length > 1 && (
         <>
