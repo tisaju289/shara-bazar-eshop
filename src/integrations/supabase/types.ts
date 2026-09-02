@@ -131,6 +131,7 @@ export type Database = {
           price: number
           reviews_count: number
           reviews_rating: number | null
+          slug: string
           stock: number
           subcategory_id: string | null
           tag: string | null
@@ -151,6 +152,7 @@ export type Database = {
           price?: number
           reviews_count?: number
           reviews_rating?: number | null
+          slug: string
           stock?: number
           subcategory_id?: string | null
           tag?: string | null
@@ -171,6 +173,7 @@ export type Database = {
           price?: number
           reviews_count?: number
           reviews_rating?: number | null
+          slug?: string
           stock?: number
           subcategory_id?: string | null
           tag?: string | null
@@ -299,6 +302,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      slugify: { Args: { _txt: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
