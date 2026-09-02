@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { thumb } from "@/lib/img";
+import { thumb, thumbSrcSet } from "@/lib/img";
 import { useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
 import { ProductSlider } from "@/components/ProductSlider";
