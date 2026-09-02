@@ -40,7 +40,7 @@ type DBCategory = { id: string; name_bn: string; slug: string; sort_order: numbe
 type DBBrand = { id: string; name_bn: string };
 
 const PRODUCT_COLUMNS =
-  "id,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,keywords,reviews_rating,reviews_count,offer_badge,created_at";
+  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,keywords,reviews_rating,reviews_count,offer_badge,created_at";
 const MAX_PUBLIC_PRODUCTS = 5000;
 
 function useCategories() {
