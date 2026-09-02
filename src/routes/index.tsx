@@ -590,7 +590,7 @@ function Index() {
         <div className="container mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
           <a href="/" className="flex items-center gap-2 shrink-0">
             {brand?.logo_url ? (
-              <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
+              <img src={thumb(brand.logo_url, 96)} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
             ) : (
               <div className="size-10 rounded-2xl grid place-items-center text-primary-foreground shadow-[var(--shadow-soft)]" style={{ background: "var(--gradient-hero)" }}>
                 <Leaf className="size-5" />
@@ -989,7 +989,7 @@ function Index() {
           <div className="space-y-3">
             <div className="flex items-center gap-2 justify-center ">
               {brand?.logo_url ? (
-                <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white/10 p-1" />
+                <img src={thumb(brand.logo_url, 96)} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white/10 p-1" />
               ) : (
                 <div className="size-10 rounded-2xl grid place-items-center bg-white/10"><Leaf className="size-5" /></div>
               )}
