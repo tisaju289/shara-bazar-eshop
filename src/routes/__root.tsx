@@ -121,7 +121,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     }
     const links: Array<Record<string, string>> = [
       { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://images.weserv.nl", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://images.weserv.nl" },
     ];
+
     if (d.favicon_url) links.push({ rel: "icon", href: d.favicon_url });
     return { meta, links };
   },
