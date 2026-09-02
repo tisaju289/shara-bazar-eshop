@@ -362,7 +362,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
 }
 
 type DBProduct = {
-  id: string; name_bn: string; unit: string; price: number; old_price: number | null;
+  id: string; slug?: string; name_bn: string; unit: string; price: number; old_price: number | null;
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
