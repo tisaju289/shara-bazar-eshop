@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,7 +162,7 @@ function SubcategoryProductPage() {
             <div className="size-16 md:size-20 rounded-2xl overflow-hidden shrink-0 grid place-items-center"
               style={{ background: "var(--gradient-warm)" }}>
               {currentSubcat.image_url ? (
-                <img src={currentSubcat.image_url} alt={currentSubcat.name_bn} className="size-full object-cover" />
+                <img loading="lazy" decoding="async" src={thumb(currentSubcat.image_url, 200)} alt={currentSubcat.name_bn} className="size-full object-cover" />
               ) : (
                 <Layers className="size-7 text-primary" />
               )}

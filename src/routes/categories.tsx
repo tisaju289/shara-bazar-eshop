@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -53,7 +54,7 @@ function CategoriesPage() {
                 className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
               >
                 <div className="size-16 md:size-20 rounded-2xl grid place-items-center text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-                  {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
+                  {c.image_url ? <img loading="lazy" decoding="async" src={thumb(c.image_url, 200)} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
                 </div>
                 <div className="text-xs md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
                 <div className="text-[10px] text-muted-foreground">{counts[c.id] ?? 0} আইটেম</div>

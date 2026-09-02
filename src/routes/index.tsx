@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
 import { ProductSlider } from "@/components/ProductSlider";
@@ -144,10 +145,10 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
     <div className="md:w-[240px] lg:w-[280px] shrink-0">
       {sec.side_link ? (
         <a href={sec.side_link} className="block rounded-2xl overflow-hidden">
-          <img src={sec.side_image_url} alt={sec.title_bn || ""} className="w-full h-full object-cover" loading="lazy" />
+          <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="w-full h-full object-cover" loading="lazy" />
         </a>
       ) : (
-        <img src={sec.side_image_url} alt={sec.title_bn || ""} className="w-full rounded-2xl object-cover" loading="lazy" />
+        <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="w-full rounded-2xl object-cover" loading="lazy" />
       )}
     </div>
   ) : null;
@@ -250,7 +251,7 @@ function BrandMarqueeInner({ brands, brandCounts }: { brands: BrandItem[]; brand
               style={{ background: "var(--gradient-warm)" }}
             >
               {b.image_url ? (
-                <img src={b.image_url} alt={b.name_bn} className="size-full object-contain p-1" />
+                <img loading="lazy" decoding="async" src={thumb(b.image_url, 160)} alt={b.name_bn} className="size-full object-contain p-1" />
               ) : (
                 <span className="text-3xl">🏷️</span>
               )}
@@ -339,7 +340,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
             className="group snap-start shrink-0 basis-[calc(25%-0.6rem)] md:basis-[14%] flex flex-col items-center gap-2 p-2 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
           >
             <div className="size-14 md:size-16 rounded-2xl grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
-              {c.image_url ? <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
+              {c.image_url ? <img loading="lazy" decoding="async" src={thumb(c.image_url, 200)} alt={c.name_bn} className="size-full object-cover" /> : "🛒"}
             </div>
             <div className="text-[11px] md:text-sm font-semibold text-center leading-tight">{c.name_bn}</div>
             <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
@@ -668,7 +669,7 @@ function Index() {
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
                       {sideCards.slice(0, 2).map((c, i) => {
                         const el = (
-                          <img src={c.image_url} alt={`offer-${i + 1}`}
+                          <img loading="lazy" decoding="async" src={thumb(c.image_url, 800)} alt={`offer-${i + 1}`}
                             className="w-full h-full object-cover rounded-2xl border border-border hover:opacity-95 transition" />
                         );
                         return c.link
@@ -705,7 +706,7 @@ function Index() {
                       <div className="relative rounded-2xl overflow-hidden border border-border bg-card">
                         <div className="aspect-[4/3] w-full">
                           {t.image_url
-                            ? <img src={t.image_url} alt={t.label_bn} className="w-full h-full object-cover" />
+                            ? <img loading="lazy" decoding="async" src={thumb(t.image_url, 300)} alt={t.label_bn} className="w-full h-full object-cover" />
                             : <div className="w-full h-full grid place-items-center text-4xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>}
                         </div>
                         {t.label_bn && (
@@ -765,7 +766,7 @@ function Index() {
           if (!sec.image_url) return null;
           const img = (
             <div className="rounded-3xl overflow-hidden relative">
-              <img src={sec.image_url} alt={sec.caption_bn || "banner"} className="w-full h-auto object-cover" />
+              <img loading="lazy" decoding="async" src={thumb(sec.image_url, 1200)} alt={sec.caption_bn || "banner"} className="w-full h-auto object-cover" />
               {sec.caption_bn && (
                 <div className="absolute inset-x-0 bottom-0 p-4 md:p-6 bg-gradient-to-t from-black/60 to-transparent text-white font-semibold">
                   {sec.caption_bn}
@@ -797,7 +798,7 @@ function Index() {
                 <div className={`grid grid-cols-2 ${colMap[cols]} gap-3 md:gap-4`}>
                   {items.map((b, i) => {
                     const el = (
-                      <img src={b.image_url} alt={`banner-${i + 1}`}
+                      <img loading="lazy" decoding="async" src={thumb(b.image_url, 800)} alt={`banner-${i + 1}`}
                         className="w-full h-full object-cover rounded-2xl border border-border hover:opacity-95 transition" />
                     );
                     return b.link
@@ -819,7 +820,7 @@ function Index() {
                   {items.map((f, i) => (
                     <div key={i} className="flex items-center gap-3 rounded-2xl bg-card border border-border p-3 md:p-4">
                       {f.image_url ? (
-                        <img src={f.image_url} alt={f.title_bn} className="size-10 md:size-12 object-contain shrink-0" />
+                        <img loading="lazy" decoding="async" src={thumb(f.image_url, 96)} alt={f.title_bn} className="size-10 md:size-12 object-contain shrink-0" />
                       ) : (
                         <div className="size-10 md:size-12 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gradient-warm)" }}>
                           <ShieldCheck className="size-5 text-[var(--leaf-deep)]" />
@@ -908,10 +909,10 @@ function Index() {
               {sec.banner_image_url && (
                 sec.banner_link ? (
                   <a href={sec.banner_link} className="block rounded-2xl overflow-hidden">
-                    <img src={sec.banner_image_url} alt={sec.title_bn} className="w-full object-cover" loading="lazy" />
+                    <img src={thumb(sec.banner_image_url, 1200)} alt={sec.title_bn} className="w-full object-cover" loading="lazy" />
                   </a>
                 ) : (
-                  <img src={sec.banner_image_url} alt={sec.title_bn} className="w-full rounded-2xl object-cover" loading="lazy" />
+                  <img src={thumb(sec.banner_image_url, 1200)} alt={sec.title_bn} className="w-full rounded-2xl object-cover" loading="lazy" />
                 )
               )}
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
@@ -1030,7 +1031,7 @@ function Index() {
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     {p.image_url ? (
-                      <img src={p.image_url} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
+                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
                     ) : (
                       <div className="size-14 rounded-xl grid place-items-center text-2xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                     )}
@@ -1093,7 +1094,7 @@ function Index() {
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                           {p.image_url ? (
-                            <img src={p.image_url} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
+                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
                           ) : (
                             <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                           )}

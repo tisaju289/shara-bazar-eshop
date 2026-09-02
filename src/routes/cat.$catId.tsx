@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -169,7 +170,7 @@ function CategoryPage() {
         {currentCategory && (
           <div className="flex items-center gap-4 mb-6 p-4 rounded-2xl bg-card border border-border">
             {currentCategory.image_url ? (
-              <img src={currentCategory.image_url} alt={currentCategory.name_bn}
+              <img loading="lazy" decoding="async" src={thumb(currentCategory.image_url, 200)} alt={currentCategory.name_bn}
                 className="size-16 md:size-20 rounded-2xl object-cover shrink-0"
                 style={{ background: "var(--gradient-warm)" }} />
             ) : (
@@ -225,7 +226,7 @@ function CategoryPage() {
                   >
                     <div className="aspect-square overflow-hidden" style={{ background: "var(--gradient-warm)" }}>
                       {sc.image_url ? (
-                        <img src={sc.image_url} alt={sc.name_bn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img loading="lazy" decoding="async" src={thumb(sc.image_url, 300)} alt={sc.name_bn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full grid place-items-center">
                           <Layers className="size-10 text-primary/50" />
