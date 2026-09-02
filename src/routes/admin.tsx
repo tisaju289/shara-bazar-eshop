@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useAuth } from "@/hooks/useAuth";
 import { Leaf, LayoutDashboard, Package, Tags, Settings, LogOut, Loader2, Menu, Globe, ShoppingBag, Bookmark, Layers } from "lucide-react";
 import { useState } from "react";
@@ -63,7 +64,7 @@ function AdminLayout() {
     <>
       <div className="px-5 py-5 flex items-center gap-2">
         {brand?.logo_url ? (
-          <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
+          <img src={thumb(brand.logo_url, 96)} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
         ) : (
           <div className="size-10 rounded-2xl grid place-items-center text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
             <Leaf className="size-5" />

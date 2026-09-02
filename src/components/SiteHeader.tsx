@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { Search, ShoppingCart, MapPin, Phone, Leaf } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useEffect, useState } from "react";
@@ -75,7 +76,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
         <div className="container mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             {brand?.logo_url ? (
-              <img src={brand.logo_url} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
+              <img src={thumb(brand.logo_url, 96)} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
             ) : (
               <div className="size-10 rounded-2xl grid place-items-center text-primary-foreground shadow-[var(--shadow-soft)]" style={{ background: "var(--gradient-hero)" }}>
                 <Leaf className="size-5" />
@@ -124,7 +125,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
         <div className="px-4 py-2.5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             {brand?.logo_url ? (
-              <img src={brand.logo_url} alt={brand.name_bn} className="size-8 rounded-xl object-contain bg-white p-0.5 shadow-[var(--shadow-soft)]" />
+              <img src={thumb(brand.logo_url, 80)} alt={brand.name_bn} className="size-8 rounded-xl object-contain bg-white p-0.5 shadow-[var(--shadow-soft)]" />
             ) : (
               <div className="size-8 rounded-xl grid place-items-center text-primary-foreground shadow-[var(--shadow-soft)]" style={{ background: "var(--gradient-hero)" }}>
                 <Leaf className="size-4" />
