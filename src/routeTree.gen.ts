@@ -24,6 +24,7 @@ import { Route as AdminSubcategoriesRouteImport } from './routes/admin.subcatego
 import { Route as BrandsIndexRouteImport } from './routes/brands.index'
 import { Route as BrandsBrandIdRouteImport } from './routes/brands.$brandId'
 import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
+import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as SubcatSubcatIdRouteImport } from './routes/subcat.$subcatId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -101,6 +102,11 @@ const CatCatIdRoute = CatCatIdRouteImport.update({
   path: '/cat/$catId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductSlugRoute = ProductSlugRouteImport.update({
+  id: '/product/$slug',
+  path: '/product/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubcatSubcatIdRoute = SubcatSubcatIdRouteImport.update({
   id: '/subcat/$subcatId',
   path: '/subcat/$subcatId',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/admin/subcategories': typeof AdminSubcategoriesRoute
   '/brands/$brandId': typeof BrandsBrandIdRoute
   '/cat/$catId': typeof CatCatIdRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin/': typeof AdminIndexRoute
   '/brands/': typeof BrandsIndexRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/admin/subcategories': typeof AdminSubcategoriesRoute
   '/brands/$brandId': typeof BrandsBrandIdRoute
   '/cat/$catId': typeof CatCatIdRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin': typeof AdminIndexRoute
   '/brands': typeof BrandsIndexRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/admin/subcategories': typeof AdminSubcategoriesRoute
   '/brands/$brandId': typeof BrandsBrandIdRoute
   '/cat/$catId': typeof CatCatIdRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin/': typeof AdminIndexRoute
   '/brands/': typeof BrandsIndexRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/admin/subcategories'
     | '/brands/$brandId'
     | '/cat/$catId'
+    | '/product/$slug'
     | '/subcat/$subcatId'
     | '/admin/'
     | '/brands/'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/admin/subcategories'
     | '/brands/$brandId'
     | '/cat/$catId'
+    | '/product/$slug'
     | '/subcat/$subcatId'
     | '/admin'
     | '/brands'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/admin/subcategories'
     | '/brands/$brandId'
     | '/cat/$catId'
+    | '/product/$slug'
     | '/subcat/$subcatId'
     | '/admin/'
     | '/brands/'
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   BrandsBrandIdRoute: typeof BrandsBrandIdRoute
   CatCatIdRoute: typeof CatCatIdRoute
+  ProductSlugRoute: typeof ProductSlugRoute
   SubcatSubcatIdRoute: typeof SubcatSubcatIdRoute
   BrandsIndexRoute: typeof BrandsIndexRoute
 }
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CatCatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/product/$slug': {
+      id: '/product/$slug'
+      path: '/product/$slug'
+      fullPath: '/product/$slug'
+      preLoaderRoute: typeof ProductSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subcat/$subcatId': {
       id: '/subcat/$subcatId'
       path: '/subcat/$subcatId'
@@ -376,6 +396,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   BrandsBrandIdRoute: BrandsBrandIdRoute,
   CatCatIdRoute: CatCatIdRoute,
+  ProductSlugRoute: ProductSlugRoute,
   SubcatSubcatIdRoute: SubcatSubcatIdRoute,
   BrandsIndexRoute: BrandsIndexRoute,
 }
