@@ -152,7 +152,7 @@ export type Database = {
           price?: number
           reviews_count?: number
           reviews_rating?: number | null
-          slug: string
+          slug?: string
           stock?: number
           subcategory_id?: string | null
           tag?: string | null
