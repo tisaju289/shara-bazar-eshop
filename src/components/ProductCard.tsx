@@ -1,6 +1,6 @@
 import { Plus, Minus, Heart, Star } from "lucide-react";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
-import { thumb } from "@/lib/img";
+import { thumb, thumbSrcSet } from "@/lib/img";
 
 export type ProductCardData = {
   id: string;
