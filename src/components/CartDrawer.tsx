@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { thumb } from "@/lib/img";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Loader2, Minus, Plus, X } from "lucide-react";
@@ -185,7 +186,7 @@ export function CartDrawer() {
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     {p.image_url ? (
-                      <img src={p.image_url} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
+                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
                     ) : (
                       <div className="size-14 rounded-xl grid place-items-center text-2xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                     )}
@@ -247,7 +248,7 @@ export function CartDrawer() {
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                           {p.image_url ? (
-                            <img src={p.image_url} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
+                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
                           ) : (
                             <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                           )}

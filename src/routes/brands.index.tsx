@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -55,7 +56,7 @@ function BrandsPage() {
                 className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
               >
                 <div className="size-16 md:size-20 rounded-2xl grid place-items-center text-3xl group-hover:scale-110 transition overflow-hidden bg-white" style={{ background: "var(--gradient-warm)" }}>
-                  {b.image_url ? <img src={b.image_url} alt={b.name_bn} className="size-full object-contain p-1" /> : "🏷️"}
+                  {b.image_url ? <img loading="lazy" decoding="async" src={thumb(b.image_url, 200)} alt={b.name_bn} className="size-full object-contain p-1" /> : "🏷️"}
                 </div>
                 <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
                 <div className="text-[10px] text-muted-foreground">{counts[b.id] ?? 0} পণ্য</div>

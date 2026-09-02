@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { thumb } from "@/lib/img";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -58,7 +59,7 @@ export function CategoryMarquee({
               style={{ background: "var(--gradient-warm)" }}
             >
               {c.image_url ? (
-                <img src={c.image_url} alt={c.name_bn} className="size-full object-cover" />
+                <img loading="lazy" decoding="async" src={thumb(c.image_url, 200)} alt={c.name_bn} className="size-full object-cover" />
               ) : (
                 <span className="text-2xl">🛒</span>
               )}
