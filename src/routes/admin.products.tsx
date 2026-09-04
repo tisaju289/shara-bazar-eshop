@@ -11,6 +11,7 @@ export const Route = createFileRoute("/admin/products")({
 
 type Product = {
   id: string;
+  slug?: string | null;
   name_bn: string;
   category_id: string | null;
   subcategory_id: string | null;
@@ -32,7 +33,7 @@ type Brand = { id: string; name_bn: string };
 type SubCat = { id: string; category_id: string | null; name_bn: string };
 
 const emptyForm: Omit<Product, "id"> = {
-  name_bn: "", category_id: null, subcategory_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
+  name_bn: "", slug: "", category_id: null, subcategory_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
   image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
   reviews_rating: 0, reviews_count: 0, offer_badge: "",
 };
@@ -81,6 +82,7 @@ function AdminProducts() {
       old_price: p.old_price ?? null,
       image_url: p.image_url ?? "",
       tag: p.tag ?? "",
+      slug: p.slug ?? "",
       keywords: p.keywords ?? "",
       reviews_rating: p.reviews_rating ?? 0,
       reviews_count: p.reviews_count ?? 0,
@@ -96,8 +98,11 @@ function AdminProducts() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const slugValue = form.slug?.trim();
+    const { slug: _formSlug, ...rest } = form;
     const payload = {
-      ...form,
+      ...rest,
+      ...(slugValue ? { slug: slugValue } : {}),
       price: Number(form.price),
       old_price: form.old_price ? Number(form.old_price) : null,
       stock: Number(form.stock),
@@ -108,6 +113,7 @@ function AdminProducts() {
       reviews_count: Number(form.reviews_count) || 0,
       offer_badge: form.offer_badge?.trim() || null,
     };
+
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
       : await supabase.from("products").insert(payload);
@@ -127,7 +133,7 @@ function AdminProducts() {
   };
 
   const duplicate = async (p: Product) => {
-    const { id, ...rest } = p;
+    const { id, slug: _slug, ...rest } = p;
     const payload = {
       ...rest,
       name_bn: p.name_bn + " (কপি)",
@@ -428,6 +434,9 @@ function AdminProducts() {
             <div className="p-5 space-y-4">
               <Field label="পণ্যের নাম (বাংলা)">
                 <input required value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} className="input" />
+              </Field>
+              <Field label="স্লাগ (URL) — ফাঁকা রাখলে অটো তৈরি হবে">
+                <input value={form.slug ?? ""} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="input" placeholder="auto" />
               </Field>
               <Field label="ক্যাটাগরি">
                 <select

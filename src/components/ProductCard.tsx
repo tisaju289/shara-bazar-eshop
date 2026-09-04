@@ -1,9 +1,11 @@
 import { Plus, Minus, Heart, Star } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
 import { thumb, thumbSrcSet } from "@/lib/img";
 
 export type ProductCardData = {
   id: string;
+  slug?: string | null;
   name_bn: string;
   unit: string;
   price: number;
@@ -16,6 +18,7 @@ export type ProductCardData = {
   reviews_count?: number | null;
   offer_badge?: string | null;
 };
+
 
 type Props = {
   product: ProductCardData;
@@ -82,7 +85,15 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
   return (
     <article className="group relative flex flex-col h-full rounded-xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] transition-all duration-300">
       <div className="relative aspect-square overflow-hidden bg-white">
-        {p.image_url ? (
+        {p.slug ? (
+          <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
+            {p.image_url ? (
+              <img src={thumb(p.image_url, 320)} srcSet={thumbSrcSet(p.image_url, 320)} sizes="(max-width: 768px) 45vw, 220px" width={320} height={320} alt={p.name_bn} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
+            ) : (
+              <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
+            )}
+          </Link>
+        ) : p.image_url ? (
           <img src={thumb(p.image_url, 320)} srcSet={thumbSrcSet(p.image_url, 320)} sizes="(max-width: 768px) 45vw, 220px" width={320} height={320} alt={p.name_bn} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
         ) : (
           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
@@ -99,7 +110,13 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
       </div>
       <div className="p-2.5 md:p-3 space-y-1 text-left flex flex-col flex-1 border-t border-border">
         <div className="text-[10px] md:text-[11px] italic text-muted-foreground">ডেলিভারি ১-২ ঘণ্টা</div>
-        {s.show_name && <h3 className="font-semibold text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.3rem]">{p.name_bn}</h3>}
+        {s.show_name && (
+          <h3 className="font-semibold text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.3rem]">
+            {p.slug ? (
+              <Link to="/product/$slug" params={{ slug: p.slug }} className="hover:text-primary">{p.name_bn}</Link>
+            ) : p.name_bn}
+          </h3>
+        )}
         {meta && <div className="text-[10px] md:text-[11px] text-muted-foreground line-clamp-1">{meta}</div>}
         {s.show_reviews && reviewCount > 0 && (
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
