@@ -98,9 +98,10 @@ function AdminProducts() {
     e.preventDefault();
     setSaving(true);
     const slugValue = form.slug?.trim();
+    const { slug: _formSlug, ...rest } = form;
     const payload = {
-      ...form,
-      ...(slugValue ? { slug: slugValue } : { slug: undefined }),
+      ...rest,
+      ...(slugValue ? { slug: slugValue } : {}),
       price: Number(form.price),
       old_price: form.old_price ? Number(form.old_price) : null,
       stock: Number(form.stock),
@@ -111,6 +112,7 @@ function AdminProducts() {
       reviews_count: Number(form.reviews_count) || 0,
       offer_badge: form.offer_badge?.trim() || null,
     };
+
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
       : await supabase.from("products").insert(payload);
