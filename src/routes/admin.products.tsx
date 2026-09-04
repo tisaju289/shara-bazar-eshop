@@ -99,6 +99,7 @@ function AdminProducts() {
     setSaving(true);
     const payload = {
       ...form,
+      slug: form.slug?.trim() || null,
       price: Number(form.price),
       old_price: form.old_price ? Number(form.old_price) : null,
       stock: Number(form.stock),
