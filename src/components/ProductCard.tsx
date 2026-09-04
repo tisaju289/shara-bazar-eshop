@@ -1,9 +1,11 @@
 import { Plus, Minus, Heart, Star } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
 import { thumb, thumbSrcSet } from "@/lib/img";
 
 export type ProductCardData = {
   id: string;
+  slug?: string | null;
   name_bn: string;
   unit: string;
   price: number;
@@ -16,6 +18,7 @@ export type ProductCardData = {
   reviews_count?: number | null;
   offer_badge?: string | null;
 };
+
 
 type Props = {
   product: ProductCardData;
