@@ -97,9 +97,10 @@ function AdminProducts() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const slugValue = form.slug?.trim();
     const payload = {
       ...form,
-      slug: form.slug?.trim() || null,
+      ...(slugValue ? { slug: slugValue } : { slug: undefined }),
       price: Number(form.price),
       old_price: form.old_price ? Number(form.old_price) : null,
       stock: Number(form.stock),
