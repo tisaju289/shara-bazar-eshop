@@ -82,6 +82,7 @@ function AdminProducts() {
       old_price: p.old_price ?? null,
       image_url: p.image_url ?? "",
       tag: p.tag ?? "",
+      slug: p.slug ?? "",
       keywords: p.keywords ?? "",
       reviews_rating: p.reviews_rating ?? 0,
       reviews_count: p.reviews_count ?? 0,
