@@ -26,6 +26,7 @@ import { Route as BrandsBrandIdRouteImport } from './routes/brands.$brandId'
 import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as SubcatSubcatIdRouteImport } from './routes/subcat.$subcatId'
+import { Route as ApiPublicManifestRouteImport } from './routes/api/public/manifest'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +113,11 @@ const SubcatSubcatIdRoute = SubcatSubcatIdRouteImport.update({
   path: '/subcat/$subcatId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicManifestRoute = ApiPublicManifestRouteImport.update({
+  id: '/api/public/manifest',
+  path: '/api/public/manifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin/': typeof AdminIndexRoute
   '/brands/': typeof BrandsIndexRoute
+  '/api/public/manifest': typeof ApiPublicManifestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin': typeof AdminIndexRoute
   '/brands': typeof BrandsIndexRoute
+  '/api/public/manifest': typeof ApiPublicManifestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/subcat/$subcatId': typeof SubcatSubcatIdRoute
   '/admin/': typeof AdminIndexRoute
   '/brands/': typeof BrandsIndexRoute
+  '/api/public/manifest': typeof ApiPublicManifestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/subcat/$subcatId'
     | '/admin/'
     | '/brands/'
+    | '/api/public/manifest'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/subcat/$subcatId'
     | '/admin'
     | '/brands'
+    | '/api/public/manifest'
   id:
     | '__root__'
     | '/'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/subcat/$subcatId'
     | '/admin/'
     | '/brands/'
+    | '/api/public/manifest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   ProductSlugRoute: typeof ProductSlugRoute
   SubcatSubcatIdRoute: typeof SubcatSubcatIdRoute
   BrandsIndexRoute: typeof BrandsIndexRoute
+  ApiPublicManifestRoute: typeof ApiPublicManifestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubcatSubcatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/manifest': {
+      id: '/api/public/manifest'
+      path: '/api/public/manifest'
+      fullPath: '/api/public/manifest'
+      preLoaderRoute: typeof ApiPublicManifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -399,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductSlugRoute: ProductSlugRoute,
   SubcatSubcatIdRoute: SubcatSubcatIdRoute,
   BrandsIndexRoute: BrandsIndexRoute,
+  ApiPublicManifestRoute: ApiPublicManifestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
