@@ -33,10 +33,24 @@ async function loadSeo() {
       keywords: map.seo?.keywords || "",
       og_image: map.seo?.og_image || "",
       favicon_url: map.seo?.favicon_url || "",
+      logo_url: map.brand?.logo_url || "",
     };
   } catch {
-    return { title: "", description: "", keywords: "", og_image: "", favicon_url: "" };
+    return { title: "", description: "", keywords: "", og_image: "", favicon_url: "", logo_url: "" };
   }
+}
+
+/** Square PNG rendition used for favicon / apple-touch-icon. */
+function iconUrl(url: string, size: number): string {
+  if (url.includes("/storage/v1/object/public/")) {
+    const t = url.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/");
+    return `${t}${t.includes("?") ? "&" : "?"}width=${size}&height=${size}&quality=85&resize=contain`;
+  }
+  if (/^https?:\/\//i.test(url)) {
+    const src = url.replace(/^https?:\/\//i, "");
+    return `https://images.weserv.nl/?url=${encodeURIComponent(src)}&w=${size}&h=${size}&fit=contain&cbg=white&output=png`;
+  }
+  return url;
 }
 
 function NotFoundComponent() {
@@ -99,7 +113,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   loader: () => loadSeo(),
   head: ({ loaderData }) => {
-    const d = loaderData ?? { title: "", description: "", keywords: "", og_image: "", favicon_url: "" };
+    const d = loaderData ?? { title: "", description: "", keywords: "", og_image: "", favicon_url: "", logo_url: "" };
     const title = d.title || "Lovable App";
     const description = d.description || "Lovable Generated Project";
     const meta: Array<Record<string, string>> = [
@@ -124,15 +138,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta.push({ name: "apple-mobile-web-app-capable", content: "yes" });
     meta.push({ name: "apple-mobile-web-app-status-bar-style", content: "default" });
     meta.push({ name: "apple-mobile-web-app-title", content: title });
+    const appIcon = (d as any).logo_url || d.favicon_url || "";
     const links: Array<Record<string, string>> = [
       { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/app-icon-192.png" },
+      { rel: "manifest", href: "/api/public/manifest" },
+      { rel: "apple-touch-icon", href: appIcon ? iconUrl(appIcon, 192) : "/app-icon-192.png" },
       { rel: "preconnect", href: "https://images.weserv.nl", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://images.weserv.nl" },
     ];
 
     if (d.favicon_url) links.push({ rel: "icon", href: d.favicon_url });
+    else if (appIcon) links.push({ rel: "icon", type: "image/png", href: iconUrl(appIcon, 64) });
     return { meta, links };
   },
   shellComponent: RootShell,
