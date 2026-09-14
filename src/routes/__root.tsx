@@ -14,6 +14,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { TrackingScripts } from "@/components/TrackingScripts";
 import { useEffect } from "react";
 import { CartDrawer } from "@/components/CartDrawer";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { supabase } from "@/integrations/supabase/client";
 
 async function loadSeo() {
@@ -163,6 +164,7 @@ function RootComponent() {
       <TrackingScripts />
       <Outlet />
       <CartDrawer />
+      <InstallAppPrompt />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
