@@ -119,8 +119,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta.push({ property: "og:image", content: d.og_image });
       meta.push({ name: "twitter:image", content: d.og_image });
     }
+    meta.push({ name: "theme-color", content: "#16a34a" });
+    meta.push({ name: "apple-mobile-web-app-capable", content: "yes" });
+    meta.push({ name: "apple-mobile-web-app-status-bar-style", content: "default" });
+    meta.push({ name: "apple-mobile-web-app-title", content: title });
     const links: Array<Record<string, string>> = [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/app-icon-192.png" },
       { rel: "preconnect", href: "https://images.weserv.nl", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://images.weserv.nl" },
     ];
