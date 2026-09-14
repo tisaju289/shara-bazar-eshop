@@ -33,10 +33,24 @@ async function loadSeo() {
       keywords: map.seo?.keywords || "",
       og_image: map.seo?.og_image || "",
       favicon_url: map.seo?.favicon_url || "",
+      logo_url: map.brand?.logo_url || "",
     };
   } catch {
-    return { title: "", description: "", keywords: "", og_image: "", favicon_url: "" };
+    return { title: "", description: "", keywords: "", og_image: "", favicon_url: "", logo_url: "" };
   }
+}
+
+/** Square PNG rendition used for favicon / apple-touch-icon. */
+function iconUrl(url: string, size: number): string {
+  if (url.includes("/storage/v1/object/public/")) {
+    const t = url.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/");
+    return `${t}${t.includes("?") ? "&" : "?"}width=${size}&height=${size}&quality=85&resize=contain`;
+  }
+  if (/^https?:\/\//i.test(url)) {
+    const src = url.replace(/^https?:\/\//i, "");
+    return `https://images.weserv.nl/?url=${encodeURIComponent(src)}&w=${size}&h=${size}&fit=contain&cbg=white&output=png`;
+  }
+  return url;
 }
 
 function NotFoundComponent() {
