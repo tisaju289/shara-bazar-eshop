@@ -15,12 +15,37 @@ export function ImageInput({ value, onChange, folder = "uploads", placeholder = 
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const toWebp = async (file: File): Promise<{ blob: Blob; ext: string; type: string }> => {
+    // SVG/GIF: keep as-is (animation / vector would be lost)
+    if (file.type === "image/svg+xml" || file.type === "image/gif") {
+      return { blob: file, ext: file.name.split(".").pop() || "png", type: file.type };
+    }
+    try {
+      const bitmap = await createImageBitmap(file);
+      const MAX = 1600;
+      const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+      const w = Math.round(bitmap.width * scale);
+      const h = Math.round(bitmap.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("no canvas");
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      bitmap.close?.();
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/webp", 0.82));
+      if (!blob || blob.type !== "image/webp") throw new Error("no webp");
+      return { blob, ext: "webp", type: "image/webp" };
+    } catch {
+      return { blob: file, ext: file.name.split(".").pop() || "jpg", type: file.type };
+    }
+  };
+
   const upload = async (file: File) => {
     if (!file.type.startsWith("image/")) return;
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
+    const { blob, ext, type } = await toWebp(file);
     const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("site-images").upload(path, file, { upsert: false, contentType: file.type });
+    const { error } = await supabase.storage.from("site-images").upload(path, blob, { upsert: false, contentType: type });
     setUploading(false);
     if (error) return alert("আপলোড ব্যর্থ: " + error.message);
     const { data } = supabase.storage.from("site-images").getPublicUrl(path);
