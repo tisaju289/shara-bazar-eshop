@@ -1,53 +1,44 @@
 ## লক্ষ্য
 
-Admin Settings এ "হিরো সেকশন" ও "হোম সেকশন" এর ভেতরের "সেকশন হেডিং" — দুটোই সরিয়ে দেওয়া হবে। সব কিছু একটাই ট্যাব "হোম সেকশন" এর নিচে আসবে, যেখানে admin চাইলে যেকোনো সেকশন যোগ/বাদ/অন-অফ করতে পারবে।
+হোমপেজকে Shwapno-এর বর্তমান অনলাইন শপের মতো ঘন, দ্রুত এবং সহজ কেনাকাটার অভিজ্ঞতায় সাজানো হবে—নিজস্ব ব্র্যান্ড, বাংলা লেখা, পণ্য, ক্যাটাগরি ও অ্যাডমিন কন্ট্রোল অক্ষুণ্ণ রেখে।
 
-## নতুন সেকশন টাইপ
+## যা বদলাবে
 
-প্রতিটি home section এ একটা `type` থাকবে:
+### হেডার ও নেভিগেশন
+- ডেস্কটপে লাল ব্র্যান্ড বার: লোগো, ডেলিভারি লোকেশন, বড় সার্চ, ভাষা/অ্যাকাউন্ট ও কার্ট।
+- নিচে পাতলা মেনু বার: ক্যাটাগরি, ডিল, ব্র্যান্ড ও অ্যাডমিনে দেওয়া মেনু।
+- মোবাইলে কমপ্যাক্ট লোগো, সার্চ, লোকেশন ও কার্ট; নিচের নেভিগেশন থাকবে।
 
-- **hero** — ব্যাজ, টাইটেল (৩ অংশ), সাবটাইটেল, ২টা CTA বাটন, স্লাইডার ইমেজ
-- **category** — টাইটেল/সাবটাইটেল + ক্যাটাগরি গ্রিড (সব ক্যাটাগরি)
-- **product** — টাইটেল/সাবটাইটেল + ক্যাটাগরি ফিল্টার + limit (পণ্য গ্রিড)
-- **offer** — অফার ব্যানার (label, title, subtitle, coupon code, min order, CTA)
-- **banner** — একটা ইমেজ + optional link + optional caption (নতুন)
+### প্রথম স্ক্রিন
+- বামে ডেস্কটপ ক্যাটাগরি তালিকা।
+- মাঝখানে বড় অটো স্লাইডার।
+- ডানে ২টি ছোট প্রচারণার ব্যানার।
+- মোবাইলে ক্যাটাগরি অনুভূমিক সারি, তারপর পূর্ণ-প্রস্থ স্লাইডার ও অফার কার্ড।
 
-প্রতিটার `enabled` toggle, order (↑/↓), delete থাকবে।
+### হোম সেকশন
+- ছবিসহ ক্যাটাগরি স্লাইডার/গ্রিড।
+- চারটি সুবিধা: দ্রুত ডেলিভারি, আসল পণ্য, সহায়তা, সহজ পেমেন্ট।
+- Shwapno-ধাঁচের সরু, স্ক্যানযোগ্য প্রোডাক্ট কার্ড ও অনুভূমিক স্লাইডার।
+- ডিল, ব্র্যান্ড, ব্যানার গ্রিড, ক্যাটাগরি টাইল ও অন্যান্য বর্তমান অ্যাডমিন-নিয়ন্ত্রিত সেকশন একই নতুন ভিজ্যুয়াল ভাষায় দেখানো হবে।
+- প্রতিটি সেকশনের শিরোনাম, ফাঁক, অ্যারো এবং “সব দেখুন” লিংক একরকম হবে।
 
-## পরিবর্তন
+### প্রোডাক্ট কার্ড ও কার্ট
+- বড় পণ্যের ছবি, অফার/বেস্ট-সেলার ব্যাজ, ডেলিভারি লাইন, নাম, পুরনো/নতুন দাম এবং স্পষ্ট “ব্যাগে যোগ” বাটন।
+- যোগ করার পর একই জায়গায় পরিমাণ কমানো/বাড়ানোর নিয়ন্ত্রণ।
+- ডেস্কটপে পাশে ছোট স্থায়ী কার্ট সারাংশ; মোবাইলে বর্তমান নিচের কার্ট প্রবেশপথ।
 
-### `src/hooks/useSiteSettings.ts`
-- `HomeSection` টাইপ discriminated union করা — `type: "hero" | "category" | "product" | "offer" | "banner"` + প্রতিটার field।
-- `Hero`, `Offer`, `Sections` টাইপ-গুলো রেখে দেওয়া (পুরোনো data যেন break না করে) কিন্তু default home_sections এ এদের data inject করা হবে যদি home_sections খালি থাকে (one-time seed at runtime in the hook)।
+### ডিজাইন সিস্টেম
+- প্রধান লাল, অ্যাকশন হলুদ, সাফল্য সবুজ, পরিষ্কার সাদা/হালকা ধূসর পটভূমি।
+- গোলাকারতা ও ছায়া কমিয়ে Shwapno-এর মতো পরিষ্কার, বাণিজ্যিক ঘনত্ব।
+- বাংলা ফন্ট, বর্তমান WebP/দ্রুত ইমেজ ব্যবস্থা এবং dark-mode নিরাপদ semantic tokens রাখা হবে।
+- অন্য সাইটের লোগো, লেখা বা প্রচারণার ছবি কপি করা হবে না।
 
-### `src/routes/admin.settings.tsx`
-- TabKey থেকে `"hero"` সরানো, TABS থেকে "হিরো সেকশন" এন্ট্রি সরানো।
-- `HomeSectionsTab` থেকে "সেকশন হেডিং" ব্লক ও `sections`/`onSections` props পুরো সরানো।
-- `addItem` কে একটা টাইপ-পিকার দিয়ে replace — admin "সেকশন যোগ" বাটনে চাপলে ৫টা টাইপের একটা ড্রপডাউন/বাটন আসবে।
-- প্রতিটা section card টাইপ অনুযায়ী আলাদা editor render করবে (hero editor, category editor, product editor, offer editor, banner editor)।
-- `HeroTab` ও পুরোনো `SectionsTab` related কোড সরানো।
-- `saveTab` সরল হবে — শুধু `home_sections` save করবে।
+### অ্যাডমিন কন্ট্রোল
+- বর্তমান Home Sections ব্যবস্থাই থাকবে; hero side cards, category, product, deal, banner grid, feature ও brand-এর সব তথ্য অ্যাডমিন থেকে নিয়ন্ত্রণ করা যাবে।
+- প্রয়োজনীয় নতুন display option শুধু বিদ্যমান JSON settings-এ যোগ হবে; ডাটাবেস টেবিল বদলাবে না।
 
-### `src/routes/index.tsx`
-- পুরাতন hardcoded Hero, Categories heading, Offer JSX সরিয়ে একটাই loop: `homeSections.filter(enabled).map(...)` যেটা type অনুযায়ী render করবে।
-- প্রতিটা টাইপের জন্য ছোট render component: `HeroSection`, `CategorySection`, `ProductSection`, `OfferSection`, `BannerSection` — যাদের props এ section data, cart helpers, categories, products যাবে।
-- Backward compat: যদি `home_sections` খালি/legacy থাকে, পুরোনো `hero`/`offer`/`sections` থেকে default sections বানিয়ে দেখানো হবে (hook এর seeding দিয়ে)।
+## যাচাই
 
-## টেকনিক্যাল ডিটেইলস
-
-```ts
-type HomeSectionBase = { id: string; enabled: boolean };
-type HeroSection = HomeSectionBase & { type: "hero"; badge_bn; title_bn; title_highlight_bn; title_suffix_bn; subtitle_bn; cta_primary_bn; cta_primary_enabled; cta_secondary_bn; cta_secondary_enabled; images: string[] };
-type CategorySection = HomeSectionBase & { type: "category"; title_bn; subtitle_bn };
-type ProductSection = HomeSectionBase & { type: "product"; title_bn; subtitle_bn; category_id; limit };
-type OfferSection = HomeSectionBase & { type: "offer"; label_bn; title_bn; subtitle_bn; coupon_code; min_order_bn; cta_bn };
-type BannerSection = HomeSectionBase & { type: "banner"; image_url; link; caption_bn };
-export type HomeSection = HeroSection | CategorySection | ProductSection | OfferSection | BannerSection;
-```
-
-পুরোনো `home_sections` (যাদের `type` নেই) কে hook এ load-time এ `type: "product"` ধরা হবে।
-
-## আউট অফ স্কোপ
-
-- DB schema change নেই — সবই `site_settings` jsonb এ থাকছে।
-- পুরোনো `hero`/`offer`/`sections` settings রেকর্ড DB থেকে delete করা হচ্ছে না (যদি admin আবার দরকার মনে করে fallback হিসেবে থাকছে)।
+- ডেস্কটপ 1280px ও মোবাইল ভিউতে হেডার, প্রথম স্ক্রিন, স্লাইডার, কার্ড, কার্ট ও সেকশন ক্রম পরীক্ষা।
+- সার্চ, ক্যাটাগরি/ব্র্যান্ড/পণ্য লিংক, add/subtract, buy-now এবং admin-saved sections পরীক্ষা।
+- হোমপেজের নিজস্ব SEO title, description, Open Graph ও Twitter metadata নিশ্চিত করা।
