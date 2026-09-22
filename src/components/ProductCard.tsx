@@ -83,7 +83,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
   const rating = Number(p.reviews_rating ?? 0);
   const reviewCount = Number(p.reviews_count ?? 0);
   return (
-    <article className="group relative flex flex-col h-full rounded-xl bg-card border border-border overflow-hidden hover:shadow-[var(--shadow-pop)] transition-all duration-300">
+    <article className="group relative flex flex-col h-full rounded-lg bg-card border border-border overflow-hidden hover:border-primary/40 hover:shadow-[var(--shadow-soft)] transition-all duration-200">
       <div className="relative aspect-square overflow-hidden bg-white">
         {p.slug ? (
           <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
@@ -138,11 +138,11 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
           <div className={`grid ${s.show_add_to_cart && s.show_buy_now ? "grid-cols-2" : "grid-cols-1"} gap-1.5 pt-1.5 mt-auto`}>
             {s.show_add_to_cart && (
               qty === 0 ? (
-                <button onClick={() => add(p.id)} className="h-8 rounded-lg border border-primary bg-transparent text-primary text-xs font-bold inline-flex items-center justify-center gap-1 hover:bg-primary hover:text-primary-foreground transition">
+                <button onClick={() => add(p.id)} className="h-8 rounded-md border border-primary bg-transparent text-primary text-xs font-bold inline-flex items-center justify-center gap-1 hover:bg-primary hover:text-primary-foreground transition">
                   <Plus className="size-3.5" /> {s.add_to_cart_text_bn}
                 </button>
               ) : (
-                <div className="flex items-center justify-between border border-primary text-primary rounded-lg h-8 px-1">
+                <div className="flex items-center justify-between border border-primary text-primary rounded-md h-8 px-1">
                   <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
                   <span className="text-xs font-bold">{qty}</span>
                   <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
@@ -150,7 +150,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
               )
             )}
             {s.show_buy_now && (
-              <button onClick={onBuyNow} className="h-8 rounded-lg bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90">
+              <button onClick={onBuyNow} className="h-8 rounded-md bg-accent text-accent-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90">
                 {s.buy_now_text_bn}
               </button>
             )}
