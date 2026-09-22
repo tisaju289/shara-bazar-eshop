@@ -32,7 +32,7 @@ function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallb
   }, [slides.length]);
   const go = (n: number) => setIdx((n + slides.length) % slides.length);
   return (
-    <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white">
+    <div className="relative rounded-lg overflow-hidden shadow-[var(--shadow-soft)] border border-border bg-white">
       <div
         className="relative hero-frame"
         style={{ ["--hero-ar" as any]: (aspectRatio || "21/9").replace("/", " / ") }}
@@ -586,52 +586,56 @@ function Index() {
       )}
 
       {/* Header */}
-      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
-          <a href="/" className="flex items-center gap-2 shrink-0">
-            {brand?.logo_url ? (
-              <img src={thumb(brand.logo_url, 96)} alt={brand.name_bn} className="size-10 rounded-2xl object-contain bg-white p-1 shadow-[var(--shadow-soft)]" />
-            ) : (
-              <div className="size-10 rounded-2xl grid place-items-center text-primary-foreground shadow-[var(--shadow-soft)]" style={{ background: "var(--gradient-hero)" }}>
-                <Leaf className="size-5" />
+      <header className="hidden md:block sticky top-0 z-40 shadow-[var(--shadow-soft)]">
+        <div className="bg-primary text-primary-foreground">
+          <div className="container mx-auto px-4 py-3 flex items-center gap-4">
+            <a href="/" className="flex items-center gap-2 shrink-0">
+              {brand?.logo_url ? (
+                <img src={thumb(brand.logo_url, 96)} alt={brand.name_bn} className="size-10 rounded-md object-contain bg-card p-1" />
+              ) : (
+                <div className="size-10 rounded-md grid place-items-center bg-card text-primary">
+                  <Leaf className="size-5" />
+                </div>
+              )}
+              <div className="leading-tight">
+                <div className="font-[family-name:var(--font-display)] font-extrabold text-lg">{brand?.name_bn ?? "তাজা বাজার"}</div>
+                {brand?.tagline_bn && <div className="text-[10px] opacity-80 -mt-0.5">{brand.tagline_bn}</div>}
               </div>
-            )}
-            <div className="leading-tight">
-              <div className="font-[family-name:var(--font-display)] font-extrabold text-lg text-[var(--leaf-deep)]">{brand?.name_bn ?? "তাজা বাজার"}</div>
-              {brand?.tagline_bn && <div className="text-[10px] text-muted-foreground -mt-0.5 hidden sm:block">{brand.tagline_bn}</div>}
-            </div>
-          </a>
+            </a>
 
-          <form onSubmit={submitSearch} className="flex-1 min-w-0">
-            <div className="relative">
-              <button type="submit" aria-label="search" className="absolute left-2 top-1/2 -translate-y-1/2 size-9 grid place-items-center text-muted-foreground hover:text-primary">
-                <Search className="size-5" />
-              </button>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="খুঁজুন: ইলিশ, আম, মিনিকেট চাল..."
-                className="w-full h-12 pl-12 pr-4 rounded-full bg-secondary border border-transparent focus:border-primary outline-none transition placeholder:text-muted-foreground"
-              />
-            </div>
-          </form>
+            <form onSubmit={submitSearch} className="flex-1 min-w-0">
+              <div className="relative">
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="খুঁজুন: ইলিশ, আম, মিনিকেট চাল..."
+                  className="w-full h-11 pl-4 pr-12 rounded-md bg-card text-foreground outline-none text-sm placeholder:text-muted-foreground"
+                />
+                <button type="submit" aria-label="search" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 px-3 rounded-md bg-accent text-accent-foreground grid place-items-center">
+                  <Search className="size-5" />
+                </button>
+              </div>
+            </form>
 
-          {menuItems.length > 0 && (
-            <nav className="flex items-center gap-x-5 text-sm font-medium text-[var(--leaf-deep)]">
+            <button onClick={() => setCartOpen(true)} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-md bg-accent text-accent-foreground font-bold hover:opacity-95 transition">
+              <ShoppingCart className="size-5" />
+              <span className="text-sm">৳{cartTotal}</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-card text-primary text-[11px] grid place-items-center font-bold border border-border">{cartCount}</span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {menuItems.length > 0 && (
+          <div className="bg-card border-b border-border">
+            <nav className="container mx-auto px-4 h-10 flex items-center gap-6 text-sm font-semibold text-[var(--leaf-deep)] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {menuItems.map((m, i) => (
                 <a key={i} href={m.url} className="hover:text-primary transition whitespace-nowrap">{m.label_bn}</a>
               ))}
             </nav>
-          )}
-
-          <button onClick={() => setCartOpen(true)} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-full bg-primary text-primary-foreground hover:opacity-95 transition shadow-[var(--shadow-soft)]">
-            <ShoppingCart className="size-5" />
-            <span className="hidden sm:inline text-sm font-semibold">৳{cartTotal}</span>
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 size-5 rounded-full bg-[var(--chili)] text-white text-[11px] grid place-items-center font-bold">{cartCount}</span>
-            )}
-          </button>
-        </div>
+          </div>
+        )}
       </header>
 
       {/* Mobile site header (logo + search) */}
@@ -670,29 +674,57 @@ function Index() {
       {!prodLoading && homeSections.map((sec) => {
         if (sec.type === "hero") {
           const sideCards = (sec.side_cards ?? []).filter((c) => c.image_url);
+          const catRail = categories.slice(0, 10);
           return (
             <section key={sec.id} className="relative overflow-hidden">
-              <div className="container mx-auto px-4 py-6 md:py-10">
-                {sideCards.length > 0 ? (
-                  <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-                    <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
-                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
-                      {sideCards.slice(0, 2).map((c, i) => {
-                        const el = (
-                          <img loading="lazy" decoding="async" src={thumb(c.image_url, 800)} alt={`offer-${i + 1}`}
-                            className="w-full h-full object-cover rounded-2xl border border-border hover:opacity-95 transition" />
-                        );
-                        return c.link
-                          ? <a key={i} href={c.link} className="block min-h-0">{el}</a>
-                          : <div key={i} className="min-h-0">{el}</div>;
-                      })}
+              <div className="container mx-auto px-4 py-4 md:py-6">
+                <div className={`grid gap-3 md:gap-4 ${catRail.length > 0 ? "lg:grid-cols-[minmax(0,230px)_minmax(0,1fr)]" : ""}`}>
+                  {catRail.length > 0 && (
+                    <aside className="hidden lg:block rounded-lg border border-border bg-card overflow-hidden self-start">
+                      <div className="px-3 py-2 bg-primary text-primary-foreground text-sm font-bold">সব ক্যাটাগরি</div>
+                      <ul className="divide-y divide-border">
+                        {catRail.map((c: any) => (
+                          <li key={c.id}>
+                            <Link
+                              to="/cat/$catId"
+                              params={{ catId: c.id }}
+                              className="flex items-center gap-2 px-3 py-2 text-[13px] hover:bg-secondary hover:text-primary transition"
+                            >
+                              {c.image_url ? (
+                                <img src={thumb(c.image_url, 48)} alt={c.name_bn} loading="lazy" className="size-6 rounded object-contain shrink-0" />
+                              ) : (
+                                <span className="size-6 rounded bg-secondary shrink-0" />
+                              )}
+                              <span className="truncate">{c.name_bn}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link to="/categories" className="block px-3 py-2 text-[13px] font-semibold text-primary hover:bg-secondary">সব দেখুন →</Link>
+                    </aside>
+                  )}
+
+                  {sideCards.length > 0 ? (
+                    <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] min-w-0">
+                      <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                      <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                        {sideCards.slice(0, 2).map((c, i) => {
+                          const el = (
+                            <img loading="lazy" decoding="async" src={thumb(c.image_url, 800)} alt={`offer-${i + 1}`}
+                              className="w-full h-full object-cover rounded-lg border border-border hover:opacity-95 transition" />
+                          );
+                          return c.link
+                            ? <a key={i} href={c.link} className="block min-h-0">{el}</a>
+                            : <div key={i} className="min-h-0">{el}</div>;
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
-                  </div>
-                )}
+                  ) : (
+                    <div className="relative min-w-0">
+                      <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           );
