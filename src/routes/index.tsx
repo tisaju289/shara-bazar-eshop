@@ -32,7 +32,7 @@ function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallb
   }, [slides.length]);
   const go = (n: number) => setIdx((n + slides.length) % slides.length);
   return (
-    <div className="relative rounded-[2rem] overflow-hidden shadow-[var(--shadow-pop)] border border-border bg-white">
+    <div className="relative rounded-lg overflow-hidden shadow-[var(--shadow-soft)] border border-border bg-white">
       <div
         className="relative hero-frame"
         style={{ ["--hero-ar" as any]: (aspectRatio || "21/9").replace("/", " / ") }}
@@ -674,29 +674,57 @@ function Index() {
       {!prodLoading && homeSections.map((sec) => {
         if (sec.type === "hero") {
           const sideCards = (sec.side_cards ?? []).filter((c) => c.image_url);
+          const catRail = categories.slice(0, 10);
           return (
             <section key={sec.id} className="relative overflow-hidden">
-              <div className="container mx-auto px-4 py-6 md:py-10">
-                {sideCards.length > 0 ? (
-                  <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-                    <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
-                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
-                      {sideCards.slice(0, 2).map((c, i) => {
-                        const el = (
-                          <img loading="lazy" decoding="async" src={thumb(c.image_url, 800)} alt={`offer-${i + 1}`}
-                            className="w-full h-full object-cover rounded-2xl border border-border hover:opacity-95 transition" />
-                        );
-                        return c.link
-                          ? <a key={i} href={c.link} className="block min-h-0">{el}</a>
-                          : <div key={i} className="min-h-0">{el}</div>;
-                      })}
+              <div className="container mx-auto px-4 py-4 md:py-6">
+                <div className={`grid gap-3 md:gap-4 ${catRail.length > 0 ? "lg:grid-cols-[minmax(0,230px)_minmax(0,1fr)]" : ""}`}>
+                  {catRail.length > 0 && (
+                    <aside className="hidden lg:block rounded-lg border border-border bg-card overflow-hidden self-start">
+                      <div className="px-3 py-2 bg-primary text-primary-foreground text-sm font-bold">সব ক্যাটাগরি</div>
+                      <ul className="divide-y divide-border">
+                        {catRail.map((c: any) => (
+                          <li key={c.id}>
+                            <Link
+                              to="/cat/$catId"
+                              params={{ catId: c.id }}
+                              className="flex items-center gap-2 px-3 py-2 text-[13px] hover:bg-secondary hover:text-primary transition"
+                            >
+                              {c.image_url ? (
+                                <img src={thumb(c.image_url, 48)} alt={c.name_bn} loading="lazy" className="size-6 rounded object-contain shrink-0" />
+                              ) : (
+                                <span className="size-6 rounded bg-secondary shrink-0" />
+                              )}
+                              <span className="truncate">{c.name_bn}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link to="/categories" className="block px-3 py-2 text-[13px] font-semibold text-primary hover:bg-secondary">সব দেখুন →</Link>
+                    </aside>
+                  )}
+
+                  {sideCards.length > 0 ? (
+                    <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] min-w-0">
+                      <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                      <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                        {sideCards.slice(0, 2).map((c, i) => {
+                          const el = (
+                            <img loading="lazy" decoding="async" src={thumb(c.image_url, 800)} alt={`offer-${i + 1}`}
+                              className="w-full h-full object-cover rounded-lg border border-border hover:opacity-95 transition" />
+                          );
+                          return c.link
+                            ? <a key={i} href={c.link} className="block min-h-0">{el}</a>
+                            : <div key={i} className="min-h-0">{el}</div>;
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
-                  </div>
-                )}
+                  ) : (
+                    <div className="relative min-w-0">
+                      <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           );
