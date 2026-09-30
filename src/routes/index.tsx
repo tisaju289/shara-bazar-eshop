@@ -17,6 +17,7 @@ import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryMarquee } from "@/components/CategoryMarquee";
+import { ImagePreloader } from "@/components/ImagePreloader";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -40,8 +41,8 @@ function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallb
         {slides.map((src, i) => (
           <img
             key={i}
-            src={thumb(src, 800)}
-            srcSet={thumbSrcSet(src, 600)}
+            src={thumb(src, 600)}
+            srcSet={thumbSrcSet(src, 450)}
             sizes="100vw"
             alt={`hero-${i}`}
             loading={i === 0 ? "eager" : "lazy"}
@@ -563,6 +564,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <ImagePreloader imageUrls={products.slice(0, 8).map(p => p.image_url).filter(Boolean)} priority={8} />
       {/* Top utility bar */}
       {topbar?.enabled && (
         <div className="hidden md:block bg-[var(--leaf-deep)] text-primary-foreground/90 text-xs">

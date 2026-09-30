@@ -11,7 +11,7 @@ function isSupabaseStorage(url: string) {
   return url.includes("/storage/v1/object/public/");
 }
 
-export function thumb(url: string | null | undefined, width = 400, quality = 75): string | undefined {
+export function thumb(url: string | null | undefined, width = 400, quality = 70): string | undefined {
   if (!url) return undefined;
   if (url.startsWith("data:") || url.startsWith("blob:")) return url;
 
