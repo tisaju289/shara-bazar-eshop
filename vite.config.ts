@@ -20,11 +20,35 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'tanstack-vendor': ['@tanstack/react-query', '@tanstack/react-router'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          'lucide': ['lucide-react'],
+        // Function form: only splits modules that are actually part of the
+        // bundle, so the SSR build (where deps are external) doesn't fail
+        // with "cannot be included in manualChunks" errors.
+        manualChunks(id) {
+          const path = id.replaceAll("\\", "/");
+          if (!path.includes("/node_modules/")) return;
+          if (
+            path.includes("/node_modules/react/") ||
+            path.includes("/node_modules/react-dom/") ||
+            path.includes("/node_modules/scheduler/")
+          ) {
+            return "react-vendor";
+          }
+          if (
+            path.includes("/node_modules/@tanstack/react-query/") ||
+            path.includes("/node_modules/@tanstack/react-router/")
+          ) {
+            return "tanstack-vendor";
+          }
+          if (
+            path.includes("@radix-ui/react-dialog") ||
+            path.includes("@radix-ui/react-dropdown-menu") ||
+            path.includes("@radix-ui/react-select")
+          ) {
+            return "ui-vendor";
+          }
+          if (path.includes("/node_modules/lucide-react/")) {
+            return "lucide";
+          }
         },
       },
     },
