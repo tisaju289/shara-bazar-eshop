@@ -379,6 +379,11 @@ const PRODUCT_COLUMNS =
   "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,created_at";
 const MAX_PUBLIC_PRODUCTS = 200;
 
+// হোম পেজের এক্সট্রা সেকশনগুলোর ক্যাটাগরি আইডি
+const SPICES_CAT_ID = "ab590c50-a6d8-4230-bf0a-4b48804db41e"; // মসলা ও গুঁড়া মসলা
+const VEGETABLES_CAT_ID = "31cbc984-4369-4866-acfd-7927466c254f"; // সবজি
+const OIL_GHEE_CAT_ID = "5f212542-453a-4e64-a539-7da5a89e4107"; // তেল ও ঘি
+
 function useCategories() {
   return useQuery({
     queryKey: ["categories", "public"],
@@ -428,11 +433,69 @@ function useProducts() {
   });
 }
 
+// হট প্রোডাক্ট সেকশন — সবচেয়ে জনপ্রিয় ১২টি পণ্য (সবচেয়ে বেশি রিভিউ)
+function useHotProducts() {
+  return useQuery({
+    queryKey: ["products", "hot"],
+    queryFn: async (): Promise<DBProduct[]> => {
+      const { data, error } = await supabase
+        .from("products")
+        .select(PRODUCT_COLUMNS)
+        .eq("is_active", true)
+        .order("reviews_count", { ascending: false, nullsFirst: false })
+        .limit(12);
+      if (error) throw error;
+      return (data as unknown as DBProduct[]) ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+// মসলা / সবজি / তেল সেকশনের পণ্য — ক্যাটাগরি ধরে সরাসরি আনা হয়
+function useExtraCategoryProducts(catIds: string[]) {
+  return useQuery({
+    queryKey: ["products", "extra-cats", catIds.join(",")],
+    queryFn: async (): Promise<DBProduct[]> => {
+      const { data, error } = await supabase
+        .from("products")
+        .select(PRODUCT_COLUMNS)
+        .eq("is_active", true)
+        .in("category_id", catIds)
+        .order("reviews_count", { ascending: false, nullsFirst: false })
+        .limit(60);
+      if (error) throw error;
+      return (data as unknown as DBProduct[]) ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
 function Index() {
   const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();
   const { data: products = [], isLoading: prodLoading } = useProducts();
+  const { data: hotProducts = [] } = useHotProducts();
+  const { data: extraCatProducts = [] } = useExtraCategoryProducts([
+    SPICES_CAT_ID,
+    VEGETABLES_CAT_ID,
+    OIL_GHEE_CAT_ID,
+  ]);
+
+  // কার্ট/চেকআউটে দাম ও নাম রেজলভের জন্য সব সেকশনের পণ্য একসাথে (ডুপ্লিকেট বাদ)
+  const allProducts = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: DBProduct[] = [];
+    for (const p of [...products, ...hotProducts, ...extraCatProducts]) {
+      if (!seen.has(p.id)) {
+        seen.add(p.id);
+        merged.push(p);
+      }
+    }
+    return merged;
+  }, [products, hotProducts, extraCatProducts]);
 
   const [cart, setCart] = useCart();
   const [cartOpen, setCartOpen] = useState(false);
@@ -458,7 +521,7 @@ function Index() {
 
   const add = (id: string) => {
     setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
-    const p = products.find((x) => x.id === id);
+    const p = allProducts.find((x) => x.id === id);
     if (p) {
       trackEvent("AddToCart", {
         value: p.price,
@@ -483,19 +546,19 @@ function Index() {
     setOrderError(null);
     setCheckoutOpen(true);
     const ids = Object.keys(items);
-    const total = ids.reduce((s, id) => s + (products.find((p) => p.id === id)?.price ?? 0) * items[id], 0);
+    const total = ids.reduce((s, id) => s + (allProducts.find((p) => p.id === id)?.price ?? 0) * items[id], 0);
     trackEvent("InitiateCheckout", {
       value: total,
       currency: "BDT",
       content_ids: ids,
       content_type: "product",
       num_items: Object.values(items).reduce((a, b) => a + b, 0),
-      contents: ids.map((id) => ({ id, quantity: items[id], item_price: products.find((p) => p.id === id)?.price })),
+      contents: ids.map((id) => ({ id, quantity: items[id], item_price: allProducts.find((p) => p.id === id)?.price })),
     });
   };
 
   const checkoutTotal = useMemo(
-    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (allProducts.find((p) => p.id === id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
   const grandTotal = checkoutTotal + deliveryCharge;
@@ -508,7 +571,7 @@ function Index() {
     }
     setPlacing(true);
     const items = Object.entries(checkoutItems).map(([id, q]) => {
-      const p = products.find((x) => x.id === id);
+      const p = allProducts.find((x) => x.id === id);
       return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
     });
     const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
@@ -541,7 +604,7 @@ function Index() {
       content_type: "product",
       num_items: Object.values(checkoutItems).reduce((a, b) => a + b, 0),
       contents: Object.entries(checkoutItems).map(([id, q]) => ({
-        id, quantity: q, item_price: products.find((p) => p.id === id)?.price,
+        id, quantity: q, item_price: allProducts.find((p) => p.id === id)?.price,
       })),
       phone: orderForm.phone.trim(),
       external_id: orderForm.phone.trim(),
@@ -550,7 +613,7 @@ function Index() {
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotal = useMemo(
-    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (allProducts.find((p) => p.id === id)?.price ?? 0) * q, 0),
     [cart, products],
   );
 
@@ -565,6 +628,11 @@ function Index() {
     for (const p of products) if (p.brand_id) m[p.brand_id] = (m[p.brand_id] ?? 0) + 1;
     return m;
   }, [products]);
+
+  // হোম পেজের এক্সট্রা সেকশন — মসলা, সবজি, তেল ও ঘি
+  const moslaProducts = extraCatProducts.filter((p) => p.category_id === SPICES_CAT_ID).slice(0, 12);
+  const vegProducts = extraCatProducts.filter((p) => p.category_id === VEGETABLES_CAT_ID).slice(0, 12);
+  const oilProducts = extraCatProducts.filter((p) => p.category_id === OIL_GHEE_CAT_ID).slice(0, 12);
 
   const brand = settings?.brand;
   const topbar = settings?.topbar;
@@ -606,6 +674,48 @@ function Index() {
   ] : [];
 
   const sectionsToRender = homeSections.length > 0 ? homeSections : defaultSections;
+
+  // এক্সট্রা ক্যাটাগরি সেকশন — সেন্টার হেডিং + প্রোডাক্ট স্লাইডার + "সব দেখুন" বাটন
+  const renderCategoryProductSection = (
+    key: string,
+    title: string,
+    subtitle: string,
+    catId: string,
+    items: DBProduct[],
+  ) => {
+    if (items.length === 0) return null;
+    return (
+      <section key={key} className="py-6 md:py-10">
+        <div className="container mx-auto px-4 space-y-4">
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="min-w-0">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{title}</h2>
+              <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{subtitle}</p>
+            </div>
+          </div>
+          <ProductSlider
+            products={items}
+            categories={categories}
+            brands={brands}
+            cart={cart}
+            add={add}
+            sub={sub}
+            onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+            settings={settings?.product_card}
+          />
+          <div className="flex justify-center">
+            <Link
+              to="/products"
+              search={{ cat: catId } as any}
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
+            >
+              সব দেখুন <ChevronRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -1119,6 +1229,48 @@ function Index() {
       </>
       )}
 
+      {/* হট প্রোডাক্ট — এক লাইনে অটো মার্কি স্লাইডার */}
+      {hotProducts.length > 0 && (
+        <section className="py-6 md:py-10">
+          <div className="container mx-auto px-4 space-y-4">
+            <div className="flex flex-col items-center text-center gap-2">
+              <div className="min-w-0">
+                <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">হট প্রোডাক্ট</h2>
+                <p className="text-muted-foreground text-xs md:text-sm mt-0.5">এখন সবচেয়ে জনপ্রিয় পণ্যগুলো</p>
+              </div>
+            </div>
+            <ProductSlider
+              products={hotProducts}
+              categories={categories}
+              brands={brands}
+              cart={cart}
+              add={add}
+              sub={sub}
+              onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+              settings={settings?.product_card}
+              display="marquee"
+            />
+            <div className="flex justify-center">
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
+              >
+                সব দেখুন <ChevronRight className="size-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* মসলা সেকশন */}
+      {renderCategoryProductSection("mosla", "মসলা ও গুঁড়া মসলা", "খাঁটি ও সুগন্ধি মসলার স্বাদ", SPICES_CAT_ID, moslaProducts)}
+
+      {/* সবজি সেকশন */}
+      {renderCategoryProductSection("vegetables", "সবজি", "প্রতিদিনের টাটকা সবজি", VEGETABLES_CAT_ID, vegProducts)}
+
+      {/* তেল ও ঘি সেকশন */}
+      {renderCategoryProductSection("oil", "তেল ও ঘি", "বিশুদ্ধ তেল ও ঘি", OIL_GHEE_CAT_ID, oilProducts)}
+
       {/* জনপ্রিয় ব্র্যান্ড (fallback — শুধু যদি অ্যাডমিনে ব্র্যান্ড সেকশন যোগ করা না থাকে) */}
       {!prodLoading && brands.length > 0 && !homeSections.some((s) => s.type === "brand") && (
         <section className="py-8 md:py-12">
@@ -1199,7 +1351,7 @@ function Index() {
             <div className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4 space-y-3">
               {cartCount === 0 && <p className="text-center text-muted-foreground mt-10 text-sm">আপনার কার্ট খালি 🛒</p>}
               {Object.entries(cart).map(([id, q]) => {
-                const p = products.find((x) => x.id === id);
+                const p = allProducts.find((x) => x.id === id);
                 if (!p) return null;
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
@@ -1262,7 +1414,7 @@ function Index() {
                 <div className="p-4 space-y-4">
                   <div className="bg-secondary/50 rounded-2xl p-3 space-y-3">
                     {Object.entries(checkoutItems).map(([id, q]) => {
-                      const p = products.find((x) => x.id === id);
+                      const p = allProducts.find((x) => x.id === id);
                       if (!p) return null;
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
