@@ -13,7 +13,7 @@ import { trackEvent } from "@/lib/tracking";
 import { SlidersHorizontal, ChevronRight, Home, LayoutGrid, X, Layers } from "lucide-react";
 
 export const Route = createFileRoute("/cat/$catId")({
-  head: () => ({ meta: [{ title: "ক্যাটাগরি — তাজা বাজার" }] }),
+  head: () => ({ meta: [{ title: "ক্যাটাগরি — FreshFeni" }] }),
   component: CategoryPage,
 });
 

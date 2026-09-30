@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "অ্যাডমিন প্যানেল — তাজা বাজার" }] }),
+  head: () => ({ meta: [{ title: "অ্যাডমিন প্যানেল — FreshFeni" }] }),
   component: AdminLayout,
 });
 
@@ -71,7 +71,7 @@ function AdminLayout() {
           </div>
         )}
         <div>
-          <div className="font-extrabold text-[var(--leaf-deep)]">{brand?.name_bn || "তাজা বাজার"}</div>
+          <div className="font-extrabold text-[var(--leaf-deep)]">{brand?.name_bn || "FreshFeni"}</div>
           <div className="text-[10px] text-muted-foreground">অ্যাডমিন প্যানেল</div>
         </div>
       </div>

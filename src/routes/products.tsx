@@ -17,7 +17,7 @@ import { ShoppingCart } from "lucide-react";
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
-      { title: "সব পণ্য — তাজা বাজার" },
+      { title: "সব পণ্য — FreshFeni" },
       { name: "description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
     ],
   }),

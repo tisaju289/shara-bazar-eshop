@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/public/manifest")({
   server: {
     handlers: {
       GET: async () => {
-        let name = "তাজা বাজার";
+        let name = "FreshFeni";
         let short = name;
         let description = "";
         let logo = "";
@@ -58,8 +58,8 @@ export const Route = createFileRoute("/api/public/manifest")({
           scope: "/",
           display: "standalone",
           orientation: "portrait",
-          background_color: "#ffffff",
-          theme_color: "#16a34a",
+          background_color: "#FDF8EB",
+          theme_color: "#DC6A00",
           icons,
         };
 

@@ -100,7 +100,7 @@ function useCountdown(target: Date | null) {
 function CountdownBox({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center leading-none">
-      <span className="min-w-[2.2rem] rounded-md bg-[var(--chili,#e11d48)] bg-red-600 text-white text-sm md:text-base font-extrabold px-1.5 py-1 text-center tabular-nums">
+      <span className="min-w-[2.2rem] rounded-md bg-[var(--chili,#D6401C)] text-white text-sm md:text-base font-extrabold px-1.5 py-1 text-center tabular-nums">
         {String(value).padStart(2, "0")}
       </span>
       <span className="text-[8px] md:text-[9px] font-bold text-muted-foreground mt-0.5 tracking-wide">{label}</span>
@@ -641,7 +641,7 @@ function Index() {
                 </div>
               )}
               <div className="leading-tight">
-                <div className="font-[family-name:var(--font-display)] font-extrabold text-lg">{brand?.name_bn ?? "তাজা বাজার"}</div>
+                <div className="font-[family-name:var(--font-display)] font-extrabold text-lg">{brand?.name_bn ?? "FreshFeni"}</div>
                 {brand?.tagline_bn && <div className="text-[10px] opacity-80 -mt-0.5">{brand.tagline_bn}</div>}
               </div>
             </a>
@@ -871,7 +871,7 @@ function Index() {
                             : <div className="w-full h-full grid place-items-center text-4xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>}
                         </div>
                         {t.label_bn && (
-                          <div className="absolute inset-x-3 bottom-3 rounded-full bg-[var(--mango,theme(colors.amber.400))] bg-amber-400 text-center text-[11px] md:text-sm font-bold py-1.5 text-[var(--leaf-deep)] shadow">
+                          <div className="absolute inset-x-3 bottom-3 rounded-full bg-[var(--mango,#F8A800)] text-center text-[11px] md:text-sm font-bold py-1.5 text-[var(--leaf-deep)] shadow">
                             {t.label_bn}
                           </div>
                         )}

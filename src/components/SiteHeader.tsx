@@ -84,7 +84,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
                 </div>
               )}
               <div className="leading-tight">
-                <div className="font-[family-name:var(--font-display)] font-extrabold text-lg">{brand?.name_bn ?? "তাজা বাজার"}</div>
+                <div className="font-[family-name:var(--font-display)] font-extrabold text-lg">{brand?.name_bn ?? "FreshFeni"}</div>
                 {brand?.tagline_bn && <div className="text-[10px] opacity-80 -mt-0.5">{brand.tagline_bn}</div>}
               </div>
             </Link>
@@ -135,7 +135,7 @@ export function SiteHeader({ cartCount, cartTotal, onCartClick }: SiteHeaderProp
                 <Leaf className="size-4" />
               </div>
             )}
-            <span className="font-[family-name:var(--font-display)] font-extrabold text-base text-[var(--leaf-deep)]">{brand?.name_bn ?? "তাজা বাজার"}</span>
+            <span className="font-[family-name:var(--font-display)] font-extrabold text-base text-[var(--leaf-deep)]">{brand?.name_bn ?? "FreshFeni"}</span>
           </Link>
           <button type="button" onClick={() => setSearchOpen(true)} className="size-9 grid place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition" aria-label="search">
             <Search className="size-5" />

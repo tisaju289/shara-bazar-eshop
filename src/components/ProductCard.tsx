@@ -37,7 +37,7 @@ const DEFAULTS: ProductCardSettings = {
   show_price: true, show_old_price: true, show_tag: true, show_offer_badge: true,
   show_reviews: true, show_add_to_cart: true, show_buy_now: true, show_wishlist: false,
   add_to_cart_text_bn: "কার্ট", buy_now_text_bn: "এখনই কিনুন",
-  badge_bg: "#e11d48", badge_color: "#ffffff", badge_style: "starburst",
+  badge_bg: "#D6401C", badge_color: "#ffffff", badge_style: "starburst",
 };
 
 export function OfferBadge({ text, settings }: { text: string; settings: ProductCardSettings }) {
@@ -89,13 +89,13 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
         {p.slug ? (
           <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
             {p.image_url ? (
-              <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)" }} />
+              <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #FBF7EC 0%, #F3E8D2 100%)" }} />
             ) : (
               <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
             )}
           </Link>
         ) : p.image_url ? (
-          <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)" }} />
+          <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #FBF7EC 0%, #F3E8D2 100%)" }} />
         ) : (
           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
         )}

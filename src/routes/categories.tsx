@@ -8,7 +8,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 export const Route = createFileRoute("/categories")({
   head: () => ({
     meta: [
-      { title: "সব ক্যাটাগরি — তাজা বাজার" },
+      { title: "সব ক্যাটাগরি — FreshFeni" },
       { name: "description", content: "আমাদের সব ক্যাটাগরি এক জায়গায় দেখুন।" },
     ],
   }),

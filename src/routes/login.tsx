@@ -4,7 +4,7 @@ import { Leaf, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "লগইন — তাজা বাজার অ্যাডমিন" }] }),
+  head: () => ({ meta: [{ title: "লগইন — FreshFeni অ্যাডমিন" }] }),
   component: LoginPage,
 });
 
@@ -49,13 +49,13 @@ function LoginPage() {
       <div className="hidden lg:flex flex-col justify-between p-12 text-primary-foreground relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
         <Link to="/" className="flex items-center gap-2 relative z-10">
           <div className="size-10 rounded-2xl bg-white/20 grid place-items-center"><Leaf className="size-5" /></div>
-          <span className="font-extrabold text-xl">তাজা বাজার</span>
+          <span className="font-extrabold text-xl">FreshFeni</span>
         </Link>
         <div className="relative z-10 space-y-3 max-w-md">
           <h2 className="text-4xl font-extrabold leading-tight">অ্যাডমিন প্যানেলে স্বাগতম</h2>
           <p className="text-primary-foreground/85">আপনার দোকান, পণ্য, এবং অর্ডার এক জায়গায় ম্যানেজ করুন।</p>
         </div>
-        <p className="text-xs text-primary-foreground/70 relative z-10">© তাজা বাজার</p>
+        <p className="text-xs text-primary-foreground/70 relative z-10">© FreshFeni</p>
         <div className="absolute -bottom-20 -right-20 size-96 rounded-full bg-white/10 blur-3xl" />
       </div>
       <div className="flex items-center justify-center p-6 md:p-10">

@@ -254,8 +254,8 @@ export type ProductCard = {
 };
 
 const DEFAULTS: SiteSettings = {
-  brand: { name_bn: "তাজা বাজার", tagline_bn: "তাজা · বিশ্বস্ত · দ্রুত", logo_url: "" },
-  seo: { title: "তাজা বাজার", description: "", keywords: "", og_image: "", favicon_url: "" },
+  brand: { name_bn: "FreshFeni", tagline_bn: "Fresh Every Day", logo_url: "" },
+  seo: { title: "FreshFeni", description: "Fresh Every Day — অনলাইন বাজার", keywords: "", og_image: "", favicon_url: "" },
   topbar: { location_bn: "", phone: "", enabled: true, notice_enabled: false, notice_bn: "", notice_speed: 30 },
   header_menu: { items: [] },
   hero: {
@@ -342,7 +342,7 @@ const DEFAULTS: SiteSettings = {
     show_wishlist: false,
     add_to_cart_text_bn: "কার্ট",
     buy_now_text_bn: "এখনই কিনুন",
-    badge_bg: "#e11d48",
+    badge_bg: "#D6401C",
     badge_color: "#ffffff",
     badge_style: "starburst",
   },

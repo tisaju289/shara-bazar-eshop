@@ -8,9 +8,9 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 export const Route = createFileRoute("/brands/")({
   head: () => ({
     meta: [
-      { title: "সব ব্র্যান্ড — তাজা বাজার" },
+      { title: "সব ব্র্যান্ড — FreshFeni" },
       { name: "description", content: "আমাদের সব ব্র্যান্ড এক জায়গায় দেখুন।" },
-      { property: "og:title", content: "সব ব্র্যান্ড — তাজা বাজার" },
+      { property: "og:title", content: "সব ব্র্যান্ড — FreshFeni" },
       { property: "og:description", content: "আমাদের সব ব্র্যান্ড এক জায়গায় দেখুন।" },
     ],
   }),

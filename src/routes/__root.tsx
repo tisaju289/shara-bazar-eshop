@@ -114,8 +114,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   loader: () => loadSeo(),
   head: ({ loaderData }) => {
     const d = loaderData ?? { title: "", description: "", keywords: "", og_image: "", favicon_url: "", logo_url: "" };
-    const title = d.title || "Lovable App";
-    const description = d.description || "Lovable Generated Project";
+    const title = d.title || "FreshFeni";
+    const description = d.description || "Fresh Every Day — অনলাইন বাজার";
     const meta: Array<Record<string, string>> = [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -134,7 +134,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta.push({ property: "og:image", content: d.og_image });
       meta.push({ name: "twitter:image", content: d.og_image });
     }
-    meta.push({ name: "theme-color", content: "#16a34a" });
+    meta.push({ name: "theme-color", content: "#DC6A00" });
     meta.push({ name: "apple-mobile-web-app-capable", content: "yes" });
     meta.push({ name: "apple-mobile-web-app-status-bar-style", content: "default" });
     meta.push({ name: "apple-mobile-web-app-title", content: title });
@@ -143,6 +143,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/api/public/manifest" },
       { rel: "apple-touch-icon", href: appIcon ? iconUrl(appIcon, 192) : "/app-icon-192.png" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" },
       { rel: "preconnect", href: "https://images.weserv.nl", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://images.weserv.nl" },
       { rel: "preconnect", href: "https://*.supabase.co", crossOrigin: "anonymous" },
@@ -160,7 +163,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="bn">
       <head>
         <HeadContent />
       </head>

@@ -13,7 +13,7 @@ import { SlidersHorizontal, ChevronRight, Home, Tag, X } from "lucide-react";
 
 export const Route = createFileRoute("/brands/$brandId")({
   head: () => ({
-    meta: [{ title: "ব্র্যান্ড পণ্য — তাজা বাজার" }],
+    meta: [{ title: "ব্র্যান্ড পণ্য — FreshFeni" }],
   }),
   component: BrandProductPage,
 });
