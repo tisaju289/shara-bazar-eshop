@@ -89,13 +89,13 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
         {p.slug ? (
           <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
             {p.image_url ? (
-              <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #FBF7EC 0%, #F3E8D2 100%)" }} />
+              <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             ) : (
               <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
             )}
           </Link>
         ) : p.image_url ? (
-          <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #FBF7EC 0%, #F3E8D2 100%)" }} />
+          <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
         ) : (
           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
         )}

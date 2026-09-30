@@ -215,7 +215,7 @@ function CategoryPage() {
 
             {/* Subcategory cards */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground mb-4">একটি সাব-ক্যাটাগরি বেছে নিন</p>
+              <p className="text-sm text-muted-foreground mb-4 text-center">একটি সাব-ক্যাটাগরি বেছে নিন</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {subCats.map((sc) => (
                   <Link

@@ -169,18 +169,21 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
     <section className="py-6 md:py-10">
       <div className="container mx-auto px-4">
         <div className="rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
-            {cd && (
-              <div className="flex items-end gap-1.5">
-                <CountdownBox value={cd.hours} label="HRS" />
-                <CountdownBox value={cd.minutes} label="MIN" />
-                <CountdownBox value={cd.seconds} label="SEC" />
-              </div>
-            )}
+          <div className="flex flex-col items-center text-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+              {cd && (
+                <div className="flex items-end gap-1.5">
+                  <CountdownBox value={cd.hours} label="HRS" />
+                  <CountdownBox value={cd.minutes} label="MIN" />
+                  <CountdownBox value={cd.seconds} label="SEC" />
+                </div>
+              )}
+            </div>
             {tabs.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto no-scrollbar ml-auto">
-                {tabs.map((t, i) => (
+              <div className="w-full flex justify-center">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-full">
+                  {tabs.map((t, i) => (
                   <button
                     key={i}
                     type="button"
@@ -194,6 +197,7 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
                     {t.label_bn}
                   </button>
                 ))}
+                </div>
               </div>
             )}
           </div>
@@ -725,7 +729,7 @@ function Index() {
             <>
               <section className="py-6 md:py-10">
                 <div className="container mx-auto px-4">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">আজকের তাজা পণ্য</h2>
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">আজকের তাজা পণ্য</h2>
                   <ProductSlider
                     products={products.slice(0, 12)}
                     categories={categories}
@@ -741,7 +745,7 @@ function Index() {
               </section>
               <section className="py-6 md:py-10">
                 <div className="container mx-auto px-4">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">নিত্য প্রয়োজনীয় পণ্য</h2>
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">নিত্য প্রয়োজনীয় পণ্য</h2>
                   <ProductSlider
                     products={products.slice(12, 24)}
                     categories={categories}
@@ -757,7 +761,7 @@ function Index() {
               </section>
               <section className="py-6 md:py-10">
                 <div className="container mx-auto px-4">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">তাজা সবজি</h2>
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">তাজা সবজি</h2>
                   <ProductSlider
                     products={products.slice(24, 36)}
                     categories={categories}
@@ -773,7 +777,7 @@ function Index() {
               </section>
               <section className="py-6 md:py-10">
                 <div className="container mx-auto px-4">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">মসলা ও ঝাল</h2>
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">মসলা ও ঝাল</h2>
                   <ProductSlider
                     products={products.slice(36, 48)}
                     categories={categories}
@@ -826,7 +830,7 @@ function Index() {
                   {sideCards.length > 0 ? (
                     <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] min-w-0">
                       <HeroSlider images={(sec.images ?? []).filter(Boolean)} fallback={sec.image_url || heroImg} aspectRatio={sec.aspect_ratio} />
-                      <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                      <div className="hidden lg:grid lg:grid-cols-1 gap-3 md:gap-4">
                         {sideCards.slice(0, 2).map((c, i) => {
                           const el = (
                             <img loading="lazy" decoding="async" src={thumb(c.image_url, 800)} alt={`offer-${i + 1}`}
@@ -859,7 +863,7 @@ function Index() {
             <section key={sec.id} className="py-4 md:py-6">
               <div className="container mx-auto px-4 space-y-4">
                 {sec.title_bn && (
-                  <h2 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                  <h2 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)] text-center">{sec.title_bn}</h2>
                 )}
                 <div className={`grid grid-cols-2 ${colMap[cols]} gap-3 md:gap-4`}>
                   {tiles.map((t, i) => {
@@ -888,9 +892,9 @@ function Index() {
           return (
             <section key={sec.id} id="categories" className="py-10 md:py-14">
               <div className="container mx-auto px-4">
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 mb-4">
+                <div className="flex flex-col items-center text-center gap-2 mb-4">
                   <div className="min-w-0">
-                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
+                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
                     {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
                   </div>
                   <Link to="/categories" className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
@@ -954,7 +958,7 @@ function Index() {
             <section key={sec.id} className="py-4 md:py-6">
               <div className="container mx-auto px-4 space-y-4">
                 {sec.title_bn && (
-                  <h2 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                  <h2 className="text-lg md:text-xl font-extrabold text-[var(--leaf-deep)] text-center">{sec.title_bn}</h2>
                 )}
                 <div className={`grid grid-cols-2 ${colMap[cols]} gap-3 md:gap-4`}>
                   {items.map((b, i) => {
@@ -1003,9 +1007,9 @@ function Index() {
           return (
             <section key={sec.id} className="py-6 md:py-10">
               <div className="container mx-auto px-4 space-y-4">
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                <div className="flex flex-col items-center text-center gap-2">
                   <div className="min-w-0">
-                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn || "জনপ্রিয় ব্র্যান্ড"}</h2>
+                    <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ব্র্যান্ড"}</h2>
                     {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
                   </div>
                   {sec.show_all_link !== false && (
@@ -1076,9 +1080,9 @@ function Index() {
                   <img src={thumb(sec.banner_image_url, 1200)} alt={sec.title_bn} className="w-full rounded-2xl object-cover" loading="lazy" />
                 )
               )}
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+              <div className="flex flex-col items-center text-center gap-2">
                 <div className="min-w-0">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] truncate">{sec.title_bn}</h2>
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
                   {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
                 </div>
                 <Link
@@ -1194,7 +1198,7 @@ function Index() {
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     {p.image_url ? (
-                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
+                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover" style={{ background: "var(--gradient-warm)" }} />
                     ) : (
                       <div className="size-14 rounded-xl grid place-items-center text-2xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                     )}
@@ -1257,7 +1261,7 @@ function Index() {
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                           {p.image_url ? (
-                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
+                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover shrink-0" style={{ background: "var(--gradient-warm)" }} />
                           ) : (
                             <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                           )}

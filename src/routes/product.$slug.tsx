@@ -140,7 +140,7 @@ function ProductDetailPage() {
                       srcSet={thumbSrcSet(product.image_url, 700)}
                       sizes="(max-width: 768px) 100vw, 500px"
                       alt={product.name_bn}
-                      className="w-full h-full object-contain p-6"
+                      className="w-full h-full object-cover"
                       fetchPriority="high"
                     />
                   ) : (
@@ -201,7 +201,7 @@ function ProductDetailPage() {
 
             {related.length > 0 && (
               <section className="mt-10">
-                <h2 className="text-lg font-extrabold mb-3">একই ক্যাটাগরির পণ্য</h2>
+                <h2 className="text-lg font-extrabold mb-3 text-center">একই ক্যাটাগরির পণ্য</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3">
                   {related.map((r) => (
                     <ProductCard

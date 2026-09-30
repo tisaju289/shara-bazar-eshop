@@ -186,7 +186,7 @@ export function CartDrawer() {
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     {p.image_url ? (
-                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
+                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover" style={{ background: "var(--gradient-warm)" }} />
                     ) : (
                       <div className="size-14 rounded-xl grid place-items-center text-2xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                     )}
@@ -248,7 +248,7 @@ export function CartDrawer() {
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                           {p.image_url ? (
-                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
+                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover shrink-0" style={{ background: "var(--gradient-warm)" }} />
                           ) : (
                             <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                           )}

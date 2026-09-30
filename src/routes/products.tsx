@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, Plus, Minus, X, CheckCircle2,
-  Home, LayoutGrid, Package,
+  Home, LayoutGrid, Package, SlidersHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -93,6 +93,7 @@ function ProductsPage() {
   const [activeCat, setActiveCat] = useState<string | "all">(cat ?? "all");
   const [priceMin, setPriceMin] = useState<string>("");
   const [priceMax, setPriceMax] = useState<string>("");
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // Cart state
   const [cart, setCart] = useCart();
@@ -262,8 +263,30 @@ function ProductsPage() {
             {q ? `"${q}" এর ফলাফল` : "সব পণ্য"}
           </h1>
 
+          <div className="lg:hidden flex items-center gap-3">
+            <button
+              onClick={() => setFilterOpen((v) => !v)}
+              className="flex items-center gap-2 h-10 px-4 rounded-xl bg-secondary text-secondary-foreground text-sm font-semibold"
+            >
+              <SlidersHorizontal className="size-4" />
+              ফিল্টার
+              {(priceMin || priceMax || activeCat !== "all") && (
+                <span className="size-2 rounded-full bg-primary inline-block" />
+              )}
+            </button>
+            {(priceMin || priceMax || activeCat !== "all") && (
+              <button
+                onClick={() => { setPriceMin(""); setPriceMax(""); setActiveCat("all"); }}
+                className="flex items-center gap-1.5 h-10 px-4 rounded-xl bg-secondary text-xs text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3.5" /> রিসেট
+              </button>
+            )}
+            <span className="ml-auto text-xs text-muted-foreground">{filtered.length} টি পণ্য</span>
+          </div>
+
           <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-            <aside className="order-1 lg:sticky lg:top-24 lg:self-start space-y-4">
+            <aside className={`${filterOpen ? "block" : "hidden"} lg:block order-1 lg:sticky lg:top-24 lg:self-start space-y-4`}>
               <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
                 <h3 className="font-bold text-sm text-[var(--leaf-deep)]">দামের পরিসর (৳)</h3>
                 <div className="flex items-center gap-2">
@@ -401,7 +424,7 @@ function ProductsPage() {
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     {p.image_url ? (
-                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain" style={{ background: "var(--gradient-warm)" }} />
+                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover" style={{ background: "var(--gradient-warm)" }} />
                     ) : (
                       <div className="size-14 rounded-xl grid place-items-center text-2xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                     )}
@@ -464,7 +487,7 @@ function ProductsPage() {
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                           {p.image_url ? (
-                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-contain shrink-0" style={{ background: "var(--gradient-warm)" }} />
+                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover shrink-0" style={{ background: "var(--gradient-warm)" }} />
                           ) : (
                             <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
                           )}
