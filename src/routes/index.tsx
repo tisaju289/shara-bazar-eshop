@@ -18,6 +18,7 @@ import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryMarquee } from "@/components/CategoryMarquee";
 import { ImagePreloader } from "@/components/ImagePreloader";
+import { ProductSkeleton } from "@/components/ProductSkeleton";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -372,7 +373,7 @@ type DBCategory = { id: string; name_bn: string; slug: string; sort_order: numbe
 
 const PRODUCT_COLUMNS =
   "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,created_at";
-const MAX_PUBLIC_PRODUCTS = 5000;
+const MAX_PUBLIC_PRODUCTS = 200;
 
 function useCategories() {
   return useQuery({
@@ -386,6 +387,8 @@ function useCategories() {
       if (error) throw error;
       return data ?? [];
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 }
 function useBrands() {
@@ -399,6 +402,8 @@ function useBrands() {
       if (error) throw error;
       return (data as { id: string; name_bn: string; image_url: string | null; slug: string }[]) ?? [];
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 }
 function useProducts() {
@@ -414,6 +419,8 @@ function useProducts() {
       if (error) throw error;
       return (data as unknown as DBProduct[]) ?? [];
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -562,9 +569,43 @@ function Index() {
   const menuItems = settings?.header_menu?.items ?? [];
   const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
 
+  // Default sections if none configured
+  const defaultSections = homeSections.length === 0 ? [
+    {
+      id: "fresh",
+      type: "products",
+      title_bn: "আজকের তাজা পণ্য",
+      limit: 12,
+      bg_color: "var(--secondary)",
+    },
+    {
+      id: "daily",
+      type: "products",
+      title_bn: "নিত্য প্রয়োজনীয় পণ্য",
+      limit: 12,
+      bg_color: "var(--secondary)",
+    },
+    {
+      id: "vegetables",
+      type: "products",
+      title_bn: "তাজা সবজি",
+      limit: 12,
+      bg_color: "var(--secondary)",
+    },
+    {
+      id: "spices",
+      type: "products",
+      title_bn: "মসলা ও ঝাল",
+      limit: 12,
+      bg_color: "var(--secondary)",
+    },
+  ] : [];
+
+  const sectionsToRender = homeSections.length > 0 ? homeSections : defaultSections;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <ImagePreloader imageUrls={products.slice(0, 8).map(p => p.image_url).filter(Boolean)} priority={8} />
+      <ImagePreloader imageUrls={products.slice(0, 4).map(p => p.image_url).filter(Boolean)} priority={4} />
       {/* Top utility bar */}
       {topbar?.enabled && (
         <div className="hidden md:block bg-[var(--leaf-deep)] text-primary-foreground/90 text-xs">
@@ -671,9 +712,85 @@ function Index() {
 
       {/* Admin-configurable home sections */}
       {prodLoading && (
-        <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3">
+            {[...Array(10)].map((_, i) => <ProductSkeleton key={i} />)}
+          </div>
+        </div>
       )}
-      {!prodLoading && homeSections.map((sec) => {
+      {!prodLoading && (
+        <>
+          {/* Default sections if no admin config */}
+          {homeSections.length === 0 && (
+            <>
+              <section className="py-6 md:py-10">
+                <div className="container mx-auto px-4">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">আজকের তাজা পণ্য</h2>
+                  <ProductSlider
+                    products={products.slice(0, 12)}
+                    categories={categories}
+                    brands={brands}
+                    cart={cart}
+                    add={add}
+                    sub={sub}
+                    onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+                    settings={settings?.product_card}
+                    display="slider"
+                  />
+                </div>
+              </section>
+              <section className="py-6 md:py-10">
+                <div className="container mx-auto px-4">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">নিত্য প্রয়োজনীয় পণ্য</h2>
+                  <ProductSlider
+                    products={products.slice(12, 24)}
+                    categories={categories}
+                    brands={brands}
+                    cart={cart}
+                    add={add}
+                    sub={sub}
+                    onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+                    settings={settings?.product_card}
+                    display="slider"
+                  />
+                </div>
+              </section>
+              <section className="py-6 md:py-10">
+                <div className="container mx-auto px-4">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">তাজা সবজি</h2>
+                  <ProductSlider
+                    products={products.slice(24, 36)}
+                    categories={categories}
+                    brands={brands}
+                    cart={cart}
+                    add={add}
+                    sub={sub}
+                    onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+                    settings={settings?.product_card}
+                    display="slider"
+                  />
+                </div>
+              </section>
+              <section className="py-6 md:py-10">
+                <div className="container mx-auto px-4">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4">মসলা ও ঝাল</h2>
+                  <ProductSlider
+                    products={products.slice(36, 48)}
+                    categories={categories}
+                    brands={brands}
+                    cart={cart}
+                    add={add}
+                    sub={sub}
+                    onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
+                    settings={settings?.product_card}
+                    display="slider"
+                  />
+                </div>
+              </section>
+            </>
+          )}
+          {/* Admin configured sections */}
+          {homeSections.length > 0 && sectionsToRender.map((sec) => {
         if (sec.type === "hero") {
           const sideCards = (sec.side_cards ?? []).filter((c) => c.image_url);
           const catRail = categories.slice(0, 10);
@@ -989,6 +1106,8 @@ function Index() {
           </section>
         );
       })}
+      </>
+      )}
 
       {/* জনপ্রিয় ব্র্যান্ড (fallback — শুধু যদি অ্যাডমিনে ব্র্যান্ড সেকশন যোগ করা না থাকে) */}
       {!prodLoading && brands.length > 0 && !homeSections.some((s) => s.type === "brand") && (

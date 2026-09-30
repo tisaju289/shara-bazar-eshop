@@ -24,9 +24,17 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           'tanstack-vendor': ['@tanstack/react-query', '@tanstack/react-router'],
           'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          'lucide': ['lucide-react'],
         },
       },
     },
     chunkSizeWarningLimit: 1000,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
 });
