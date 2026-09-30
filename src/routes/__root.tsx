@@ -145,6 +145,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: appIcon ? iconUrl(appIcon, 192) : "/app-icon-192.png" },
       { rel: "preconnect", href: "https://images.weserv.nl", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://images.weserv.nl" },
+      { rel: "preconnect", href: "https://*.supabase.co", crossOrigin: "anonymous" },
     ];
 
     if (d.favicon_url) links.push({ rel: "icon", href: d.favicon_url });

@@ -17,7 +17,7 @@ export function thumb(url: string | null | undefined, width = 400, quality = 75)
 
   if (isSupabaseStorage(url)) {
     const transformed = url.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/");
-    return `${transformed}${transformed.includes("?") ? "&" : "?"}width=${width}&quality=${quality}&resize=contain`;
+    return `${transformed}${transformed.includes("?") ? "&" : "?"}width=${width}&quality=${quality}&resize=contain&format=webp`;
   }
 
   if (/^https?:\/\//i.test(url)) {
@@ -29,7 +29,7 @@ export function thumb(url: string | null | undefined, width = 400, quality = 75)
 }
 
 /** Responsive srcset at 1x/2x for a given base width. */
-export function thumbSrcSet(url: string | null | undefined, width = 400, quality = 75): string | undefined {
+export function thumbSrcSet(url: string | null | undefined, width = 400, quality = 80): string | undefined {
   if (!url) return undefined;
   const a = thumb(url, width, quality);
   const b = thumb(url, width * 2, quality);

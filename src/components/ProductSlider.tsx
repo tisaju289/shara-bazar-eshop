@@ -73,7 +73,7 @@ export function ProductSlider({
     })();
     return (
       <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${colsClass} gap-3 md:gap-4`}>
-        {limited.map((p) => (
+        {limited.map((p, index) => (
           <ProductCard
             key={p.id}
             product={p}
@@ -84,6 +84,7 @@ export function ProductSlider({
             sub={sub}
             onBuyNow={() => onBuyNow(p.id)}
             settings={settings}
+            priority={index < 6}
           />
         ))}
       </div>
@@ -139,7 +140,7 @@ export function ProductSlider({
         ref={ref}
         className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {products.map((p) => (
+        {products.map((p, index) => (
           <div key={p.id} className="snap-start shrink-0 basis-[calc(50%-0.4rem)] sm:basis-[calc(33.33%-0.6rem)] md:basis-[calc(25%-0.6rem)] lg:basis-[calc(20%-0.7rem)]">
             <ProductCard
               product={p}
@@ -150,6 +151,7 @@ export function ProductSlider({
               sub={sub}
               onBuyNow={() => onBuyNow(p.id)}
               settings={settings}
+              priority={index < 4}
             />
           </div>
         ))}

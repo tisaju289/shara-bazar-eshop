@@ -29,6 +29,7 @@ type Props = {
   sub: (id: string) => void;
   onBuyNow: () => void;
   settings?: ProductCardSettings;
+  priority?: boolean;
 };
 
 const DEFAULTS: ProductCardSettings = {
@@ -76,7 +77,7 @@ export function OfferBadge({ text, settings }: { text: string; settings: Product
   );
 }
 
-export function ProductCard({ product: p, categoryName, brandName, qty, add, sub, onBuyNow, settings }: Props) {
+export function ProductCard({ product: p, categoryName, brandName, qty, add, sub, onBuyNow, settings, priority = false }: Props) {
   const s = { ...DEFAULTS, ...(settings ?? {}) };
   const meta = [s.show_brand && brandName, s.show_category && categoryName, s.show_unit && p.unit]
     .filter(Boolean).join(" · ");
@@ -88,13 +89,13 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
         {p.slug ? (
           <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
             {p.image_url ? (
-              <img src={thumb(p.image_url, 320)} srcSet={thumbSrcSet(p.image_url, 320)} sizes="(max-width: 768px) 45vw, 220px" width={320} height={320} alt={p.name_bn} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
+              <img src={thumb(p.image_url, 180)} srcSet={thumbSrcSet(p.image_url, 180)} sizes="(max-width: 768px) 45vw, 160px" width={180} height={180} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)" }} />
             ) : (
               <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
             )}
           </Link>
         ) : p.image_url ? (
-          <img src={thumb(p.image_url, 320)} srcSet={thumbSrcSet(p.image_url, 320)} sizes="(max-width: 768px) 45vw, 220px" width={320} height={320} alt={p.name_bn} loading="lazy" decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" />
+          <img src={thumb(p.image_url, 180)} srcSet={thumbSrcSet(p.image_url, 180)} sizes="(max-width: 768px) 45vw, 160px" width={180} height={180} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-contain p-3 group-hover:scale-105 transition duration-500" style={{ background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)" }} />
         ) : (
           <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
         )}

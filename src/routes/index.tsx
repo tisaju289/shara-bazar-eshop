@@ -40,8 +40,8 @@ function HeroSlider({ images, fallback, aspectRatio }: { images: string[]; fallb
         {slides.map((src, i) => (
           <img
             key={i}
-            src={thumb(src, 1200)}
-            srcSet={thumbSrcSet(src, 900)}
+            src={thumb(src, 800)}
+            srcSet={thumbSrcSet(src, 600)}
             sizes="100vw"
             alt={`hero-${i}`}
             loading={i === 0 ? "eager" : "lazy"}
