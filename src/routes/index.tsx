@@ -897,11 +897,13 @@ function Index() {
                     <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ক্যাটাগরি"}</h2>
                     {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
                   </div>
-                  <Link to="/categories" className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                </div>
+                <CategoryMarquee categories={categories} catCounts={catCounts} />
+                <div className="mt-5 flex justify-center">
+                  <Link to="/categories" className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
                     সব দেখুন <ChevronRight className="size-4" />
                   </Link>
                 </div>
-                <CategoryMarquee categories={categories} catCounts={catCounts} />
               </div>
             </section>
           );
@@ -1012,13 +1014,15 @@ function Index() {
                     <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn || "জনপ্রিয় ব্র্যান্ড"}</h2>
                     {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
                   </div>
-                  {sec.show_all_link !== false && (
-                    <Link to="/brands" className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
-                      সব দেখুন <ChevronRight className="size-4" />
-                    </Link>
-                  )}
                 </div>
                 <BrandMarquee brands={brands} brandCounts={brandCounts} />
+                {sec.show_all_link !== false && (
+                  <div className="flex justify-center">
+                    <Link to="/brands" className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
+                      সব দেখুন <ChevronRight className="size-4" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </section>
           );
@@ -1085,13 +1089,6 @@ function Index() {
                   <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
                   {sec.subtitle_bn && <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{sec.subtitle_bn}</p>}
                 </div>
-                <Link
-                  to="/products"
-                  search={(sec.category_id ? { cat: sec.category_id } : {}) as any}
-                  className="shrink-0 text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  সব দেখুন <ChevronRight className="size-4" />
-                </Link>
               </div>
               <ProductSlider
                 products={items}
@@ -1106,6 +1103,15 @@ function Index() {
                 rows={sec.rows ?? 3}
                 columns={sec.columns ?? 5}
               />
+              <div className="flex justify-center">
+                <Link
+                  to="/products"
+                  search={(sec.category_id ? { cat: sec.category_id } : {}) as any}
+                  className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
+                >
+                  সব দেখুন <ChevronRight className="size-4" />
+                </Link>
+              </div>
             </div>
           </section>
         );
