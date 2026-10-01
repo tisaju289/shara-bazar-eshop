@@ -137,6 +137,7 @@ export type ProductSection = Base & {
   banner_image_url?: string; // wide banner strip above the products
   banner_link?: string;
   sort?: "newest" | "price_asc" | "price_desc" | "discount" | "random";
+  bg_color?: string;
 };
 export type DealTab = { label_bn: string; category_id: string };
 export type DealSection = Base & {
