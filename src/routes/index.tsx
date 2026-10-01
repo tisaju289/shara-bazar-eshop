@@ -646,7 +646,7 @@ function Index() {
     {
       id: "fresh",
       enabled: true,
-      type: "products",
+      type: "product",
       title_bn: "আজকের তাজা পণ্য",
       subtitle_bn: "",
       category_id: "",
@@ -656,7 +656,7 @@ function Index() {
     {
       id: "daily",
       enabled: true,
-      type: "products",
+      type: "product",
       title_bn: "নিত্য প্রয়োজনীয় পণ্য",
       subtitle_bn: "",
       category_id: "",
@@ -666,7 +666,7 @@ function Index() {
     {
       id: "vegetables",
       enabled: true,
-      type: "products",
+      type: "product",
       title_bn: "তাজা সবজি",
       subtitle_bn: "",
       category_id: "",
@@ -676,7 +676,7 @@ function Index() {
     {
       id: "spices",
       enabled: true,
-      type: "products",
+      type: "product",
       title_bn: "মসলা ও ঝাল",
       subtitle_bn: "",
       category_id: "",
