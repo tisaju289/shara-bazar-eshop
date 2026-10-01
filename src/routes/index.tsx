@@ -744,7 +744,7 @@ function Index() {
 
       {/* Header */}
       <header className="hidden md:block sticky top-0 z-40 shadow-[var(--shadow-soft)]">
-        <div className="bg-primary text-primary-foreground">
+        <div className="bg-header text-primary-foreground">
           <div className="container mx-auto px-4 py-3 flex items-center gap-4">
             <a href="/" className="flex items-center gap-2 shrink-0">
               {brand?.logo_url ? (
