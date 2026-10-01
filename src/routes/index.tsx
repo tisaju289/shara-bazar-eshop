@@ -786,7 +786,7 @@ function Index() {
               </div>
             </form>
 
-            <button onClick={() => setCartOpen(true)} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-md bg-accent text-accent-foreground font-bold hover:opacity-95 transition">
+            <button onClick={() => setCartOpen(true)} className="relative inline-flex items-center gap-2 h-11 px-4 rounded-md bg-accent text-accent-foreground font-bold border border-primary-foreground/30 hover:opacity-95 transition">
               <ShoppingCart className="size-5" />
               <span className="text-sm">৳{cartTotal}</span>
               {cartCount > 0 && (
