@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type ProductSection } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
@@ -642,7 +642,7 @@ function Index() {
   const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
 
   // Default sections if none configured
-  const defaultSections = homeSections.length === 0 ? [
+  const defaultSections: ProductSection[] = homeSections.length === 0 ? [
     {
       id: "fresh",
       type: "products",
@@ -719,7 +719,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <ImagePreloader imageUrls={products.slice(0, 4).map(p => p.image_url).filter(Boolean)} priority={4} />
+      <ImagePreloader imageUrls={products.slice(0, 4).map(p => p.image_url).filter((u): u is string => !!u)} priority={4} />
       {/* Top utility bar */}
       {topbar?.enabled && (
         <div className="hidden md:block bg-[var(--leaf-deep)] text-primary-foreground/90 text-xs">
