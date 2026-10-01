@@ -645,6 +645,7 @@ function Index() {
   const defaultSections: ProductSection[] = homeSections.length === 0 ? [
     {
       id: "fresh",
+      enabled: true,
       type: "products",
       title_bn: "আজকের তাজা পণ্য",
       limit: 12,
@@ -652,6 +653,7 @@ function Index() {
     },
     {
       id: "daily",
+      enabled: true,
       type: "products",
       title_bn: "নিত্য প্রয়োজনীয় পণ্য",
       limit: 12,
@@ -659,6 +661,7 @@ function Index() {
     },
     {
       id: "vegetables",
+      enabled: true,
       type: "products",
       title_bn: "তাজা সবজি",
       limit: 12,
@@ -666,6 +669,7 @@ function Index() {
     },
     {
       id: "spices",
+      enabled: true,
       type: "products",
       title_bn: "মসলা ও ঝাল",
       limit: 12,
