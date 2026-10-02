@@ -1,6 +1,6 @@
-import { useRouter } from "@tanstack/react-router";
+import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 
-export default function RootError({ error, reset }: { error: Error; reset: () => void }) {
+export default function RootError({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
