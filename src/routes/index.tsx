@@ -926,7 +926,7 @@ function Index() {
                 <div className={`grid gap-3 md:gap-4 ${catRail.length > 0 ? "lg:grid-cols-[minmax(0,230px)_minmax(0,1fr)]" : ""}`}>
                   {catRail.length > 0 && (
                     <aside className="hidden lg:flex flex-col h-0 min-h-full rounded-lg border border-border bg-card overflow-hidden">
-                      <div className="px-3 py-2 bg-primary text-primary-foreground text-sm font-bold shrink-0">সব ক্যাটাগরি</div>
+                      <div className="px-3 py-2 bg-[var(--leaf-deep)] text-primary-foreground text-sm font-bold shrink-0">সব ক্যাটাগরি</div>
                       <ul className="flex-1 min-h-0 overflow-y-auto divide-y divide-border [scrollbar-width:thin]">
                         {catRail.map((c: any) => (
                           <li key={c.id}>
