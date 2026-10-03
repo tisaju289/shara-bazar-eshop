@@ -1,11 +1,10 @@
 // Image delivery helpers.
-// - Supabase storage images go through Supabase's own render/image CDN.
-// - Any other remote image is proxied through images.weserv.nl, a free global
-//   image CDN that resizes + converts to WebP and caches aggressively.
-// Both paths give us small, cached, modern-format images instead of the
-// multi-megabyte originals.
-
-const WESERV = "https://images.weserv.nl/?url=";
+// - Supabase storage images go through Supabase's own render/image CDN
+//   (resized + WebP + edge cached).
+// - Other remote images are loaded directly from their origin. We previously
+//   proxied them through images.weserv.nl, but that free proxy rate-limits
+//   and rejects many hosts, which left brand/category images broken. Direct
+//   loading is reliable; browsers cache them per-origin.
 
 function isSupabaseStorage(url: string) {
   return url.includes("/storage/v1/object/public/");
@@ -20,15 +19,10 @@ export function thumb(url: string | null | undefined, width = 400, quality = 70)
     return `${transformed}${transformed.includes("?") ? "&" : "?"}width=${width}&quality=${quality}&resize=contain&format=webp`;
   }
 
-  if (/^https?:\/\//i.test(url)) {
-    const src = url.replace(/^https?:\/\//i, "");
-    return `${WESERV}${encodeURIComponent(src)}&w=${width}&q=${quality}&output=webp&we&il`;
-  }
-
   return url;
 }
 
-/** Responsive srcset at 1x/2x for a given base width. */
+/** Responsive srcset at 1x/2x for a given base width (Supabase images only). */
 export function thumbSrcSet(url: string | null | undefined, width = 400, quality = 80): string | undefined {
   if (!url) return undefined;
   const a = thumb(url, width, quality);
