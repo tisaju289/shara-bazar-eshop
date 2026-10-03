@@ -267,7 +267,21 @@ function BrandMarqueeInner({ brands, brandCounts }: { brands: BrandItem[]; brand
               style={{ background: "var(--gradient-warm)" }}
             >
               {b.image_url ? (
-                <img loading="lazy" decoding="async" src={thumb(b.image_url, 160)} alt={b.name_bn} className="size-full object-contain p-1" />
+                <img
+                  loading="eager"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  src={thumb(b.image_url, 160)}
+                  alt={b.name_bn}
+                  className="size-full object-contain p-1"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    if (el.dataset.fbk) return;
+                    el.dataset.fbk = "1";
+                    el.style.display = "none";
+                    el.parentElement?.insertAdjacentHTML("beforeend", '<span class="text-3xl">🏷️</span>');
+                  }}
+                />
               ) : (
                 <span className="text-3xl">🏷️</span>
               )}
