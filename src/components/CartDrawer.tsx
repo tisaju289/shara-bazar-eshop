@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { thumb } from "@/lib/img";
+import { ProductImage } from "@/components/ProductImage";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Loader2, Minus, Plus, X } from "lucide-react";
@@ -185,11 +185,13 @@ export function CartDrawer() {
                 if (!p) return null;
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
-                    {p.image_url ? (
-                      <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover" style={{ background: "var(--gradient-warm)" }} />
-                    ) : (
-                      <div className="size-14 rounded-xl grid place-items-center text-2xl" style={{ background: "var(--gradient-warm)" }}>🛒</div>
-                    )}
+                    <ProductImage
+                      url={p.image_url}
+                      alt={p.name_bn}
+                      width={120}
+                      className="size-14 rounded-xl object-cover"
+                      style={{ background: "var(--gradient-warm)" }}
+                    />
                     <div className="flex-1 text-sm">
                       <div className="font-semibold leading-tight">{p.name_bn}</div>
                       <div className="text-xs text-muted-foreground">৳{p.price} × {q}</div>
@@ -247,11 +249,13 @@ export function CartDrawer() {
                       if (!p) return null;
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
-                          {p.image_url ? (
-                            <img loading="lazy" decoding="async" src={thumb(p.image_url, 120)} alt={p.name_bn} className="size-14 rounded-xl object-cover shrink-0" style={{ background: "var(--gradient-warm)" }} />
-                          ) : (
-                            <div className="size-14 rounded-xl grid place-items-center text-2xl shrink-0" style={{ background: "var(--gradient-warm)" }}>🛒</div>
-                          )}
+                            <ProductImage
+                              url={p.image_url}
+                              alt={p.name_bn}
+                              width={120}
+                              className="size-14 rounded-xl object-cover shrink-0"
+                              style={{ background: "var(--gradient-warm)" }}
+                            />
                           <div className="flex-1 min-w-0 text-sm">
                             <div className="font-semibold leading-tight truncate">{p.name_bn}</div>
                             <div className="text-xs text-muted-foreground">৳{p.price} · ৳{p.price * q}</div>

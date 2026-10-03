@@ -59,7 +59,7 @@ export function CategoryMarquee({
               style={{ background: "var(--gradient-warm)" }}
             >
               {c.image_url ? (
-                <img loading="lazy" decoding="async" src={thumb(c.image_url, 200)} alt={c.name_bn} className="size-full object-cover" />
+                <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={thumb(c.image_url, 200)} alt={c.name_bn} className="size-full object-cover" />
               ) : (
                 <span className="text-2xl">🛒</span>
               )}

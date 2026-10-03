@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
 import { openCartDrawer } from "@/hooks/useCartDrawer";
-import { thumb, thumbSrcSet } from "@/lib/img";
+import { ProductImage } from "@/components/ProductImage";
 import { Home, ChevronRight, Plus, Minus, Star, Truck, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -134,18 +134,16 @@ function ProductDetailPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="relative rounded-xl border border-border bg-white overflow-hidden">
                 <div className="aspect-square grid place-items-center">
-                  {product.image_url ? (
-                    <img
-                      src={thumb(product.image_url, 700)}
-                      srcSet={thumbSrcSet(product.image_url, 700)}
-                      sizes="(max-width: 768px) 100vw, 500px"
-                      alt={product.name_bn}
-                      className="w-full h-full object-cover"
-                      fetchPriority="high"
-                    />
-                  ) : (
-                    <div className="text-7xl">🛒</div>
-                  )}
+                  <ProductImage
+                    url={product.image_url}
+                    alt={product.name_bn}
+                    width={700}
+                    sizes="(max-width: 768px) 100vw, 500px"
+                    loading="eager"
+                    fetchPriority="high"
+                    className="w-full h-full object-cover"
+                    fallback={<div className="w-full h-full grid place-items-center text-7xl">🛒</div>}
+                  />
                 </div>
                 {product.tag && (
                   <span className="absolute top-3 left-3 text-[11px] font-bold uppercase bg-[var(--chili)] text-white px-2 py-0.5 rounded">{product.tag}</span>

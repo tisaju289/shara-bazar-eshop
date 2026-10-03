@@ -12,6 +12,7 @@ export function ImagePreloader({ imageUrls, priority = 4 }: Props) {
 
     urlsToPreload.forEach((url) => {
       const img = new Image();
+      img.referrerPolicy = "no-referrer";
       img.src = thumb(url, 150) || url;
     });
   }, [imageUrls, priority]);

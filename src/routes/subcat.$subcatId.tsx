@@ -162,7 +162,7 @@ function SubcategoryProductPage() {
             <div className="size-16 md:size-20 rounded-2xl overflow-hidden shrink-0 grid place-items-center"
               style={{ background: "var(--gradient-warm)" }}>
               {currentSubcat.image_url ? (
-                <img loading="lazy" decoding="async" src={thumb(currentSubcat.image_url, 200)} alt={currentSubcat.name_bn} className="size-full object-cover" />
+                <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={thumb(currentSubcat.image_url, 200)} alt={currentSubcat.name_bn} className="size-full object-cover" />
               ) : (
                 <Layers className="size-7 text-primary" />
               )}

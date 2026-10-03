@@ -85,6 +85,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const meta: Array<Record<string, string>> = [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // তৃতীয় পক্ষের ইমেজ হোস্ট (ImgBB, Pinterest, Daraz ইত্যাদি) Referer দেখে
+      // হটলিংক ব্লক করে — referrer না পাঠালে ইমেজ সরাসরি লোড হয়।
+      { name: "referrer", content: "no-referrer" },
       { title },
       { name: "description", content: description },
       { property: "og:title", content: title },

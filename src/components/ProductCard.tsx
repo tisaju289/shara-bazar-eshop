@@ -1,7 +1,7 @@
 import { Plus, Minus, Heart, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
-import { thumb, thumbSrcSet } from "@/lib/img";
+import { ProductImage } from "@/components/ProductImage";
 
 export type ProductCardData = {
   id: string;
@@ -88,16 +88,26 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
       <div className="relative aspect-square overflow-hidden bg-white">
         {p.slug ? (
           <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
-            {p.image_url ? (
-              <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            ) : (
-              <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
-            )}
+            <ProductImage
+              url={p.image_url}
+              alt={p.name_bn}
+              width={150}
+              sizes="(max-width: 768px) 45vw, 140px"
+              loading={priority ? "eager" : "lazy"}
+              className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+              fallback={<div className="w-full h-full grid place-items-center text-5xl">🛒</div>}
+            />
           </Link>
-        ) : p.image_url ? (
-          <img src={thumb(p.image_url, 150)} srcSet={thumbSrcSet(p.image_url, 150)} sizes="(max-width: 768px) 45vw, 140px" width={150} height={150} alt={p.name_bn} loading={priority ? "eager" : "lazy"} decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
         ) : (
-          <div className="w-full h-full grid place-items-center text-5xl">🛒</div>
+          <ProductImage
+            url={p.image_url}
+            alt={p.name_bn}
+            width={150}
+            sizes="(max-width: 768px) 45vw, 140px"
+            loading={priority ? "eager" : "lazy"}
+            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            fallback={<div className="w-full h-full grid place-items-center text-5xl">🛒</div>}
+          />
         )}
         {s.show_tag && p.tag && (
           <span className="absolute top-2 left-2 text-[10px] font-bold tracking-wide uppercase bg-[var(--chili)] text-white px-2 py-0.5 rounded">{p.tag}</span>
