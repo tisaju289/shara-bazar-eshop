@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MigrateImagesRouteImport } from './routes/migrate-images'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
@@ -21,6 +22,7 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSubcategoriesRouteImport } from './routes/admin.subcategories'
+import { Route as ApiRestRouteImport } from './routes/api/rest'
 import { Route as BrandsIndexRouteImport } from './routes/brands.index'
 import { Route as BrandsBrandIdRouteImport } from './routes/brands.$brandId'
 import { Route as CatCatIdRouteImport } from './routes/cat.$catId'
@@ -46,6 +48,11 @@ const CategoriesRoute = CategoriesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MigrateImagesRoute = MigrateImagesRouteImport.update({
+  id: '/migrate-images',
+  path: '/migrate-images',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -88,6 +95,11 @@ const AdminSubcategoriesRoute = AdminSubcategoriesRouteImport.update({
   path: '/subcategories',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiRestRoute = ApiRestRouteImport.update({
+  id: '/api/rest',
+  path: '/api/rest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrandsIndexRoute = BrandsIndexRouteImport.update({
   id: '/brands/',
   path: '/brands/',
@@ -124,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
+  '/migrate-images': typeof MigrateImagesRoute
   '/products': typeof ProductsRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -131,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/subcategories': typeof AdminSubcategoriesRoute
+  '/api/rest': typeof ApiRestRoute
   '/brands/$brandId': typeof BrandsBrandIdRoute
   '/cat/$catId': typeof CatCatIdRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -143,6 +157,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
+  '/migrate-images': typeof MigrateImagesRoute
   '/products': typeof ProductsRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -150,6 +165,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/subcategories': typeof AdminSubcategoriesRoute
+  '/api/rest': typeof ApiRestRoute
   '/brands/$brandId': typeof BrandsBrandIdRoute
   '/cat/$catId': typeof CatCatIdRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -164,6 +180,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/login': typeof LoginRoute
+  '/migrate-images': typeof MigrateImagesRoute
   '/products': typeof ProductsRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -171,6 +188,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/subcategories': typeof AdminSubcategoriesRoute
+  '/api/rest': typeof ApiRestRoute
   '/brands/$brandId': typeof BrandsBrandIdRoute
   '/cat/$catId': typeof CatCatIdRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -186,6 +204,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categories'
     | '/login'
+    | '/migrate-images'
     | '/products'
     | '/admin/brands'
     | '/admin/categories'
@@ -193,6 +212,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/settings'
     | '/admin/subcategories'
+    | '/api/rest'
     | '/brands/$brandId'
     | '/cat/$catId'
     | '/product/$slug'
@@ -205,6 +225,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/login'
+    | '/migrate-images'
     | '/products'
     | '/admin/brands'
     | '/admin/categories'
@@ -212,6 +233,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/settings'
     | '/admin/subcategories'
+    | '/api/rest'
     | '/brands/$brandId'
     | '/cat/$catId'
     | '/product/$slug'
@@ -225,6 +247,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categories'
     | '/login'
+    | '/migrate-images'
     | '/products'
     | '/admin/brands'
     | '/admin/categories'
@@ -232,6 +255,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/settings'
     | '/admin/subcategories'
+    | '/api/rest'
     | '/brands/$brandId'
     | '/cat/$catId'
     | '/product/$slug'
@@ -246,7 +270,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CategoriesRoute: typeof CategoriesRoute
   LoginRoute: typeof LoginRoute
+  MigrateImagesRoute: typeof MigrateImagesRoute
   ProductsRoute: typeof ProductsRoute
+  ApiRestRoute: typeof ApiRestRoute
   BrandsBrandIdRoute: typeof BrandsBrandIdRoute
   CatCatIdRoute: typeof CatCatIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -283,6 +309,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/migrate-images': {
+      id: '/migrate-images'
+      path: '/migrate-images'
+      fullPath: '/migrate-images'
+      preLoaderRoute: typeof MigrateImagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -340,6 +373,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/subcategories'
       preLoaderRoute: typeof AdminSubcategoriesRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/rest': {
+      id: '/api/rest'
+      path: '/api/rest'
+      fullPath: '/api/rest'
+      preLoaderRoute: typeof ApiRestRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/brands/': {
       id: '/brands/'
@@ -413,7 +453,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CategoriesRoute: CategoriesRoute,
   LoginRoute: LoginRoute,
+  MigrateImagesRoute: MigrateImagesRoute,
   ProductsRoute: ProductsRoute,
+  ApiRestRoute: ApiRestRoute,
   BrandsBrandIdRoute: BrandsBrandIdRoute,
   CatCatIdRoute: CatCatIdRoute,
   ProductSlugRoute: ProductSlugRoute,
