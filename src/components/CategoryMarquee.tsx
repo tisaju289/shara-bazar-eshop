@@ -1,19 +1,18 @@
-import { Link } from "@tanstack/react-router";
-import { thumb } from "@/lib/img";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CategoryCard } from "@/components/CategoryCard";
 
 type Cat = { id: string; name_bn: string; image_url: string | null };
 
 /**
- * Horizontal row of category circles with prev/next arrows.
- * Manual slide only — no auto marquee.
+ * Horizontal row of category cards (shared CategoryCard design — square
+ * full-bleed image + pill label straddling the bottom edge). Manual slide only.
  */
 export function CategoryMarquee({
   categories,
-  catCounts,
 }: {
   categories: Cat[];
+  /** kept for API compatibility — item counts are no longer displayed */
   catCounts?: Record<string, number>;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -45,30 +44,16 @@ export function CategoryMarquee({
       </button>
       <div
         ref={ref}
-        className="flex overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 md:gap-5 overflow-x-auto scroll-smooth pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categories.map((c, i) => (
-          <Link
+          <CategoryCard
             key={`${c.id}-${i}`}
-            to="/cat/$catId"
-            params={{ catId: c.id }}
-            className="group shrink-0 flex flex-col items-center gap-2 mr-3 md:mr-4 w-[88px] md:w-[110px]"
-          >
-            <div
-              className="size-16 md:size-20 rounded-full grid place-items-center overflow-hidden border-2 border-border group-hover:border-primary group-hover:scale-105 transition shadow-sm"
-              style={{ background: "var(--gradient-warm)" }}
-            >
-              {c.image_url ? (
-                <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={thumb(c.image_url, 200)} alt={c.name_bn} className="size-full object-cover" />
-              ) : (
-                <span className="text-2xl">🛒</span>
-              )}
-            </div>
-            <div className="text-[11px] md:text-xs font-semibold text-center leading-tight line-clamp-2">{c.name_bn}</div>
-            {catCounts && (
-              <div className="text-[10px] text-muted-foreground">{catCounts[c.id] ?? 0} আইটেম</div>
-            )}
-          </Link>
+            id={c.id}
+            name_bn={c.name_bn}
+            image_url={c.image_url}
+            className="shrink-0 w-[150px] sm:w-[175px] md:w-[205px] lg:w-[230px]"
+          />
         ))}
       </div>
     </div>

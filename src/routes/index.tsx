@@ -18,6 +18,7 @@ import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryMarquee } from "@/components/CategoryMarquee";
+import { BrandCard } from "@/components/BrandCard";
 import { ImagePreloader } from "@/components/ImagePreloader";
 import { ProductSkeleton } from "@/components/ProductSkeleton";
 
@@ -225,7 +226,11 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   );
 }
 
-function BrandMarqueeInner({ brands, brandCounts }: { brands: BrandItem[]; brandCounts: Record<string, number> }) {
+function BrandMarqueeInner({ brands }: {
+  brands: BrandItem[];
+  /** kept for API compatibility — counts are no longer displayed */
+  brandCounts?: Record<string, number>;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: -1 | 1) => {
@@ -254,42 +259,16 @@ function BrandMarqueeInner({ brands, brandCounts }: { brands: BrandItem[]; brand
       </button>
       <div
         ref={ref}
-        className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 md:gap-5 overflow-x-auto scroll-smooth pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {brands.map((b) => (
-          <Link
+          <BrandCard
             key={b.id}
-            to="/brands/$brandId"
-            params={{ brandId: b.id }}
-            className="group shrink-0 flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary hover:shadow-[var(--shadow-pop)] transition min-w-[100px] md:min-w-[120px]"
-          >
-            <div
-              className="size-16 md:size-20 rounded-2xl grid place-items-center overflow-hidden group-hover:scale-110 transition"
-              style={{ background: "var(--gradient-warm)" }}
-            >
-              {b.image_url ? (
-                <img
-                  loading="eager"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                  src={thumb(b.image_url, 160)}
-                  alt={b.name_bn}
-                  className="size-full object-contain p-1"
-                  onError={(e) => {
-                    const el = e.currentTarget;
-                    if (el.dataset.fbk) return;
-                    el.dataset.fbk = "1";
-                    el.style.display = "none";
-                    el.parentElement?.insertAdjacentHTML("beforeend", '<span class="text-3xl">🏷️</span>');
-                  }}
-                />
-              ) : (
-                <span className="text-3xl">🏷️</span>
-              )}
-            </div>
-            <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
-            <div className="text-[10px] text-muted-foreground">{brandCounts[b.id] ?? 0} পণ্য</div>
-          </Link>
+            id={b.id}
+            name_bn={b.name_bn}
+            image_url={b.image_url}
+            className="shrink-0 w-[150px] sm:w-[175px] md:w-[205px] lg:w-[230px]"
+          />
         ))}
       </div>
     </div>

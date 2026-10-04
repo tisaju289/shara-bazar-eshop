@@ -1,9 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { thumb } from "@/lib/img";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { BrandCard } from "@/components/BrandCard";
 
 export const Route = createFileRoute("/brands/")({
   head: () => ({
@@ -18,7 +18,6 @@ export const Route = createFileRoute("/brands/")({
 });
 
 type DBBrand = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
-type DBProduct = { id: string; brand_id: string | null };
 
 function BrandsPage() {
   const { data: brands = [] } = useQuery({
@@ -29,16 +28,6 @@ function BrandsPage() {
       return data ?? [];
     },
   });
-  const { data: products = [] } = useQuery({
-    queryKey: ["products", "public", "brand-counts"],
-    queryFn: async (): Promise<DBProduct[]> => {
-      const { data, error } = await supabase.from("products").select("id,brand_id").eq("is_active", true);
-      if (error) throw error;
-      return (data as DBProduct[]) ?? [];
-    },
-  });
-  const counts: Record<string, number> = {};
-  for (const p of products) if (p.brand_id) counts[p.brand_id] = (counts[p.brand_id] ?? 0) + 1;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -47,20 +36,9 @@ function BrandsPage() {
       <section className="py-6 md:py-10 pb-24 md:pb-10">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)] mb-6 text-center">সব ব্র্যান্ড</h1>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6 md:gap-x-4 md:gap-y-8">
             {brands.map((b) => (
-              <Link
-                key={b.id}
-                to="/brands/$brandId"
-                params={{ brandId: b.id }}
-                className="group flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl bg-card border border-border hover:border-primary transition"
-              >
-                <div className="size-16 md:size-20 rounded-2xl grid place-items-center text-3xl group-hover:scale-110 transition overflow-hidden bg-white" style={{ background: "var(--gradient-warm)" }}>
-                  {b.image_url ? <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={thumb(b.image_url, 200)} alt={b.name_bn} className="size-full object-contain p-1" onError={(e) => { const el = e.currentTarget; if (el.dataset.fbk) return; el.dataset.fbk = "1"; el.style.display = "none"; el.parentElement?.insertAdjacentHTML("beforeend", '<span class="text-3xl">🏷️</span>'); }} /> : "🏷️"}
-                </div>
-                <div className="text-xs md:text-sm font-semibold text-center leading-tight">{b.name_bn}</div>
-                <div className="text-[10px] text-muted-foreground">{counts[b.id] ?? 0} পণ্য</div>
-              </Link>
+              <BrandCard key={b.id} id={b.id} name_bn={b.name_bn} image_url={b.image_url} className="w-full" />
             ))}
           </div>
           {brands.length === 0 && (
