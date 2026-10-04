@@ -2,7 +2,24 @@ import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard, ProductCardData } from "@/components/ProductCard";
 
-export function ProductSlider({
+export function ProductSlider(props: Parameters<typeof SliderRow>[0]) {
+  const { display = "slider", rows = 1, products } = props;
+  if (display === "grid" || rows <= 1 || products.length === 0) return <SliderRow {...props} />;
+  const per = Math.ceil(products.length / rows);
+  const chunks = Array.from({ length: rows }, (_, i) => products.slice(i * per, (i + 1) * per)).filter((c) => c.length);
+  return (
+    <div className="space-y-4">
+      {chunks.map((c, i) => <SliderRow key={i} {...props} products={c} />)}
+    </div>
+  );
+}
+
+const BASIS: Record<number, string> = {
+  2: "lg:basis-[calc(50%-0.5rem)]", 3: "lg:basis-[calc(33.33%-0.7rem)]", 4: "lg:basis-[calc(25%-0.75rem)]",
+  5: "lg:basis-[calc(20%-0.8rem)]", 6: "lg:basis-[calc(16.66%-0.85rem)]", 7: "lg:basis-[calc(14.28%-0.86rem)]", 8: "lg:basis-[calc(12.5%-0.875rem)]",
+};
+
+function SliderRow({
   products,
   categories,
   brands,
@@ -141,7 +158,7 @@ export function ProductSlider({
         className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {products.map((p, index) => (
-          <div key={p.id} className="snap-start shrink-0 basis-[calc(50%-0.4rem)] sm:basis-[calc(33.33%-0.6rem)] md:basis-[calc(25%-0.6rem)] lg:basis-[calc(20%-0.7rem)]">
+          <div key={p.id} className={`snap-start shrink-0 basis-[calc(50%-0.4rem)] sm:basis-[calc(33.33%-0.6rem)] md:basis-[calc(25%-0.6rem)] ${BASIS[Math.max(2, Math.min(8, columns))]}`}>
             <ProductCard
               product={p}
               categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
