@@ -241,6 +241,68 @@ function CheckoutTab({ v, on, delivery, onDelivery }: {
   );
 }
 
+const PRODUCT_PRESETS: { key: string; label: string; emoji: string; desc: string; patch: Record<string, any> }[] = [
+  { key: "weekly_deal", label: "সাপ্তাহিক ডিল", emoji: "📅", desc: "এই সপ্তাহের ছাড়ের পণ্য", patch: { title_bn: "সাপ্তাহিক ডিল", sort: "discount", only_discount: true } },
+  { key: "hot_deal", label: "হট ডিল", emoji: "🔥", desc: "সবচেয়ে বেশি ছাড়", patch: { title_bn: "হট ডিল 🔥", sort: "discount", only_discount: true, display: "marquee" } },
+  { key: "flash_sale", label: "ফ্ল্যাশ সেল", emoji: "⚡", desc: "সীমিত সময়ের অফার", patch: { title_bn: "ফ্ল্যাশ সেল", sort: "discount", only_discount: true } },
+  { key: "new_arrival", label: "নতুন পণ্য", emoji: "🆕", desc: "সর্বশেষ যোগ হওয়া পণ্য", patch: { title_bn: "নতুন এসেছে", sort: "newest" } },
+  { key: "best_seller", label: "বেস্ট সেলার", emoji: "🏆", desc: "জনপ্রিয় / বেশি রিভিউ", patch: { title_bn: "বেস্ট সেলার", sort: "popular" } },
+  { key: "budget", label: "কম দামে সেরা", emoji: "💰", desc: "দাম কম থেকে বেশি", patch: { title_bn: "কম দামে সেরা", sort: "price_asc" } },
+  { key: "premium", label: "প্রিমিয়াম পণ্য", emoji: "💎", desc: "দাম বেশি থেকে কম", patch: { title_bn: "প্রিমিয়াম কালেকশন", sort: "price_desc" } },
+  { key: "category_pick", label: "ক্যাটাগরি ভিত্তিক", emoji: "🗂️", desc: "নির্দিষ্ট ক্যাটাগরির পণ্য", patch: { title_bn: "ক্যাটাগরি পণ্য" } },
+  { key: "brand_pick", label: "ব্র্যান্ড ভিত্তিক", emoji: "🏷️", desc: "নির্দিষ্ট ব্র্যান্ডের পণ্য", patch: { title_bn: "ব্র্যান্ড পণ্য" } },
+  { key: "custom", label: "কাস্টম পণ্য সেকশন", emoji: "🛒", desc: "সব নিজে সাজান", patch: { title_bn: "নতুন পণ্য সেকশন" } },
+];
+
+const OTHER_TYPES: { type: HomeSectionType; label: string; emoji: string; desc: string }[] = [
+  { type: "deal", label: "কাউন্টডাউন ডিল", emoji: "⏰", desc: "টাইমার + ট্যাব + সাইড ব্যানার" },
+  { type: "hero", label: "হিরো স্লাইডার", emoji: "🖼️", desc: "বড় স্লাইডার + পাশের অফার কার্ড" },
+  { type: "category", label: "ক্যাটাগরি স্লাইডার", emoji: "📂", desc: "সব ক্যাটাগরি ছবি সহ" },
+  { type: "category_tiles", label: "ক্যাটাগরি টাইল", emoji: "🧩", desc: "নিজের ছবি ও লিংক দিয়ে টাইল" },
+  { type: "brand", label: "ব্র্যান্ড স্লাইডার", emoji: "🏢", desc: "সব ব্র্যান্ডের লোগো" },
+  { type: "banner", label: "একক ব্যানার", emoji: "🪧", desc: "চওড়া একটি ব্যানার" },
+  { type: "banner_grid", label: "ব্যানার গ্রিড", emoji: "🔲", desc: "একাধিক ব্যানার পাশাপাশি" },
+  { type: "offer", label: "কুপন অফার", emoji: "🎟️", desc: "কুপন কোড সহ অফার বক্স" },
+  { type: "feature", label: "সুবিধা / ট্রাস্ট", emoji: "✅", desc: "দ্রুত ডেলিভারি, আসল পণ্য ইত্যাদি" },
+];
+
+const TYPE_LABEL: Record<HomeSectionType, string> = {
+  hero: "হিরো", category: "ক্যাটাগরি", category_tiles: "ক্যাটাগরি টাইল", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
+  banner_grid: "ব্যানার গ্রিড", feature: "সুবিধা", brand: "ব্র্যান্ড", deal: "কাউন্টডাউন ডিল",
+};
+const TYPE_EMOJI: Record<HomeSectionType, string> = {
+  hero: "🖼️", category: "📂", category_tiles: "🧩", product: "🛒", offer: "🎟️", banner: "🪧",
+  banner_grid: "🔲", feature: "✅", brand: "🏢", deal: "⏰",
+};
+
+function sectionTitle(s: HomeSection): string {
+  const t = (s as any).title_bn || (s as any).caption_bn || (s as any).label_bn || "";
+  return t || "(শিরোনাম নেই)";
+}
+function sectionLabel(s: HomeSection): string {
+  if (s.type === "product") {
+    const p = PRODUCT_PRESETS.find((x) => x.key === s.preset);
+    return p ? p.label : "পণ্য সেকশন";
+  }
+  return TYPE_LABEL[s.type];
+}
+
+function makeSection(type: HomeSectionType, presetPatch?: Record<string, any>, presetKey?: string): HomeSection {
+  const id = crypto.randomUUID();
+  switch (type) {
+    case "hero": return { id, enabled: true, type, badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "", subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_primary_enabled: true, cta_secondary_bn: "দেখুন", cta_secondary_enabled: true, image_url: "", images: [] };
+    case "category": return { id, enabled: true, type, title_bn: "জনপ্রিয় ক্যাটাগরি", subtitle_bn: "" };
+    case "category_tiles": return { id, enabled: true, type, title_bn: "", columns: 5, items: [{ image_url: "", label_bn: "", link: "" }] };
+    case "product": return { id, enabled: true, type, title_bn: "নতুন পণ্য সেকশন", subtitle_bn: "", category_id: "", category_ids: [], brand_ids: [], limit: 10, display: "slider", rows: 1, columns: 5, sort: "newest", preset: presetKey, ...(presetPatch ?? {}) } as HomeSection;
+    case "offer": return { id, enabled: true, type, label_bn: "অফার", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "অর্ডার করুন" };
+    case "banner_grid": return { id, enabled: true, type, title_bn: "", columns: 3, items: [{ image_url: "", link: "" }] };
+    case "feature": return { id, enabled: true, type, items: [{ image_url: "", title_bn: "দ্রুত ডেলিভারি", subtitle_bn: "৬০ মিনিটে পৌঁছে যাবে" }] };
+    case "brand": return { id, enabled: true, type, title_bn: "জনপ্রিয় ব্র্যান্ড", subtitle_bn: "আপনার পছন্দের ব্র্যান্ড বেছে নিন", show_all_link: true };
+    case "deal": return { id, enabled: true, type, title_bn: "HAPPY HOUR!!!", side_image_url: "", side_link: "", side_position: "left", countdown_enabled: true, end_at: "", daily_reset: true, tabs: [], limit: 12, bg_color: "" };
+    default: return { id, enabled: true, type: "banner", image_url: "", link: "", caption_bn: "" };
+  }
+}
+
 function HomeSectionsTab({ v, on }: {
   v: HomeSection[];
   on: (v: HomeSection[]) => void;
@@ -253,84 +315,168 @@ function HomeSectionsTab({ v, on }: {
       return data ?? [];
     },
   });
-  const setItem = (i: number, patch: Partial<HomeSection>) => {
+  const { data: brands = [] } = useQuery({
+    queryKey: ["brands", "admin-options"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("brands").select("id,name_bn").order("name_bn");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name_bn: string }[];
+    },
+  });
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [filter, setFilter] = useState("");
+
+  const setItem = (i: number, patch: Partial<HomeSection>) =>
     on(v.map((s, idx) => (idx === i ? ({ ...s, ...patch } as HomeSection) : s)));
-  };
-  const addItem = (type: HomeSectionType) => {
-    const id = crypto.randomUUID();
-    let next: HomeSection;
-    if (type === "hero") {
-      next = { id, enabled: true, type, badge_bn: "", title_bn: "", title_highlight_bn: "", title_suffix_bn: "", subtitle_bn: "", cta_primary_bn: "অর্ডার করুন", cta_primary_enabled: true, cta_secondary_bn: "দেখুন", cta_secondary_enabled: true, image_url: "", images: [] };
-    } else if (type === "category") {
-      next = { id, enabled: true, type, title_bn: "জনপ্রিয় ক্যাটাগরি", subtitle_bn: "" };
-    } else if (type === "category_tiles") {
-      next = { id, enabled: true, type, title_bn: "", columns: 5, items: [{ image_url: "", label_bn: "", link: "" }] };
-    } else if (type === "product") {
-      next = { id, enabled: true, type, title_bn: "নতুন পণ্য সেকশন", subtitle_bn: "", category_id: "", limit: 8 };
-    } else if (type === "offer") {
-      next = { id, enabled: true, type, label_bn: "অফার", title_bn: "", subtitle_bn: "", coupon_code: "", min_order_bn: "", cta_bn: "অর্ডার করুন" };
-    } else if (type === "banner_grid") {
-      next = { id, enabled: true, type, title_bn: "", columns: 3, items: [{ image_url: "", link: "" }] };
-    } else if (type === "feature") {
-      next = { id, enabled: true, type, items: [{ image_url: "", title_bn: "দ্রুত ডেলিভারি", subtitle_bn: "৬০ মিনিটে পৌঁছে যাবে" }] };
-    } else if (type === "brand") {
-      next = { id, enabled: true, type, title_bn: "জনপ্রিয় ব্র্যান্ড", subtitle_bn: "আপনার পছন্দের ব্র্যান্ড বেছে নিন", show_all_link: true };
-    } else if (type === "deal") {
-      next = {
-        id, enabled: true, type,
-        title_bn: "HAPPY HOUR!!!",
-        side_image_url: "", side_link: "", side_position: "left",
-        countdown_enabled: true, end_at: "", daily_reset: true,
-        tabs: [], limit: 12, bg_color: "",
-      };
-    } else {
-      next = { id, enabled: true, type: "banner", image_url: "", link: "", caption_bn: "" };
-    }
-    on([...v, next]);
-  };
+  const add = (sec: HomeSection) => { on([...v, sec]); setOpenId(sec.id); setAdding(false); };
   const move = (i: number, dir: -1 | 1) => {
     const j = i + dir;
     if (j < 0 || j >= v.length) return;
-    const n = [...v];
-    [n[i], n[j]] = [n[j], n[i]];
-    on(n);
+    const n = [...v]; [n[i], n[j]] = [n[j], n[i]]; on(n);
   };
-  const TYPE_LABEL: Record<HomeSectionType, string> = {
-    hero: "হিরো", category: "ক্যাটাগরি", category_tiles: "ক্যাটাগরি টাইল", product: "পণ্য", offer: "অফার", banner: "ব্যানার",
-    banner_grid: "ব্যানার গ্রিড", feature: "সুবিধা/ট্রাস্ট", brand: "ব্র্যান্ড", deal: "ডিল (কাউন্টডাউন)",
+  const duplicate = (i: number) => {
+    const copy = { ...JSON.parse(JSON.stringify(v[i])), id: crypto.randomUUID() } as HomeSection;
+    const n = [...v]; n.splice(i + 1, 0, copy); on(n); setOpenId(copy.id);
   };
+  const remove = (i: number) => {
+    if (!confirm(`"${sectionTitle(v[i])}" সেকশনটি মুছে ফেলবেন?`)) return;
+    on(v.filter((_, j) => j !== i));
+  };
+  const activeCount = v.filter((s) => s.enabled).length;
+  const q = filter.trim().toLowerCase();
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <p className="text-xs text-muted-foreground max-w-md">হোম পেজে যেকোনো সেকশন যোগ/বাদ দিন। প্রতিটা সেকশন আলাদাভাবে অন/অফ করা যাবে, উপরে-নিচে সরানো যাবে।</p>
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(TYPE_LABEL) as HomeSectionType[]).map((t) => (
-            <button key={t} type="button" onClick={() => addItem(t)}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-              <Plus className="size-3.5" /> {TYPE_LABEL[t]}
-            </button>
-          ))}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3">
+        <div className="mr-auto">
+          <h2 className="text-base font-bold text-[var(--leaf-deep)]">হোম পেজ সেকশন</h2>
+          <p className="text-xs text-muted-foreground">মোট {v.length}টি · চালু {activeCount}টি · উপর থেকে নিচে যে ক্রমে আছে, হোম পেজে সেভাবেই দেখাবে</p>
         </div>
+        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="সেকশন খুঁজুন…" className="h-10 px-3 rounded-xl bg-secondary text-sm outline-none w-44" />
+        <button type="button" onClick={() => setAdding(true)}
+          className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+          <Plus className="size-4" /> নতুন সেকশন
+        </button>
       </div>
-      {v.length === 0 && <p className="text-sm text-muted-foreground italic text-center py-6">কোনো সেকশন নেই — উপরের বাটন থেকে টাইপ বেছে যোগ করুন</p>}
-      <div className="space-y-4">
-        {v.map((s, i) => (
-          <div key={s.id} className="rounded-2xl border border-border p-4 space-y-3 bg-secondary/30">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold text-muted-foreground">সেকশন {i + 1} · {TYPE_LABEL[s.type]}</span>
-              <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 text-xs cursor-pointer">
-                  <input type="checkbox" checked={s.enabled} onChange={(e) => setItem(i, { enabled: e.target.checked })} className="size-4 accent-primary" />
-                  <span>সক্রিয়</span>
+
+      {v.length === 0 && (
+        <div className="text-center py-10 rounded-2xl border border-dashed border-border">
+          <p className="text-sm text-muted-foreground mb-3">কোনো সেকশন নেই</p>
+          <button type="button" onClick={() => setAdding(true)} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">প্রথম সেকশন যোগ করুন</button>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {v.map((s, i) => {
+          if (q && !(sectionTitle(s) + sectionLabel(s)).toLowerCase().includes(q)) return null;
+          const open = openId === s.id;
+          return (
+            <div key={s.id} className={`rounded-2xl border bg-card overflow-hidden ${open ? "border-primary shadow-sm" : "border-border"} ${s.enabled ? "" : "opacity-60"}`}>
+              <div className="flex items-center gap-2 p-2.5">
+                <div className="flex flex-col">
+                  <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="h-5 w-7 text-xs rounded hover:bg-secondary disabled:opacity-30" aria-label="উপরে">▲</button>
+                  <button type="button" disabled={i === v.length - 1} onClick={() => move(i, 1)} className="h-5 w-7 text-xs rounded hover:bg-secondary disabled:opacity-30" aria-label="নিচে">▼</button>
+                </div>
+                <span className="size-6 shrink-0 rounded-full bg-secondary text-[11px] font-bold grid place-items-center">{i + 1}</span>
+                <span className="text-xl shrink-0">{TYPE_EMOJI[s.type]}</span>
+                <button type="button" onClick={() => setOpenId(open ? null : s.id)} className="flex-1 min-w-0 text-left">
+                  <div className="text-sm font-semibold truncate">{sectionTitle(s)}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {sectionLabel(s)}
+                    {s.type === "product" && ` · ${s.display === "grid" ? "গ্রিড" : s.display === "marquee" ? "অটো মার্কি" : "স্লাইডার"} · ${s.rows ?? 1} লাইন × ${s.columns ?? 5}টি`}
+                  </div>
+                </button>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0" title="চালু/বন্ধ">
+                  <input type="checkbox" className="sr-only peer" checked={s.enabled} onChange={(e) => setItem(i, { enabled: e.target.checked })} />
+                  <span className="w-9 h-5 rounded-full bg-muted peer-checked:bg-primary transition-colors" />
+                  <span className="absolute left-0.5 top-0.5 size-4 rounded-full bg-card shadow transition-transform peer-checked:translate-x-4" />
                 </label>
-                <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↑</button>
-                <button type="button" disabled={i === v.length - 1} onClick={() => move(i, 1)} className="h-8 px-2 rounded-md bg-card border border-border text-xs disabled:opacity-40">↓</button>
-                <button type="button" onClick={() => on(v.filter((_, j) => j !== i))} className="size-8 rounded-md bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-3.5" /></button>
+                <button type="button" onClick={() => setOpenId(open ? null : s.id)} className="h-8 px-3 rounded-lg bg-secondary text-xs font-semibold shrink-0">{open ? "বন্ধ" : "এডিট"}</button>
+                <button type="button" onClick={() => duplicate(i)} className="h-8 px-2 rounded-lg bg-secondary text-xs shrink-0" title="কপি">⧉</button>
+                <button type="button" onClick={() => remove(i)} className="size-8 rounded-lg bg-destructive/10 text-destructive grid place-items-center shrink-0" title="মুছুন"><Trash2 className="size-3.5" /></button>
+              </div>
+              {open && (
+                <div className="border-t border-border p-3 bg-secondary/20">
+                  <SectionEditor section={s} setItem={(p) => setItem(i, p)} cats={cats as { id: string; name_bn: string }[]} brands={brands} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {adding && (
+        <div className="fixed inset-0 z-50 bg-foreground/40 grid place-items-center p-4" onClick={() => setAdding(false)}>
+          <div className="bg-card rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto p-5 space-y-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-[var(--leaf-deep)]">কোন ধরনের সেকশন যোগ করবেন?</h3>
+              <button type="button" onClick={() => setAdding(false)} className="size-8 rounded-lg bg-secondary">✕</button>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold mb-2">🛒 পণ্য সেকশন</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {PRODUCT_PRESETS.map((p) => (
+                  <button key={p.key} type="button" onClick={() => add(makeSection("product", p.patch, p.key))}
+                    className="text-left rounded-xl border border-border p-3 hover:border-primary hover:bg-secondary/50 transition">
+                    <div className="text-xl">{p.emoji}</div>
+                    <div className="text-sm font-semibold mt-1">{p.label}</div>
+                    <div className="text-[11px] text-muted-foreground">{p.desc}</div>
+                  </button>
+                ))}
               </div>
             </div>
-            <SectionEditor section={s} setItem={(p) => setItem(i, p)} cats={cats as { id: string; name_bn: string }[]} />
+            <div>
+              <h4 className="text-sm font-bold mb-2">🎨 অন্যান্য সেকশন</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {OTHER_TYPES.map((t) => (
+                  <button key={t.type} type="button" onClick={() => add(makeSection(t.type))}
+                    className="text-left rounded-xl border border-border p-3 hover:border-primary hover:bg-secondary/50 transition">
+                    <div className="text-xl">{t.emoji}</div>
+                    <div className="text-sm font-semibold mt-1">{t.label}</div>
+                    <div className="text-[11px] text-muted-foreground">{t.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MultiPick({ label, options, value, onChange, emptyText }: {
+  label: string;
+  options: { id: string; name_bn: string }[];
+  value: string[];
+  onChange: (v: string[]) => void;
+  emptyText: string;
+}) {
+  const [q, setQ] = useState("");
+  const list = options.filter((o) => o.name_bn?.toLowerCase().includes(q.toLowerCase()));
+  const toggle = (id: string) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id]);
+  return (
+    <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-semibold">{label}</span>
+        <span className="text-[11px] text-muted-foreground">{value.length ? `${value.length}টি বাছাই` : emptyText}</span>
+      </div>
+      <div className="flex gap-2">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="খুঁজুন…" className="flex-1 h-9 px-3 rounded-lg bg-secondary text-sm outline-none" />
+        {value.length > 0 && <button type="button" onClick={() => onChange([])} className="h-9 px-3 rounded-lg bg-secondary text-xs">সব মুছুন</button>}
+      </div>
+      <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+        {list.map((o) => {
+          const on = value.includes(o.id);
+          return (
+            <button key={o.id} type="button" onClick={() => toggle(o.id)}
+              className={`h-7 px-2.5 rounded-full text-xs border ${on ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-transparent"}`}>
+              {on ? "✓ " : ""}{o.name_bn}
+            </button>
+          );
+        })}
+        {list.length === 0 && <span className="text-xs text-muted-foreground">কিছু পাওয়া যায়নি</span>}
       </div>
     </div>
   );
@@ -435,10 +581,11 @@ function ProductCardTab({ v, on }: { v: ProductCardSettings; on: (v: ProductCard
   );
 }
 
-function SectionEditor({ section: s, setItem, cats }: {
+function SectionEditor({ section: s, setItem, cats, brands = [] }: {
   section: HomeSection;
   setItem: (p: Partial<HomeSection>) => void;
   cats: { id: string; name_bn: string }[];
+  brands?: { id: string; name_bn: string }[];
 }) {
   if (s.type === "hero") {
     const images = s.images ?? [];
@@ -555,47 +702,85 @@ function SectionEditor({ section: s, setItem, cats }: {
     );
   }
   if (s.type === "product") {
+    const display = s.display ?? "slider";
+    const catIds = s.category_ids ?? (s.category_id ? [s.category_id] : []);
     return (
-      <Section title="পণ্য সেকশন সেটিং">
-        <div className="grid md:grid-cols-2 gap-3 mb-3">
-          <Field label="হেডার ব্যানার ইমেজ (ঐচ্ছিক)" hint="সেকশনের উপরে চওড়া ব্যানার দেখাবে">
-            <ImageInput value={(s as any).banner_image_url ?? ""} onChange={(u) => setItem({ banner_image_url: u } as any)} folder="banner" />
-          </Field>
-          <Field label="ব্যানার লিংক (ঐচ্ছিক)">
-            <input className={inputCls} value={(s as any).banner_link ?? ""} onChange={(e) => setItem({ banner_link: e.target.value } as any)} />
-          </Field>
-        </div>
-        <div className="grid md:grid-cols-2 gap-3">
-          <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
-          <Field label="সাবটাইটেল"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
-          <Field label="ক্যাটাগরি">
-            <select className={inputCls} value={s.category_id} onChange={(e) => setItem({ category_id: e.target.value } as any)}>
-              <option value="">— সব ক্যাটাগরি —</option>
-              {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
-            </select>
-          </Field>
-          <Field label="সর্বোচ্চ পণ্য সংখ্যা">
-            <input type="number" min={1} max={50} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 8) } as any)} />
-          </Field>
-          <Field label="ডিসপ্লে স্টাইল">
-            <select className={inputCls} value={(s as any).display ?? "slider"} onChange={(e) => setItem({ display: e.target.value } as any)}>
-              <option value="slider">স্লাইডার (অ্যারো সহ)</option>
-              <option value="marquee">অটো মার্কি (অ্যারো ছাড়া)</option>
-              <option value="grid">গ্রিড (রো × কলাম)</option>
-            </select>
-          </Field>
-          {((s as any).display ?? "slider") === "grid" && (
-            <>
-              <Field label="রো (লাইন) সংখ্যা">
-                <input type="number" min={1} max={10} className={inputCls} value={(s as any).rows ?? 3} onChange={(e) => setItem({ rows: Math.max(1, Number(e.target.value) || 3) } as any)} />
-              </Field>
-              <Field label="কলাম সংখ্যা (প্রতি লাইনে)">
-                <input type="number" min={1} max={8} className={inputCls} value={(s as any).columns ?? 5} onChange={(e) => setItem({ columns: Math.max(1, Number(e.target.value) || 5) } as any)} />
-              </Field>
-            </>
-          )}
-        </div>
-      </Section>
+      <div className="space-y-3">
+        <Section title="১. নাম ও ধরন" defaultOpen>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="সেকশনের ধরন">
+              <select className={inputCls} value={s.preset ?? "custom"} onChange={(e) => {
+                const p = PRODUCT_PRESETS.find((x) => x.key === e.target.value);
+                const { title_bn: _t, ...rest } = p?.patch ?? {};
+                setItem({ preset: e.target.value, only_discount: false, ...rest } as any);
+              }}>
+                {PRODUCT_PRESETS.map((p) => <option key={p.key} value={p.key}>{p.emoji} {p.label}</option>)}
+              </select>
+            </Field>
+            <Field label="টাইটেল"><input className={inputCls} value={s.title_bn} onChange={(e) => setItem({ title_bn: e.target.value } as any)} /></Field>
+            <Field label="সাবটাইটেল (ঐচ্ছিক)"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
+            <Field label="সাজানোর নিয়ম">
+              <select className={inputCls} value={s.sort ?? "newest"} onChange={(e) => setItem({ sort: e.target.value } as any)}>
+                <option value="newest">নতুন আগে</option>
+                <option value="discount">বেশি ছাড় আগে</option>
+                <option value="popular">জনপ্রিয় আগে</option>
+                <option value="price_asc">কম দাম আগে</option>
+                <option value="price_desc">বেশি দাম আগে</option>
+                <option value="random">মিশ্র</option>
+              </select>
+            </Field>
+          </div>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" checked={!!s.only_discount} onChange={(e) => setItem({ only_discount: e.target.checked } as any)} className="size-4 accent-primary" />
+            শুধু ছাড়ের পণ্য দেখান (যেগুলোর পুরানো দাম আছে)
+          </label>
+        </Section>
+
+        <Section title="২. কোন পণ্য দেখাবে" defaultOpen>
+          <div className="grid md:grid-cols-2 gap-3">
+            <MultiPick label="ক্যাটাগরি" options={cats} value={catIds} emptyText="সব ক্যাটাগরি"
+              onChange={(ids) => setItem({ category_ids: ids, category_id: ids.length === 1 ? ids[0] : "" } as any)} />
+            <MultiPick label="ব্র্যান্ড" options={brands} value={s.brand_ids ?? []} emptyText="সব ব্র্যান্ড"
+              onChange={(ids) => setItem({ brand_ids: ids } as any)} />
+          </div>
+          <p className="text-[11px] text-muted-foreground">কিছু বাছাই না করলে সব পণ্য থেকে দেখাবে। ক্যাটাগরি ও ব্র্যান্ড দুটোই দিলে দুটো মিলে এমন পণ্য দেখাবে।</p>
+        </Section>
+
+        <Section title="৩. লেআউট (লাইন ও কলাম)" defaultOpen>
+          <div className="grid grid-cols-3 gap-2">
+            {([["slider", "স্লাইডার", "অ্যারো দিয়ে সরানো"], ["marquee", "অটো মার্কি", "নিজে নিজে চলবে"], ["grid", "গ্রিড", "স্থির সারি-কলাম"]] as const).map(([k, l, d]) => (
+              <button key={k} type="button" onClick={() => setItem({ display: k } as any)}
+                className={`rounded-xl border p-3 text-left ${display === k ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+                <div className="text-sm font-semibold">{l}</div>
+                <div className="text-[11px] text-muted-foreground">{d}</div>
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="কয় লাইন">
+              <input type="number" min={1} max={10} className={inputCls} value={s.rows ?? 1} onChange={(e) => setItem({ rows: Math.max(1, Math.min(10, Number(e.target.value) || 1)) } as any)} />
+            </Field>
+            <Field label="প্রতি লাইনে কয়টি (ডেস্কটপ)">
+              <select className={inputCls} value={s.columns ?? 5} onChange={(e) => setItem({ columns: Number(e.target.value) } as any)}>
+                {[2, 3, 4, 5, 6, 7, 8].map((n) => <option key={n} value={n}>{n}টি</option>)}
+              </select>
+            </Field>
+            <Field label="মোট পণ্য সংখ্যা">
+              <input type="number" min={1} max={100} className={inputCls} value={s.limit} onChange={(e) => setItem({ limit: Math.max(1, Number(e.target.value) || 8) } as any)} />
+            </Field>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {display === "grid" ? `গ্রিডে ${(s.rows ?? 1)} × ${(s.columns ?? 5)} = ${(s.rows ?? 1) * (s.columns ?? 5)}টি পণ্য দেখাবে।` : `মোট ${s.limit}টি পণ্য ${s.rows ?? 1} লাইনে ভাগ হয়ে দেখাবে। মোবাইলে প্রতি লাইনে ২টি।`}
+          </p>
+        </Section>
+
+        <Section title="৪. উপরের ব্যানার (ঐচ্ছিক)">
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="ব্যানার ইমেজ"><ImageInput value={s.banner_image_url ?? ""} onChange={(u) => setItem({ banner_image_url: u } as any)} folder="banner" /></Field>
+            <Field label="ব্যানার লিংক"><input className={inputCls} value={s.banner_link ?? ""} onChange={(e) => setItem({ banner_link: e.target.value } as any)} /></Field>
+          </div>
+        </Section>
+      </div>
     );
   }
   if (s.type === "offer") {

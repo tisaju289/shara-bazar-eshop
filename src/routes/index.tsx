@@ -1181,33 +1181,28 @@ function Index() {
           );
         }
         // product
-        const items = (sec.category_id
-          ? products.filter((p) => p.category_id === sec.category_id)
-          : (() => {
-              // mix across categories so same-cat items spread out
-              const byCat: Record<string, typeof products> = {};
-              for (const p of products) {
-                const k = p.category_id ?? "__none";
-                (byCat[k] ||= []).push(p);
-              }
-              const ks = Object.keys(byCat);
-              const mixed: typeof products = [];
-              let pos = 0, more = true;
-              while (more) {
-                more = false;
-                for (const k of ks) {
-                  if (pos < byCat[k].length) { mixed.push(byCat[k][pos]); more = true; }
-                }
-                pos++;
-              }
-              return mixed;
-            })()
-        ).slice(
-          0,
-          sec.display === "grid"
-            ? Math.max(sec.limit, (sec.rows ?? 3) * (sec.columns ?? 5))
-            : sec.limit,
-        );
+        const catIds: string[] = (sec.category_ids && sec.category_ids.length) ? sec.category_ids : (sec.category_id ? [sec.category_id] : []);
+        const brandIds: string[] = sec.brand_ids ?? [];
+        let pool = products.filter((p) =>
+          (catIds.length === 0 || (p.category_id && catIds.includes(p.category_id))) &&
+          (brandIds.length === 0 || (p.brand_id && brandIds.includes(p.brand_id))));
+        if (sec.only_discount) pool = pool.filter((p) => p.old_price && Number(p.old_price) > Number(p.price));
+        const sortMode = sec.sort ?? "newest";
+        if (sortMode === "price_asc") pool = [...pool].sort((a, b) => Number(a.price) - Number(b.price));
+        else if (sortMode === "price_desc") pool = [...pool].sort((a, b) => Number(b.price) - Number(a.price));
+        else if (sortMode === "discount") pool = [...pool].sort((a, b) => (Number(b.old_price ?? b.price) - Number(b.price)) - (Number(a.old_price ?? a.price) - Number(a.price)));
+        else if (sortMode === "popular") pool = [...pool].sort((a, b) => Number(b.reviews_count ?? 0) - Number(a.reviews_count ?? 0));
+        else if (sortMode === "random") pool = [...pool].sort((a, b) => (a.id < b.id ? -1 : 1)).sort((a, b) => ((a.id.charCodeAt(3) * 7) % 13) - ((b.id.charCodeAt(3) * 7) % 13));
+        else if (catIds.length !== 1 && brandIds.length === 0) {
+          const byCat: Record<string, typeof pool> = {};
+          for (const p of pool) (byCat[p.category_id ?? "__none"] ||= []).push(p);
+          const ks = Object.keys(byCat); const mixed: typeof pool = []; let pos = 0, more = true;
+          while (more) { more = false; for (const k of ks) { if (pos < byCat[k].length) { mixed.push(byCat[k][pos]); more = true; } } pos++; }
+          pool = mixed;
+        }
+        const secRows = Math.max(1, sec.rows ?? 1);
+        const secCols = Math.max(1, sec.columns ?? 5);
+        const items = pool.slice(0, sec.display === "grid" ? Math.max(sec.limit, secRows * secCols) : sec.limit);
         if (items.length === 0) return null;
         return (
           <section key={sec.id} id="shop" className="py-6 md:py-10">
@@ -1237,13 +1232,13 @@ function Index() {
                 onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
                 settings={settings?.product_card}
                 display={sec.display ?? "slider"}
-                rows={sec.rows ?? 3}
-                columns={sec.columns ?? 5}
+                rows={secRows}
+                columns={secCols}
               />
               <div className="flex justify-center">
                 <Link
                   to="/products"
-                  search={(sec.category_id ? { cat: sec.category_id } : {}) as any}
+                  search={(catIds.length === 1 ? { cat: catIds[0] } : {}) as any}
                   className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
                 >
                   সব দেখুন <ChevronRight className="size-4" />
