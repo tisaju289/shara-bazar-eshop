@@ -59,7 +59,7 @@ export async function cachedRestGet(
   }
 
   // ২) Cloudflare Cache API (এজ)
-  const edgeCache = (globalThis as { caches?: { default: Cache } }).caches?.default;
+  const edgeCache = (globalThis as unknown as { caches?: { default: Cache } }).caches?.default;
   if (edgeCache) {
     try {
       const hit = await edgeCache.match(new Request(key, { method: "GET" }));
