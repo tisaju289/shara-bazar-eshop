@@ -154,6 +154,13 @@ function AdminProducts() {
     if (error) { toast.error(error.message); await load(); }
   };
 
+  const updateField = async (id: string, field: "category_id" | "brand_id", value: string | null) => {
+    setItems((arr) => arr.map((x) => (x.id === id ? { ...x, [field]: value } : x)));
+    const { error } = await supabase.from("products").update({ [field]: value }).eq("id", id);
+    if (error) { toast.error("আপডেট ব্যর্থ: " + error.message); await load(); }
+    else toast.success("আপডেট হয়েছে");
+  };
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const n = new Set(prev);
