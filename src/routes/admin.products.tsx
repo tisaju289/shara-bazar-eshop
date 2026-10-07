@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy, Upload, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy, Upload, Download, ArrowUpDown, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown } from "lucide-react";
 import { ImageInput } from "@/components/ImageInput";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProducts,
@@ -23,6 +24,7 @@ type Product = {
   tag: string | null;
   stock: number;
   is_active: boolean;
+  sort_order: number;
   keywords: string | null;
   reviews_rating: number | null;
   reviews_count: number | null;
@@ -53,7 +55,7 @@ function AdminProducts() {
   const [saving, setSaving] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
-  const [sortBy, setSortBy] = useState<string>("newest");
+  const [sortBy, setSortBy] = useState<string>("manual");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkCsv, setBulkCsv] = useState("");
   const [bulkImporting, setBulkImporting] = useState(false);
@@ -62,7 +64,7 @@ function AdminProducts() {
   const load = async () => {
     setLoading(true);
     const [{ data: ps }, { data: cs }, { data: bs }, scResult] = await Promise.all([
-      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("products").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
       supabase.from("categories").select("id, name_bn").order("sort_order"),
       supabase.from("brands").select("id, name_bn").order("sort_order"),
       supabase.from("subcategories").select("id, category_id, name_bn").order("sort_order"),
@@ -365,6 +367,7 @@ function AdminProducts() {
           onChange={(e) => setSortBy(e.target.value)}
           className="shrink-0 h-11 px-3 max-w-[45%] sm:max-w-none rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium truncate"
         >
+          <option value="manual">আমার সাজানো ক্রম</option>
           <option value="newest">নতুন আগে</option>
           <option value="name_asc">নাম (A-Z)</option>
           <option value="name_desc">নাম (Z-A)</option>
