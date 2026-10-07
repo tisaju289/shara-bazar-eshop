@@ -395,6 +395,8 @@ function AdminProducts() {
                     />
                   </th>
                   <th className="p-3 font-semibold">পণ্য</th>
+                  <th className="p-3 font-semibold hidden lg:table-cell">ক্যাটাগরি</th>
+                  <th className="p-3 font-semibold hidden xl:table-cell">ব্র্যান্ড</th>
                   <th className="p-3 font-semibold hidden md:table-cell">একক</th>
                   <th className="p-3 font-semibold">দাম</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">স্টক</th>
