@@ -343,12 +343,22 @@ function AdminProducts() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 w-full">
-        <div className="relative flex-1 min-w-0">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full">
+        <div className="relative flex-1 min-w-[180px]">
           <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পণ্য খুঁজুন..."
             className="w-full h-11 pl-9 pr-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm" />
         </div>
+        <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)}
+          className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
+          <option value="all">সব ক্যাটাগরি</option>
+          {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+        </select>
+        <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}
+          className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
+          <option value="all">সব ব্র্যান্ড</option>
+          {brands.map((b) => <option key={b.id} value={b.id}>{b.name_bn}</option>)}
+        </select>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -357,6 +367,8 @@ function AdminProducts() {
           <option value="newest">নতুন আগে</option>
           <option value="name_asc">নাম (A-Z)</option>
           <option value="name_desc">নাম (Z-A)</option>
+          <option value="cat_asc">ক্যাটাগরি অনুযায়ী</option>
+          <option value="brand_asc">ব্র্যান্ড অনুযায়ী</option>
           <option value="price_asc">দাম ↑</option>
           <option value="price_desc">দাম ↓</option>
           <option value="stock_asc">স্টক ↑</option>
