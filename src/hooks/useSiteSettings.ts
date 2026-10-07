@@ -136,7 +136,7 @@ export type ProductSection = Base & {
   columns?: number; // grid mode (per row, desktop)
   banner_image_url?: string; // wide banner strip above the products
   banner_link?: string;
-  sort?: "newest" | "price_asc" | "price_desc" | "discount" | "popular" | "random";
+  sort?: "newest" | "manual" | "price_asc" | "price_desc" | "discount" | "popular" | "random";
   bg_color?: string;
   preset?: string; // e.g. weekly_deal, hot_deal, new_arrival
   category_ids?: string[]; // multiple categories (overrides category_id)

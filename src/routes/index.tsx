@@ -366,11 +366,12 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
+  sort_order?: number;
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 const PRODUCT_COLUMNS =
-  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,created_at";
+  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,sort_order,created_at";
 const MAX_PUBLIC_PRODUCTS = 200;
 
 // হোম পেজের এক্সট্রা সেকশনগুলোর ক্যাটাগরি আইডি
@@ -417,6 +418,7 @@ function useProducts() {
         .from("products")
         .select(PRODUCT_COLUMNS)
         .eq("is_active", true)
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false })
         .range(0, MAX_PUBLIC_PRODUCTS - 1);
       if (error) throw error;
@@ -1167,7 +1169,8 @@ function Index() {
           (brandIds.length === 0 || (p.brand_id && brandIds.includes(p.brand_id))));
         if (sec.only_discount) pool = pool.filter((p) => p.old_price && Number(p.old_price) > Number(p.price));
         const sortMode = sec.sort ?? "newest";
-        if (sortMode === "price_asc") pool = [...pool].sort((a, b) => Number(a.price) - Number(b.price));
+        if (sortMode === "manual") pool = [...pool].sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0));
+        else if (sortMode === "price_asc") pool = [...pool].sort((a, b) => Number(a.price) - Number(b.price));
         else if (sortMode === "price_desc") pool = [...pool].sort((a, b) => Number(b.price) - Number(a.price));
         else if (sortMode === "discount") pool = [...pool].sort((a, b) => (Number(b.old_price ?? b.price) - Number(b.price)) - (Number(a.old_price ?? a.price) - Number(a.price)));
         else if (sortMode === "popular") pool = [...pool].sort((a, b) => Number(b.reviews_count ?? 0) - Number(a.reviews_count ?? 0));

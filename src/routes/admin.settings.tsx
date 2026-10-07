@@ -721,6 +721,7 @@ function SectionEditor({ section: s, setItem, cats, brands = [] }: {
             <Field label="সাবটাইটেল (ঐচ্ছিক)"><input className={inputCls} value={s.subtitle_bn} onChange={(e) => setItem({ subtitle_bn: e.target.value } as any)} /></Field>
             <Field label="সাজানোর নিয়ম">
               <select className={inputCls} value={s.sort ?? "newest"} onChange={(e) => setItem({ sort: e.target.value } as any)}>
+                <option value="manual">আমার সাজানো ক্রম (অ্য্যাডমিন)</option>
                 <option value="newest">নতুন আগে</option>
                 <option value="discount">বেশি ছাড় আগে</option>
                 <option value="popular">জনপ্রিয় আগে</option>
