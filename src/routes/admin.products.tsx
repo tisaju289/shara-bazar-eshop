@@ -156,7 +156,8 @@ function AdminProducts() {
 
   const updateField = async (id: string, field: "category_id" | "brand_id", value: string | null) => {
     setItems((arr) => arr.map((x) => (x.id === id ? { ...x, [field]: value } : x)));
-    const { error } = await supabase.from("products").update({ [field]: value }).eq("id", id);
+    const patch = field === "category_id" ? { category_id: value } : { brand_id: value };
+    const { error } = await supabase.from("products").update(patch).eq("id", id);
     if (error) { toast.error("আপডেট ব্যর্থ: " + error.message); await load(); }
     else toast.success("আপডেট হয়েছে");
   };
