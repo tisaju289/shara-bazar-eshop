@@ -297,7 +297,12 @@ function AdminProducts() {
     reader.readAsText(f);
   };
 
+  const catName = new Map(cats.map((c) => [c.id, c.name_bn]));
+  const brandName = new Map(brands.map((b) => [b.id, b.name_bn]));
+
   const filtered = items
+    .filter((p) => catFilter === "all" || p.category_id === catFilter)
+    .filter((p) => brandFilter === "all" || p.brand_id === brandFilter)
     .filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()))
     .slice()
     .sort((a, b) => {
@@ -308,6 +313,8 @@ function AdminProducts() {
         case "price_desc": return b.price - a.price;
         case "stock_asc": return a.stock - b.stock;
         case "stock_desc": return b.stock - a.stock;
+        case "cat_asc": return (catName.get(a.category_id ?? "") ?? "zzz").localeCompare(catName.get(b.category_id ?? "") ?? "zzz", "bn");
+        case "brand_asc": return (brandName.get(a.brand_id ?? "") ?? "zzz").localeCompare(brandName.get(b.brand_id ?? "") ?? "zzz", "bn");
         default: return 0;
       }
     });
