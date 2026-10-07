@@ -426,6 +426,20 @@ function AdminProducts() {
                         </div>
                       </div>
                     </td>
+                    <td className="p-3 hidden lg:table-cell">
+                      <select value={p.category_id ?? ""} onChange={(e) => updateField(p.id, "category_id", e.target.value || null)}
+                        className="w-full max-w-[140px] h-9 px-2 rounded-lg bg-background border border-border text-xs outline-none focus:border-primary">
+                        <option value="">—</option>
+                        {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+                      </select>
+                    </td>
+                    <td className="p-3 hidden xl:table-cell">
+                      <select value={p.brand_id ?? ""} onChange={(e) => updateField(p.id, "brand_id", e.target.value || null)}
+                        className="w-full max-w-[140px] h-9 px-2 rounded-lg bg-background border border-border text-xs outline-none focus:border-primary">
+                        <option value="">—</option>
+                        {brands.map((b) => <option key={b.id} value={b.id}>{b.name_bn}</option>)}
+                      </select>
+                    </td>
                     <td className="p-3 text-muted-foreground hidden md:table-cell">{p.unit}</td>
                     <td className="p-3">
                       <div className="font-bold">৳{p.price}</div>
