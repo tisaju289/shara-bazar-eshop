@@ -24,7 +24,7 @@ type Product = {
   tag: string | null;
   stock: number;
   is_active: boolean;
-  sort_order: number;
+  sort_order?: number;
   keywords: string | null;
   reviews_rating: number | null;
   reviews_count: number | null;
