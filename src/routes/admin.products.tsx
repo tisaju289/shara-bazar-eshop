@@ -45,6 +45,8 @@ function AdminProducts() {
   const [subCats, setSubCats] = useState<SubCat[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, "id">>(emptyForm);
