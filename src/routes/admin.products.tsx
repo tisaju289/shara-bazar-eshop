@@ -310,17 +310,63 @@ function AdminProducts() {
     .slice()
     .sort((a, b) => {
       switch (sortBy) {
-        case "name_asc": return a.name_bn.localeCompare(b.name_bn, "bn");
-        case "name_desc": return b.name_bn.localeCompare(a.name_bn, "bn");
-        case "price_asc": return a.price - b.price;
-        case "price_desc": return b.price - a.price;
-        case "stock_asc": return a.stock - b.stock;
-        case "stock_desc": return b.stock - a.stock;
-        case "cat_asc": return (catName.get(a.category_id ?? "") ?? "zzz").localeCompare(catName.get(b.category_id ?? "") ?? "zzz", "bn");
-        case "brand_asc": return (brandName.get(a.brand_id ?? "") ?? "zzz").localeCompare(brandName.get(b.brand_id ?? "") ?? "zzz", "bn");
+        case "manual": return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+...
         default: return 0;
       }
     });
+
+  // ===== ম্যানুয়াল ক্রম: পণ্য উপরে/নিচে নেওয়া =====
+  const persistOrder = async (updates: { id: string; sort_order: number }[]) => {
+    setItems((arr) => arr.map((x) => {
+      const u = updates.find((y) => y.id === x.id);
+      return u ? { ...x, sort_order: u.sort_order } : x;
+    }));
+    const results = await Promise.all(
+      updates.map((u) => supabase.from("products").update({ sort_order: u.sort_order }).eq("id", u.id)),
+    );
+    const bad = results.find((r) => r.error);
+    if (bad?.error) { toast.error("ক্রম আপডেট ব্যর্থ: " + bad.error.message); await load(); }
+  };
+
+  const reindexAll = async (newVisible: Product[]) => {
+    const visIds = new Set(newVisible.map((p) => p.id));
+    const hidden = items.filter((p) => !visIds.has(p.id));
+    const full = [...newVisible, ...hidden];
+    await persistOrder(full.map((p, i) => ({ id: p.id, sort_order: i + 1 })));
+  };
+
+  const moveRow = async (id: string, dir: "up" | "down" | "top" | "bottom") => {
+    const idx = filtered.findIndex((x) => x.id === id);
+    if (idx < 0) return;
+    if (dir === "up" && idx === 0) return;
+    if (dir === "down" && idx === filtered.length - 1) return;
+    const current = filtered[idx];
+
+    if (dir === "top" || dir === "bottom") {
+      const orders = items.map((x) => x.sort_order ?? 0);
+      const target = dir === "top" ? Math.min(...orders) - 1 : Math.max(...orders) + 1;
+      await persistOrder([{ id, sort_order: target }]);
+      toast.success(dir === "top" ? "সবার উপরে নেওয়া হয়েছে" : "সবার নিচে নেওয়া হয়েছে");
+      return;
+    }
+
+    const j = dir === "up" ? idx - 1 : idx + 1;
+    const neighbour = filtered[j];
+    const curOrder = current.sort_order ?? 0;
+    const nbOrder = neighbour.sort_order ?? 0;
+    if (curOrder === nbOrder) {
+      const newVisible = [...filtered];
+      [newVisible[idx], newVisible[j]] = [newVisible[j], newVisible[idx]];
+      await reindexAll(newVisible);
+    } else {
+      await persistOrder([
+        { id: current.id, sort_order: nbOrder },
+        { id: neighbour.id, sort_order: curOrder },
+      ]);
+    }
+    toast.success(dir === "up" ? "এক ধাপ উপরে নেওয়া হয়েছে" : "এক ধাপ নিচে নেওয়া হয়েছে");
+  };
 
   return (
     <div className="space-y-6">
