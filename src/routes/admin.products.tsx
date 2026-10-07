@@ -120,7 +120,7 @@ function AdminProducts() {
 
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
+      : await supabase.from("products").insert({ ...payload, sort_order: (items.length ? Math.min(...items.map((x) => x.sort_order ?? 0)) : 1) - 1 });
     setSaving(false);
     if (error) return toast.error("সেভ ব্যর্থ: " + error.message);
     toast.success(editing ? "পণ্য আপডেট হয়েছে" : "নতুন পণ্য যোগ হয়েছে");
@@ -311,7 +311,14 @@ function AdminProducts() {
     .sort((a, b) => {
       switch (sortBy) {
         case "manual": return (a.sort_order ?? 0) - (b.sort_order ?? 0);
-...
+        case "name_asc": return a.name_bn.localeCompare(b.name_bn, "bn");
+        case "name_desc": return b.name_bn.localeCompare(a.name_bn, "bn");
+        case "price_asc": return a.price - b.price;
+        case "price_desc": return b.price - a.price;
+        case "stock_asc": return a.stock - b.stock;
+        case "stock_desc": return b.stock - b.stock;
+        case "cat_asc": return (catName.get(a.category_id ?? "") ?? "zzz").localeCompare(catName.get(b.category_id ?? "") ?? "zzz", "bn");
+        case "brand_asc": return (brandName.get(a.brand_id ?? "") ?? "zzz").localeCompare(brandName.get(b.brand_id ?? "") ?? "zzz", "bn");
         default: return 0;
       }
     });
