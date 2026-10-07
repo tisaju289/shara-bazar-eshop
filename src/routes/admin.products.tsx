@@ -45,6 +45,8 @@ function AdminProducts() {
   const [subCats, setSubCats] = useState<SubCat[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, "id">>(emptyForm);
@@ -150,6 +152,14 @@ function AdminProducts() {
     setItems((arr) => arr.map((x) => (x.id === p.id ? { ...x, is_active: next } : x)));
     const { error } = await supabase.from("products").update({ is_active: next }).eq("id", p.id);
     if (error) { toast.error(error.message); await load(); }
+  };
+
+  const updateField = async (id: string, field: "category_id" | "brand_id", value: string | null) => {
+    setItems((arr) => arr.map((x) => (x.id === id ? { ...x, [field]: value } : x)));
+    const patch = field === "category_id" ? { category_id: value } : { brand_id: value };
+    const { error } = await supabase.from("products").update(patch).eq("id", id);
+    if (error) { toast.error("আপডেট ব্যর্থ: " + error.message); await load(); }
+    else toast.success("আপডেট হয়েছে");
   };
 
   const toggleSelect = (id: string) => {
@@ -288,7 +298,12 @@ function AdminProducts() {
     reader.readAsText(f);
   };
 
+  const catName = new Map(cats.map((c) => [c.id, c.name_bn]));
+  const brandName = new Map(brands.map((b) => [b.id, b.name_bn]));
+
   const filtered = items
+    .filter((p) => catFilter === "all" || p.category_id === catFilter)
+    .filter((p) => brandFilter === "all" || p.brand_id === brandFilter)
     .filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()))
     .slice()
     .sort((a, b) => {
@@ -299,6 +314,8 @@ function AdminProducts() {
         case "price_desc": return b.price - a.price;
         case "stock_asc": return a.stock - b.stock;
         case "stock_desc": return b.stock - a.stock;
+        case "cat_asc": return (catName.get(a.category_id ?? "") ?? "zzz").localeCompare(catName.get(b.category_id ?? "") ?? "zzz", "bn");
+        case "brand_asc": return (brandName.get(a.brand_id ?? "") ?? "zzz").localeCompare(brandName.get(b.brand_id ?? "") ?? "zzz", "bn");
         default: return 0;
       }
     });
@@ -327,12 +344,22 @@ function AdminProducts() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 w-full">
-        <div className="relative flex-1 min-w-0">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full">
+        <div className="relative flex-1 min-w-[180px]">
           <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পণ্য খুঁজুন..."
             className="w-full h-11 pl-9 pr-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm" />
         </div>
+        <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)}
+          className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
+          <option value="all">সব ক্যাটাগরি</option>
+          {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+        </select>
+        <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}
+          className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
+          <option value="all">সব ব্র্যান্ড</option>
+          {brands.map((b) => <option key={b.id} value={b.id}>{b.name_bn}</option>)}
+        </select>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -341,6 +368,8 @@ function AdminProducts() {
           <option value="newest">নতুন আগে</option>
           <option value="name_asc">নাম (A-Z)</option>
           <option value="name_desc">নাম (Z-A)</option>
+          <option value="cat_asc">ক্যাটাগরি অনুযায়ী</option>
+          <option value="brand_asc">ব্র্যান্ড অনুযায়ী</option>
           <option value="price_asc">দাম ↑</option>
           <option value="price_desc">দাম ↓</option>
           <option value="stock_asc">স্টক ↑</option>
@@ -367,6 +396,8 @@ function AdminProducts() {
                     />
                   </th>
                   <th className="p-3 font-semibold">পণ্য</th>
+                  <th className="p-3 font-semibold hidden lg:table-cell">ক্যাটাগরি</th>
+                  <th className="p-3 font-semibold hidden xl:table-cell">ব্র্যান্ড</th>
                   <th className="p-3 font-semibold hidden md:table-cell">একক</th>
                   <th className="p-3 font-semibold">দাম</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">স্টক</th>
@@ -395,6 +426,20 @@ function AdminProducts() {
                           {p.tag && <span className="text-[10px] font-bold uppercase bg-[var(--chili)]/15 text-[var(--chili)] px-1.5 py-0.5 rounded">{p.tag}</span>}
                         </div>
                       </div>
+                    </td>
+                    <td className="p-3 hidden lg:table-cell">
+                      <select value={p.category_id ?? ""} onChange={(e) => updateField(p.id, "category_id", e.target.value || null)}
+                        className="w-full max-w-[140px] h-9 px-2 rounded-lg bg-background border border-border text-xs outline-none focus:border-primary">
+                        <option value="">—</option>
+                        {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+                      </select>
+                    </td>
+                    <td className="p-3 hidden xl:table-cell">
+                      <select value={p.brand_id ?? ""} onChange={(e) => updateField(p.id, "brand_id", e.target.value || null)}
+                        className="w-full max-w-[140px] h-9 px-2 rounded-lg bg-background border border-border text-xs outline-none focus:border-primary">
+                        <option value="">—</option>
+                        {brands.map((b) => <option key={b.id} value={b.id}>{b.name_bn}</option>)}
+                      </select>
                     </td>
                     <td className="p-3 text-muted-foreground hidden md:table-cell">{p.unit}</td>
                     <td className="p-3">
