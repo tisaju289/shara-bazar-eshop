@@ -458,6 +458,32 @@ function AdminProducts() {
                     </td>
                     <td className="p-3">
                       <div className="flex justify-end gap-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger title="ক্রম বদলান" className="size-8 rounded-lg hover:bg-secondary grid place-items-center text-muted-foreground">
+                            <ArrowUpDown className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="min-w-[190px]">
+                            <DropdownMenuItem
+                              disabled={filtered.findIndex((x) => x.id === p.id) <= 0}
+                              onClick={() => moveRow(p.id, "up")}
+                            >
+                              <ArrowUp className="size-4" /> এক ধাপ উপরে নিন
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled={filtered.findIndex((x) => x.id === p.id) >= filtered.length - 1}
+                              onClick={() => moveRow(p.id, "down")}
+                            >
+                              <ArrowDown className="size-4" /> এক ধাপ নিচে নিন
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => moveRow(p.id, "top")}>
+                              <ChevronsUp className="size-4" /> সবার উপরে নিন
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => moveRow(p.id, "bottom")}>
+                              <ChevronsDown className="size-4" /> সবার নিচে নিন
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <button onClick={() => duplicate(p)} title="ডুপ্লিকেট" className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Copy className="size-4" /></button>
                         <button onClick={() => openEdit(p)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center"><Pencil className="size-4" /></button>
                         <button onClick={() => remove(p.id)} className="size-8 rounded-lg hover:bg-destructive/10 text-destructive grid place-items-center"><Trash2 className="size-4" /></button>
