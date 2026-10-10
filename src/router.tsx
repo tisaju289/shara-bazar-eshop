@@ -3,6 +3,10 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
+  // A reload must start at the top rather than restore a stale footer position.
+  if (typeof window !== "undefined") {
+    window.history.scrollRestoration = "manual";
+  }
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -20,7 +24,7 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
-    scrollRestoration: true,
+    scrollRestoration: false,
     defaultPreload: "intent",
     defaultPreloadStaleTime: 30_000,
   });
