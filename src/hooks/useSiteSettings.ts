@@ -142,6 +142,10 @@ export type ProductSection = Base & {
   category_ids?: string[]; // multiple categories (overrides category_id)
   brand_ids?: string[];
   only_discount?: boolean;
+  subcategory_ids?: string[];
+  source_mode?: "filter" | "mix" | "pick";
+  sources?: { kind: "category" | "subcategory"; id: string; count: number }[];
+  product_ids?: string[];
 };
 export type DealTab = { label_bn: string; category_id: string };
 export type DealSection = Base & {

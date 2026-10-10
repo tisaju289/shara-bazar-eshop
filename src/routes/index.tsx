@@ -1164,11 +1164,33 @@ function Index() {
         // product
         const catIds: string[] = (sec.category_ids && sec.category_ids.length) ? sec.category_ids : (sec.category_id ? [sec.category_id] : []);
         const brandIds: string[] = sec.brand_ids ?? [];
+        const subIds: string[] = sec.subcategory_ids ?? [];
+        const mode = sec.source_mode ?? "filter";
         let pool = products.filter((p) =>
-          (catIds.length === 0 || (p.category_id && catIds.includes(p.category_id))) &&
+          (mode !== "filter" || catIds.length === 0 || (p.category_id && catIds.includes(p.category_id))) &&
+          (mode !== "filter" || subIds.length === 0 || ((p as any).subcategory_id && subIds.includes((p as any).subcategory_id))) &&
           (brandIds.length === 0 || (p.brand_id && brandIds.includes(p.brand_id))));
         if (sec.only_discount) pool = pool.filter((p) => p.old_price && Number(p.old_price) > Number(p.price));
         const sortMode = sec.sort ?? "newest";
+        const presorted = (arr: typeof pool) => sortMode === "manual" ? [...arr].sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0))
+          : sortMode === "price_asc" ? [...arr].sort((a, b) => Number(a.price) - Number(b.price))
+          : sortMode === "price_desc" ? [...arr].sort((a, b) => Number(b.price) - Number(a.price))
+          : sortMode === "discount" ? [...arr].sort((a, b) => (Number(b.old_price ?? b.price) - Number(b.price)) - (Number(a.old_price ?? a.price) - Number(a.price)))
+          : sortMode === "popular" ? [...arr].sort((a, b) => Number(b.reviews_count ?? 0) - Number(a.reviews_count ?? 0)) : arr;
+        let fixed: typeof pool | null = null;
+        if (mode === "pick") {
+          const byId = new Map(products.map((p) => [p.id, p]));
+          fixed = (sec.product_ids ?? []).map((id) => byId.get(id)).filter(Boolean) as typeof pool;
+        } else if (mode === "mix") {
+          const seen = new Set<string>(); fixed = [];
+          for (const src of sec.sources ?? []) {
+            const part = presorted(pool.filter((p) => src.kind === "category" ? p.category_id === src.id : (p as any).subcategory_id === src.id))
+              .filter((p) => !seen.has(p.id)).slice(0, Math.max(0, src.count));
+            part.forEach((p) => { seen.add(p.id); fixed!.push(p); });
+          }
+        }
+        if (fixed) pool = fixed;
+        else
         if (sortMode === "manual") pool = [...pool].sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0));
         else if (sortMode === "price_asc") pool = [...pool].sort((a, b) => Number(a.price) - Number(b.price));
         else if (sortMode === "price_desc") pool = [...pool].sort((a, b) => Number(b.price) - Number(a.price));
@@ -1184,7 +1206,7 @@ function Index() {
         }
         const secRows = Math.max(1, sec.rows ?? 1);
         const secCols = Math.max(1, sec.columns ?? 5);
-        const items = pool.slice(0, sec.display === "grid" ? Math.max(sec.limit, secRows * secCols) : sec.limit);
+        const items = fixed ? pool : pool.slice(0, sec.display === "grid" ? Math.max(sec.limit, secRows * secCols) : sec.limit);
         if (items.length === 0) return null;
         return (
           <section key={sec.id} id="shop" className="py-6 md:py-10">
