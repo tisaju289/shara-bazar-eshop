@@ -7,6 +7,16 @@ import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/admin/products")({
+  head: () => ({
+    meta: [
+      { title: "পণ্য ম্যানেজমেন্ট — Fresh Feni" },
+      { name: "description", content: "Fresh Feni-এর পণ্য ক্যাটাগরি, সাবক্যাটাগরি ও ব্র্যান্ড অনুযায়ী পরিচালনা করুন।" },
+      { property: "og:title", content: "পণ্য ম্যানেজমেন্ট — Fresh Feni" },
+      { property: "og:description", content: "Fresh Feni-এর পণ্য ক্যাটাগরি, সাবক্যাটাগরি ও ব্র্যান্ড অনুযায়ী পরিচালনা করুন।" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: AdminProducts,
 });
 
@@ -48,6 +58,7 @@ function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
+  const [subCatFilter, setSubCatFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -303,9 +314,11 @@ function AdminProducts() {
   const catName = new Map(cats.map((c) => [c.id, c.name_bn]));
   const brandName = new Map(brands.map((b) => [b.id, b.name_bn]));
   const subCatName = new Map(subCats.map((s) => [s.id, s.name_bn]));
+  const availableSubCats = subCats.filter((s) => catFilter === "all" || s.category_id === catFilter);
 
   const filtered = items
     .filter((p) => catFilter === "all" || p.category_id === catFilter)
+    .filter((p) => subCatFilter === "all" || p.subcategory_id === subCatFilter)
     .filter((p) => brandFilter === "all" || p.brand_id === brandFilter)
     .filter((p) => p.name_bn.toLowerCase().includes(search.toLowerCase()))
     .slice()
@@ -407,10 +420,15 @@ function AdminProducts() {
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পণ্য খুঁজুন..."
             className="w-full h-11 pl-9 pr-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm" />
         </div>
-        <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)}
+        <select aria-label="ক্যাটাগরি ফিল্টার" value={catFilter} onChange={(e) => { setCatFilter(e.target.value); setSubCatFilter("all"); }}
           className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
           <option value="all">সব ক্যাটাগরি</option>
           {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+        </select>
+        <select aria-label="সাবক্যাটাগরি ফিল্টার" value={subCatFilter} onChange={(e) => setSubCatFilter(e.target.value)}
+          className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
+          <option value="all">সব সাবক্যাটাগরি</option>
+          {availableSubCats.map((s) => <option key={s.id} value={s.id}>{s.name_bn}</option>)}
         </select>
         <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}
           className="shrink-0 h-11 px-3 rounded-xl bg-card border border-border outline-none focus:border-primary text-sm font-medium max-w-[45%] sm:max-w-none">
