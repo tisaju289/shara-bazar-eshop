@@ -323,6 +323,17 @@ function HomeSectionsTab({ v, on }: {
       return (data ?? []) as { id: string; name_bn: string }[];
     },
   });
+  const { data: subcategories = [] } = useQuery({
+    queryKey: ["subcategories", "admin-options"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subcategories")
+        .select("id,name_bn,category_id")
+        .order("sort_order");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   const [openId, setOpenId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [filter, setFilter] = useState("");
@@ -398,7 +409,13 @@ function HomeSectionsTab({ v, on }: {
               </div>
               {open && (
                 <div className="border-t border-border p-3 bg-secondary/20">
-                  <SectionEditor section={s} setItem={(p) => setItem(i, p)} cats={cats as { id: string; name_bn: string }[]} brands={brands} />
+                  <SectionEditor
+                    section={s}
+                    setItem={(p) => setItem(i, p)}
+                    cats={cats as { id: string; name_bn: string }[]}
+                    subcategories={subcategories as { id: string; name_bn: string; category_id: string | null }[]}
+                    brands={brands}
+                  />
                 </div>
               )}
             </div>
@@ -478,6 +495,215 @@ function MultiPick({ label, options, value, onChange, emptyText }: {
         })}
         {list.length === 0 && <span className="text-xs text-muted-foreground">কিছু পাওয়া যায়নি</span>}
       </div>
+    </div>
+  );
+}
+
+type HomeProductOption = {
+  id: string;
+  name_bn: string;
+  price: number;
+  unit: string;
+  is_active: boolean;
+};
+
+function OrderedProductPicker({ value, onChange }: {
+  value: string[];
+  onChange: (value: string[]) => void;
+}) {
+  const [search, setSearch] = useState("");
+  const term = search.trim();
+  const { data: results = [], isFetching, isError } = useQuery({
+    queryKey: ["home-section-product-search", term],
+    queryFn: async (): Promise<HomeProductOption[]> => {
+      let query = (supabase as any)
+        .from("products")
+        .select("id,name_bn,price,unit,is_active")
+        .eq("is_active", true);
+      if (term) query = query.ilike("name_bn", `%${term}%`);
+      const { data, error } = await query.order("name_bn").limit(40);
+      if (error) throw error;
+      return (data ?? []) as HomeProductOption[];
+    },
+    staleTime: 30_000,
+  });
+  const { data: selectedProducts = [], isError: selectedError } = useQuery({
+    queryKey: ["home-section-selected-products", value],
+    queryFn: async (): Promise<HomeProductOption[]> => {
+      const { data, error } = await (supabase as any)
+        .from("products")
+        .select("id,name_bn,price,unit,is_active")
+        .in("id", value);
+      if (error) throw error;
+      return (data ?? []) as HomeProductOption[];
+    },
+    enabled: value.length > 0,
+  });
+  const selectedById = new Map(selectedProducts.map((product) => [product.id, product]));
+  const available = results.filter((product) => !value.includes(product.id));
+
+  const move = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= value.length) return;
+    const next = [...value];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    onChange(next);
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-3 space-y-3">
+      <div>
+        <div className="text-sm font-semibold">হোম সেকশনে দেখানোর পণ্য</div>
+        <p className="text-[11px] text-muted-foreground">যে ক্রমে যোগ করবেন, হোম পেজে সেই ক্রমেই দেখাবে।</p>
+      </div>
+      <input
+        className={inputCls}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="পণ্যের নাম লিখে খুঁজুন…"
+        aria-label="পণ্য খুঁজুন"
+      />
+      <div className="max-h-44 overflow-y-auto rounded-lg border border-border divide-y divide-border">
+        {isFetching && <div className="p-3 text-xs text-muted-foreground">পণ্য খোঁজা হচ্ছে…</div>}
+        {isError && <div className="p-3 text-xs text-destructive">পণ্যের তালিকা লোড করা যায়নি। আবার চেষ্টা করুন।</div>}
+        {!isFetching && !isError && available.map((product) => (
+          <button
+            key={product.id}
+            type="button"
+            onClick={() => onChange([...value, product.id])}
+            className="w-full p-2.5 text-left flex items-center justify-between gap-3 hover:bg-secondary/70"
+          >
+            <span className="text-sm truncate">{product.name_bn}</span>
+            <span className="text-xs text-muted-foreground shrink-0">৳{product.price} / {product.unit} ＋</span>
+          </button>
+        ))}
+        {!isFetching && !isError && available.length === 0 && (
+          <div className="p-3 text-xs text-muted-foreground">
+            {term ? "এই নামে কোনো পণ্য পাওয়া যায়নি" : "আরও পণ্য খুঁজতে নাম লিখুন"}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="text-xs font-semibold">বাছাই করা পণ্য ({value.length})</div>
+        {selectedError && <p className="text-xs text-destructive">বাছাই করা পণ্যের তথ্য লোড করা যায়নি।</p>}
+        {value.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">এখনও কোনো পণ্য বাছাই করা হয়নি।</p>
+        ) : (
+          value.map((id, index) => {
+            const product = selectedById.get(id);
+            return (
+              <div key={`${id}-${index}`} className="flex items-center gap-2 rounded-lg border border-border bg-background p-2">
+                <span className="size-6 shrink-0 rounded-full bg-secondary text-[11px] font-bold grid place-items-center">{index + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm">{product?.name_bn ?? "পণ্যের তথ্য লোড হচ্ছে…"}</div>
+                  {product && (
+                    <div className="text-[11px] text-muted-foreground">
+                      ৳{product.price} / {product.unit}{!product.is_active && " · পণ্যটি বন্ধ"}
+                    </div>
+                  )}
+                </div>
+                <button type="button" disabled={index === 0} onClick={() => move(index, -1)} className="size-7 rounded bg-secondary disabled:opacity-40" aria-label="এক ধাপ উপরে">↑</button>
+                <button type="button" disabled={index === value.length - 1} onClick={() => move(index, 1)} className="size-7 rounded bg-secondary disabled:opacity-40" aria-label="এক ধাপ নিচে">↓</button>
+                <button type="button" onClick={() => onChange(value.filter((_, i) => i !== index))} className="size-7 rounded bg-destructive/10 text-destructive" aria-label={`${product?.name_bn ?? "পণ্য"} সরান`}>×</button>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+type HomeProductSource = { kind: "category" | "subcategory"; id: string; count: number };
+
+function OrderedProductSources({ value, categories, subcategories, onChange }: {
+  value: HomeProductSource[];
+  categories: { id: string; name_bn: string }[];
+  subcategories: { id: string; name_bn: string; category_id: string | null }[];
+  onChange: (value: HomeProductSource[]) => void;
+}) {
+  const categoryNames = new Map(categories.map((category) => [category.id, category.name_bn]));
+  const optionsFor = (kind: HomeProductSource["kind"]): { id: string; name_bn: string; category_id?: string | null }[] =>
+    kind === "category" ? categories : subcategories;
+  const add = () => {
+    const kind = subcategories.length > 0 ? "subcategory" : "category";
+    const options = optionsFor(kind);
+    onChange([...value, { kind, id: options[0]?.id ?? "", count: 2 }]);
+  };
+  const update = (index: number, patch: Partial<HomeProductSource>) =>
+    onChange(value.map((source, i) => i === index ? { ...source, ...patch } : source));
+  const remove = (index: number) => onChange(value.filter((_, i) => i !== index));
+  const move = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= value.length) return;
+    const next = [...value];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    onChange(next);
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-3 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <div className="text-sm font-semibold">পণ্য আসার উৎস ও সংখ্যা</div>
+          <p className="text-[11px] text-muted-foreground">উপর থেকে নিচের ক্রমে উৎসগুলো থেকে পণ্য যোগ হবে; একই পণ্য দ্বিতীয়বার আসবে না।</p>
+        </div>
+        <button type="button" onClick={add} className="h-9 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold shrink-0">＋ উৎস</button>
+      </div>
+      {value.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">এক বা একাধিক ক্যাটাগরি/সাব-ক্যাটাগরি উৎস যোগ করুন।</p>
+      ) : (
+        <div className="space-y-2">
+          {value.map((source, index) => {
+            const options = optionsFor(source.kind);
+            return (
+              <div key={`${index}-${source.kind}`} className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_110px_auto] items-end gap-2 rounded-lg border border-border p-2">
+                <Field label={`উৎস ${index + 1}`}>
+                  <select
+                    className={inputCls}
+                    value={source.kind}
+                    onChange={(e) => {
+                      const kind = e.target.value as HomeProductSource["kind"];
+                      update(index, { kind, id: optionsFor(kind)[0]?.id ?? "" });
+                    }}
+                  >
+                    <option value="subcategory">সাব-ক্যাটাগরি</option>
+                    <option value="category">ক্যাটাগরি</option>
+                  </select>
+                </Field>
+                <Field label="কোনটি">
+                  <select className={inputCls} value={source.id} onChange={(e) => update(index, { id: e.target.value })}>
+                    <option value="">বাছাই করুন</option>
+                    {options.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {"category_id" in option && option.category_id
+                          ? `${categoryNames.get(option.category_id) ?? ""} — ${option.name_bn}`
+                          : option.name_bn}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="কয়টি পণ্য">
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    className={inputCls}
+                    value={source.count}
+                    onChange={(e) => update(index, { count: Math.max(1, Math.min(100, Number(e.target.value) || 1)) })}
+                  />
+                </Field>
+                <div className="flex gap-1 pb-0.5">
+                  <button type="button" disabled={index === 0} onClick={() => move(index, -1)} className="size-9 rounded-lg bg-secondary disabled:opacity-40" aria-label="এক ধাপ উপরে">↑</button>
+                  <button type="button" disabled={index === value.length - 1} onClick={() => move(index, 1)} className="size-9 rounded-lg bg-secondary disabled:opacity-40" aria-label="এক ধাপ নিচে">↓</button>
+                  <button type="button" onClick={() => remove(index)} className="size-9 rounded-lg bg-destructive/10 text-destructive" aria-label={`উৎস ${index + 1} সরান`}>×</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -581,10 +807,11 @@ function ProductCardTab({ v, on }: { v: ProductCardSettings; on: (v: ProductCard
   );
 }
 
-function SectionEditor({ section: s, setItem, cats, brands = [] }: {
+function SectionEditor({ section: s, setItem, cats, subcategories = [], brands = [] }: {
   section: HomeSection;
   setItem: (p: Partial<HomeSection>) => void;
   cats: { id: string; name_bn: string }[];
+  subcategories?: { id: string; name_bn: string; category_id: string | null }[];
   brands?: { id: string; name_bn: string }[];
 }) {
   if (s.type === "hero") {
@@ -703,7 +930,9 @@ function SectionEditor({ section: s, setItem, cats, brands = [] }: {
   }
   if (s.type === "product") {
     const display = s.display ?? "slider";
+    const sourceMode = s.source_mode ?? "filter";
     const catIds = s.category_ids ?? (s.category_id ? [s.category_id] : []);
+    const subcategoryIds = s.subcategory_ids ?? [];
     return (
       <div className="space-y-3">
         <Section title="১. নাম ও ধরন" defaultOpen>
@@ -731,20 +960,60 @@ function SectionEditor({ section: s, setItem, cats, brands = [] }: {
               </select>
             </Field>
           </div>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={!!s.only_discount} onChange={(e) => setItem({ only_discount: e.target.checked } as any)} className="size-4 accent-primary" />
-            শুধু ছাড়ের পণ্য দেখান (যেগুলোর পুরানো দাম আছে)
-          </label>
         </Section>
 
-        <Section title="২. কোন পণ্য দেখাবে" defaultOpen>
-          <div className="grid md:grid-cols-2 gap-3">
-            <MultiPick label="ক্যাটাগরি" options={cats} value={catIds} emptyText="সব ক্যাটাগরি"
-              onChange={(ids) => setItem({ category_ids: ids, category_id: ids.length === 1 ? ids[0] : "" } as any)} />
-            <MultiPick label="ব্র্যান্ড" options={brands} value={s.brand_ids ?? []} emptyText="সব ব্র্যান্ড"
-              onChange={(ids) => setItem({ brand_ids: ids } as any)} />
+        <Section title="২. কীভাবে পণ্য বাছবেন" defaultOpen>
+          <div className="grid md:grid-cols-3 gap-2">
+            {([
+              ["filter", "ক্যাটাগরি / সাব-ক্যাটাগরি", "বাছাই করা ক্যাটাগরি থেকে পণ্য দেখান"],
+              ["mix", "প্রতি উৎস থেকে নির্দিষ্ট সংখ্যা", "প্রতিটি উৎসে আলাদা পণ্যের সংখ্যা দিন"],
+              ["pick", "নিজে পণ্য বাছাই", "শুধু আপনার বাছাই করা পণ্য দেখান"],
+            ] as const).map(([mode, title, description]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setItem({ source_mode: mode } as any)}
+                className={`rounded-xl border p-3 text-left transition ${sourceMode === mode ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-secondary/60"}`}
+                aria-pressed={sourceMode === mode}
+              >
+                <div className="text-sm font-semibold">{title}</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{description}</div>
+              </button>
+            ))}
           </div>
-          <p className="text-[11px] text-muted-foreground">কিছু বাছাই না করলে সব পণ্য থেকে দেখাবে। ক্যাটাগরি ও ব্র্যান্ড দুটোই দিলে দুটো মিলে এমন পণ্য দেখাবে।</p>
+          {sourceMode === "filter" && (
+            <div className="space-y-3">
+              <div className="grid md:grid-cols-2 gap-3">
+                <MultiPick label="ক্যাটাগরি" options={cats} value={catIds} emptyText="সব ক্যাটাগরি"
+                  onChange={(ids) => setItem({ category_ids: ids, category_id: ids.length === 1 ? ids[0] : "" } as any)} />
+                <MultiPick label="সাব-ক্যাটাগরি" options={subcategories} value={subcategoryIds} emptyText="সব সাব-ক্যাটাগরি"
+                  onChange={(ids) => setItem({ subcategory_ids: ids } as any)} />
+                <MultiPick label="ব্র্যান্ড" options={brands} value={s.brand_ids ?? []} emptyText="সব ব্র্যান্ড"
+                  onChange={(ids) => setItem({ brand_ids: ids } as any)} />
+              </div>
+              <p className="text-[11px] text-muted-foreground">কিছু বাছাই না করলে সব পণ্য থেকে দেখাবে। একাধিক শর্ত বাছাই করলে সব শর্ত মিলে এমন পণ্য দেখাবে।</p>
+            </div>
+          )}
+          {sourceMode === "mix" && (
+            <OrderedProductSources
+              value={s.sources ?? []}
+              categories={cats}
+              subcategories={subcategories}
+              onChange={(sources) => setItem({ sources } as any)}
+            />
+          )}
+          {sourceMode === "pick" && (
+            <OrderedProductPicker
+              value={s.product_ids ?? []}
+              onChange={(product_ids) => setItem({ product_ids } as any)}
+            />
+          )}
+          {sourceMode !== "pick" && (
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={!!s.only_discount} onChange={(e) => setItem({ only_discount: e.target.checked } as any)} className="size-4 accent-primary" />
+              শুধু ছাড়ের পণ্য দেখান (যেগুলোর পুরানো দাম আছে)
+            </label>
+          )}
         </Section>
 
         <Section title="৩. লেআউট (লাইন ও কলাম)" defaultOpen>

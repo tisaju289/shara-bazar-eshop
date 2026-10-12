@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type ProductSection } from "@/hooks/useSiteSettings";
+import { useSiteSettings, type HomeSection, type ProductSection } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { useCart } from "@/hooks/useCart";
@@ -429,6 +429,131 @@ function useProducts() {
   });
 }
 
+function useConfiguredSectionProducts(sections: HomeSection[]) {
+  const productIds = [...new Set(
+    sections
+      .filter((section): section is ProductSection => section.type === "product" && section.enabled && section.source_mode === "pick")
+      .flatMap((section) => section.product_ids ?? []),
+  )];
+  const sourceRequests = new Map<string, {
+    kind: "category" | "subcategory" | "brand";
+    id: string;
+    count: number;
+    sort: ProductSection["sort"];
+    onlyDiscount: boolean;
+    brandIds: string[];
+  }>();
+  const requestSource = (
+    kind: "category" | "subcategory" | "brand",
+    id: string,
+    count: number,
+    sort: ProductSection["sort"],
+    onlyDiscount: boolean,
+    brandIds: string[] = [],
+  ) => {
+    const normalizedBrandIds = [...brandIds].sort();
+    const key = `${kind}:${id}:${sort}:${onlyDiscount}:${normalizedBrandIds.join(",")}`;
+    const current = sourceRequests.get(key);
+    sourceRequests.set(key, {
+      kind,
+      id,
+      count: Math.max(count, current?.count ?? 0),
+      sort,
+      onlyDiscount,
+      brandIds: normalizedBrandIds,
+    });
+  };
+  for (const section of sections) {
+    if (section.type !== "product" || !section.enabled) continue;
+    const sort = section.sort ?? "newest";
+    const onlyDiscount = !!section.only_discount;
+    if (section.source_mode === "mix") {
+      for (const source of section.sources ?? []) {
+        if (source.id && source.count > 0) requestSource(source.kind, source.id, source.count, sort, onlyDiscount);
+      }
+    } else if ((section.source_mode ?? "filter") === "filter") {
+      const categoryIds = section.category_ids?.length
+        ? section.category_ids
+        : (section.category_id ? [section.category_id] : []);
+      const subcategoryIds = section.subcategory_ids ?? [];
+      const brandIds = section.brand_ids ?? [];
+      const targets: { kind: "category" | "subcategory" | "brand"; id: string }[] = [
+        ...categoryIds.map((id) => ({ kind: "category" as const, id })),
+        ...subcategoryIds.map((id) => ({ kind: "subcategory" as const, id })),
+      ];
+      if (targets.length === 0) targets.push(...brandIds.map((id) => ({ kind: "brand" as const, id })));
+      for (const target of targets) {
+        requestSource(target.kind, target.id, section.limit, sort, onlyDiscount, target.kind === "brand" ? [] : brandIds);
+      }
+    }
+  }
+  const requests = [...sourceRequests.values()];
+  const requestKey = JSON.stringify({ productIds, requests });
+
+  return useQuery({
+    queryKey: ["products", "home-configured", requestKey],
+    enabled: productIds.length > 0 || requests.length > 0,
+    queryFn: async (): Promise<DBProduct[]> => {
+      const found = new Map<string, DBProduct>();
+      const idChunks = Array.from({ length: Math.ceil(productIds.length / 100) }, (_, i) => productIds.slice(i * 100, (i + 1) * 100));
+      const pickedResults = await Promise.all(idChunks.map(async (ids) => {
+        const { data, error } = await (supabase as any)
+          .from("products")
+          .select(PRODUCT_COLUMNS)
+          .eq("is_active", true)
+          .in("id", ids);
+        if (error) throw error;
+        return (data as unknown as DBProduct[]) ?? [];
+      }));
+      for (const product of pickedResults.flat()) found.set(product.id, product);
+
+      const sourceResults = await Promise.all(requests.map(async (source) => {
+        const column = source.kind === "category"
+          ? "category_id"
+          : source.kind === "subcategory"
+            ? "subcategory_id"
+            : "brand_id";
+        let query = (supabase as any)
+          .from("products")
+          .select(PRODUCT_COLUMNS)
+          .eq("is_active", true)
+          .eq(column, source.id);
+        if (source.brandIds.length > 0) query = query.in("brand_id", source.brandIds);
+        switch (source.sort) {
+          case "manual":
+            query = query.order("sort_order", { ascending: true }).order("created_at", { ascending: false });
+            break;
+          case "price_asc":
+            query = query.order("price", { ascending: true });
+            break;
+          case "price_desc":
+            query = query.order("price", { ascending: false });
+            break;
+          case "popular":
+            query = query.order("reviews_count", { ascending: false, nullsFirst: false });
+            break;
+          case "newest":
+          default:
+            query = query.order("sort_order", { ascending: true }).order("created_at", { ascending: false });
+            break;
+        }
+        const candidateLimit = source.sort === "discount" || source.sort === "random" || source.onlyDiscount
+          ? 1000
+          : Math.max(source.count, 1);
+        const { data, error } = await query.limit(candidateLimit);
+        if (error) throw error;
+        return (data as DBProduct[]) ?? [];
+      }));
+      for (const products of sourceResults) {
+        for (const product of products) found.set(product.id, product);
+      }
+      return [...found.values()];
+    },
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
 // হট প্রোডাক্ট সেকশন — সবচেয়ে জনপ্রিয় ১২টি পণ্য (সবচেয়ে বেশি রিভিউ)
 function useHotProducts() {
   return useQuery({
@@ -472,7 +597,14 @@ function Index() {
   const { data: settings } = useSiteSettings();
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();
-  const { data: products = [], isLoading: prodLoading } = useProducts();
+  const { data: baseProducts = [], isLoading: baseProductsLoading } = useProducts();
+  const { data: configuredProducts = [], isLoading: configuredProductsLoading } = useConfiguredSectionProducts(settings?.home_sections ?? []);
+  const products = useMemo(() => {
+    const byId = new Map<string, DBProduct>();
+    for (const product of [...baseProducts, ...configuredProducts]) byId.set(product.id, product);
+    return [...byId.values()];
+  }, [baseProducts, configuredProducts]);
+  const prodLoading = baseProductsLoading || configuredProductsLoading;
   const { data: hotProducts = [] } = useHotProducts();
   const { data: extraCatProducts = [] } = useExtraCategoryProducts([
     SPICES_CAT_ID,
@@ -1167,10 +1299,11 @@ function Index() {
         const subIds: string[] = sec.subcategory_ids ?? [];
         const mode = sec.source_mode ?? "filter";
         let pool = products.filter((p) =>
-          (mode !== "filter" || catIds.length === 0 || (p.category_id && catIds.includes(p.category_id))) &&
-          (mode !== "filter" || subIds.length === 0 || ((p as any).subcategory_id && subIds.includes((p as any).subcategory_id))) &&
-          (brandIds.length === 0 || (p.brand_id && brandIds.includes(p.brand_id))));
-        if (sec.only_discount) pool = pool.filter((p) => p.old_price && Number(p.old_price) > Number(p.price));
+          mode !== "filter" ||
+          ((catIds.length === 0 || (p.category_id && catIds.includes(p.category_id))) &&
+            (subIds.length === 0 || ((p as any).subcategory_id && subIds.includes((p as any).subcategory_id))) &&
+            (brandIds.length === 0 || (p.brand_id && brandIds.includes(p.brand_id)))));
+        if (mode !== "pick" && sec.only_discount) pool = pool.filter((p) => p.old_price && Number(p.old_price) > Number(p.price));
         const sortMode = sec.sort ?? "newest";
         const presorted = (arr: typeof pool) => sortMode === "manual" ? [...arr].sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0))
           : sortMode === "price_asc" ? [...arr].sort((a, b) => Number(a.price) - Number(b.price))
