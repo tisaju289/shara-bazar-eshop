@@ -238,6 +238,7 @@ export type SiteSettings = {
   tracking: Tracking;
   delivery: Delivery;
   home_sections: HomeSection[];
+  home_sections_migration_v1: boolean;
   checkout: Checkout;
   product_card: ProductCard;
 };
@@ -316,6 +317,7 @@ const DEFAULTS: SiteSettings = {
     ],
   },
   home_sections: [],
+  home_sections_migration_v1: false,
   checkout: {
     title_bn: "চেকআউট",
     delivery_section_title_bn: "ডেলিভারি এলাকা",
@@ -383,11 +385,76 @@ export function useSiteSettings() {
   });
 }
 
+const LEGACY_HOME_PRODUCT_SECTIONS: ProductSection[] = [
+  {
+    id: "legacy-hot-products",
+    enabled: true,
+    type: "product",
+    title_bn: "হট প্রোডাক্ট",
+    subtitle_bn: "এখন সবচেয়ে জনপ্রিয় পণ্যগুলো",
+    category_id: "",
+    category_ids: [],
+    brand_ids: [],
+    limit: 12,
+    display: "marquee",
+    rows: 1,
+    columns: 5,
+    sort: "popular",
+  },
+  {
+    id: "legacy-spices-products",
+    enabled: true,
+    type: "product",
+    title_bn: "মসলা ও গুঁড়া মসলা",
+    subtitle_bn: "খাঁটি ও সুগন্ধি মসলার স্বাদ",
+    category_id: "ab590c50-a6d8-4230-bf0a-4b48804db41e",
+    category_ids: ["ab590c50-a6d8-4230-bf0a-4b48804db41e"],
+    brand_ids: [],
+    limit: 12,
+    display: "slider",
+    rows: 1,
+    columns: 5,
+    sort: "popular",
+  },
+  {
+    id: "legacy-vegetables-products",
+    enabled: true,
+    type: "product",
+    title_bn: "সবজি",
+    subtitle_bn: "প্রতিদিনের টাটকা সবজি",
+    category_id: "31cbc984-4369-4866-acfd-7927466c254f",
+    category_ids: ["31cbc984-4369-4866-acfd-7927466c254f"],
+    brand_ids: [],
+    limit: 12,
+    display: "slider",
+    rows: 1,
+    columns: 5,
+    sort: "popular",
+  },
+  {
+    id: "legacy-oil-products",
+    enabled: true,
+    type: "product",
+    title_bn: "তেল ও ঘি",
+    subtitle_bn: "বিশুদ্ধ তেল ও ঘি",
+    category_id: "5f212542-453a-4e64-a539-7da5a89e4107",
+    category_ids: ["5f212542-453a-4e64-a539-7da5a89e4107"],
+    brand_ids: [],
+    limit: 12,
+    display: "slider",
+    rows: 1,
+    columns: 5,
+    sort: "popular",
+  },
+];
+
 function normalizeHomeSections(
   raw: any[] | undefined,
   s: SiteSettings,
 ): HomeSection[] {
   const arr = Array.isArray(raw) ? raw : [];
+  if (arr.length === 0 && s.home_sections_migration_v1) return [];
+  let sections: HomeSection[];
   if (arr.length === 0) {
     // Seed defaults from legacy hero/sections/offer so the home page
     // doesn't go blank for projects that never used home_sections.
@@ -459,19 +526,31 @@ function normalizeHomeSections(
         show_all_link: true,
       },
     ];
-    return seed;
+    sections = seed;
+  } else {
+    sections = arr.map((item: any): HomeSection => {
+      if (item && item.type) return item as HomeSection;
+      // Legacy item (no type) → treat as product section
+      return {
+        id: item.id ?? crypto.randomUUID(),
+        enabled: item.enabled ?? true,
+        type: "product",
+        title_bn: item.title_bn ?? "",
+        subtitle_bn: item.subtitle_bn ?? "",
+        category_id: item.category_id ?? "",
+        limit: item.limit ?? 8,
+      };
+    });
   }
-  return arr.map((item: any): HomeSection => {
-    if (item && item.type) return item as HomeSection;
-    // Legacy item (no type) → treat as product section
-    return {
-      id: item.id ?? crypto.randomUUID(),
-      enabled: item.enabled ?? true,
-      type: "product",
-      title_bn: item.title_bn ?? "",
-      subtitle_bn: item.subtitle_bn ?? "",
-      category_id: item.category_id ?? "",
-      limit: item.limit ?? 8,
-    };
-  });
+  if (s.home_sections_migration_v1) return sections;
+
+  const existingIds = new Set(sections.map((section) => section.id));
+  const missingLegacySections = LEGACY_HOME_PRODUCT_SECTIONS
+    .filter((section) => !existingIds.has(section.id))
+    .map((section) => ({
+      ...section,
+      category_ids: [...(section.category_ids ?? [])],
+      brand_ids: [...(section.brand_ids ?? [])],
+    }));
+  return [...sections, ...missingLegacySections];
 }

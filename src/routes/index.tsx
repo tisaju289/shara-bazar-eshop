@@ -436,7 +436,7 @@ function useConfiguredSectionProducts(sections: HomeSection[]) {
       .flatMap((section) => section.product_ids ?? []),
   )];
   const sourceRequests = new Map<string, {
-    kind: "category" | "subcategory" | "brand";
+    kind: "category" | "subcategory" | "brand" | "all";
     id: string;
     count: number;
     sort: ProductSection["sort"];
@@ -444,7 +444,7 @@ function useConfiguredSectionProducts(sections: HomeSection[]) {
     brandIds: string[];
   }>();
   const requestSource = (
-    kind: "category" | "subcategory" | "brand",
+    kind: "category" | "subcategory" | "brand" | "all",
     id: string,
     count: number,
     sort: ProductSection["sort"],
@@ -477,11 +477,15 @@ function useConfiguredSectionProducts(sections: HomeSection[]) {
         : (section.category_id ? [section.category_id] : []);
       const subcategoryIds = section.subcategory_ids ?? [];
       const brandIds = section.brand_ids ?? [];
-      const targets: { kind: "category" | "subcategory" | "brand"; id: string }[] = [
+      const targets: { kind: "category" | "subcategory" | "brand" | "all"; id: string }[] = [
         ...categoryIds.map((id) => ({ kind: "category" as const, id })),
         ...subcategoryIds.map((id) => ({ kind: "subcategory" as const, id })),
       ];
-      if (targets.length === 0) targets.push(...brandIds.map((id) => ({ kind: "brand" as const, id })));
+      if (targets.length === 0 && brandIds.length > 0) {
+        targets.push(...brandIds.map((id) => ({ kind: "brand" as const, id })));
+      } else if (targets.length === 0) {
+        targets.push({ kind: "all", id: "*" });
+      }
       for (const target of targets) {
         requestSource(target.kind, target.id, section.limit, sort, onlyDiscount, target.kind === "brand" ? [] : brandIds);
       }
@@ -512,12 +516,14 @@ function useConfiguredSectionProducts(sections: HomeSection[]) {
           ? "category_id"
           : source.kind === "subcategory"
             ? "subcategory_id"
-            : "brand_id";
+            : source.kind === "brand"
+              ? "brand_id"
+              : null;
         let query = (supabase as any)
           .from("products")
           .select(PRODUCT_COLUMNS)
-          .eq("is_active", true)
-          .eq(column, source.id);
+          .eq("is_active", true);
+        if (column) query = query.eq(column, source.id);
         if (source.brandIds.length > 0) query = query.in("brand_id", source.brandIds);
         switch (source.sort) {
           case "manual":
@@ -757,105 +763,12 @@ function Index() {
     return m;
   }, [products]);
 
-  // হোম পেজের এক্সট্রা সেকশন — মসলা, সবজি, তেল ও ঘি
-  const moslaProducts = extraCatProducts.filter((p) => p.category_id === SPICES_CAT_ID).slice(0, 12);
-  const vegProducts = extraCatProducts.filter((p) => p.category_id === VEGETABLES_CAT_ID).slice(0, 12);
-  const oilProducts = extraCatProducts.filter((p) => p.category_id === OIL_GHEE_CAT_ID).slice(0, 12);
-
   const brand = settings?.brand;
   const topbar = settings?.topbar;
   const features = settings?.features ?? [];
   const footer = settings?.footer;
   const menuItems = settings?.header_menu?.items ?? [];
   const homeSections = (settings?.home_sections ?? []).filter((s) => s.enabled);
-
-  // Default sections if none configured
-  const defaultSections: ProductSection[] = homeSections.length === 0 ? [
-    {
-      id: "fresh",
-      enabled: true,
-      type: "product",
-      title_bn: "আজকের তাজা পণ্য",
-      subtitle_bn: "",
-      category_id: "",
-      limit: 12,
-      bg_color: "var(--secondary)",
-    },
-    {
-      id: "daily",
-      enabled: true,
-      type: "product",
-      title_bn: "নিত্য প্রয়োজনীয় পণ্য",
-      subtitle_bn: "",
-      category_id: "",
-      limit: 12,
-      bg_color: "var(--secondary)",
-    },
-    {
-      id: "vegetables",
-      enabled: true,
-      type: "product",
-      title_bn: "তাজা সবজি",
-      subtitle_bn: "",
-      category_id: "",
-      limit: 12,
-      bg_color: "var(--secondary)",
-    },
-    {
-      id: "spices",
-      enabled: true,
-      type: "product",
-      title_bn: "মসলা ও ঝাল",
-      subtitle_bn: "",
-      category_id: "",
-      limit: 12,
-      bg_color: "var(--secondary)",
-    },
-  ] : [];
-
-  const sectionsToRender = homeSections.length > 0 ? homeSections : defaultSections;
-
-  // এক্সট্রা ক্যাটাগরি সেকশন — সেন্টার হেডিং + প্রোডাক্ট স্লাইডার + "সব দেখুন" বাটন
-  const renderCategoryProductSection = (
-    key: string,
-    title: string,
-    subtitle: string,
-    catId: string,
-    items: DBProduct[],
-  ) => {
-    if (items.length === 0) return null;
-    return (
-      <section key={key} className="py-6 md:py-10">
-        <div className="container mx-auto px-4 space-y-4">
-          <div className="flex flex-col items-center text-center gap-2">
-            <div className="min-w-0">
-              <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{title}</h2>
-              <p className="text-muted-foreground text-xs md:text-sm mt-0.5">{subtitle}</p>
-            </div>
-          </div>
-          <ProductSlider
-            products={items}
-            categories={categories}
-            brands={brands}
-            cart={cart}
-            add={add}
-            sub={sub}
-            onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
-            settings={settings?.product_card}
-          />
-          <div className="flex justify-center">
-            <Link
-              to="/products"
-              search={{ cat: catId } as any}
-              className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
-            >
-              সব দেখুন <ChevronRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -975,7 +888,7 @@ function Index() {
       {!prodLoading && (
         <>
           {/* Default sections if no admin config */}
-          {homeSections.length === 0 && (
+          {homeSections.length === 0 && !settings && (
             <>
               <section className="py-6 md:py-10">
                 <div className="container mx-auto px-4">
@@ -1044,7 +957,7 @@ function Index() {
             </>
           )}
           {/* Admin configured sections */}
-          {homeSections.length > 0 && sectionsToRender.map((sec) => {
+          {homeSections.length > 0 && homeSections.map((sec) => {
         if (sec.type === "hero") {
           const sideCards = (sec.side_cards ?? []).filter((c) => c.image_url);
           const catRail = categories.slice(0, 10);
@@ -1387,48 +1300,6 @@ function Index() {
       })}
       </>
       )}
-
-      {/* হট প্রোডাক্ট — এক লাইনে অটো মার্কি স্লাইডার */}
-      {hotProducts.length > 0 && (
-        <section className="py-6 md:py-10">
-          <div className="container mx-auto px-4 space-y-4">
-            <div className="flex flex-col items-center text-center gap-2">
-              <div className="min-w-0">
-                <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">হট প্রোডাক্ট</h2>
-                <p className="text-muted-foreground text-xs md:text-sm mt-0.5">এখন সবচেয়ে জনপ্রিয় পণ্যগুলো</p>
-              </div>
-            </div>
-            <ProductSlider
-              products={hotProducts}
-              categories={categories}
-              brands={brands}
-              cart={cart}
-              add={add}
-              sub={sub}
-              onBuyNow={(id) => openCheckout({ [id]: Math.max(cart[id] ?? 0, 1) })}
-              settings={settings?.product_card}
-              display="marquee"
-            />
-            <div className="flex justify-center">
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
-              >
-                সব দেখুন <ChevronRight className="size-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* মসলা সেকশন */}
-      {renderCategoryProductSection("mosla", "মসলা ও গুঁড়া মসলা", "খাঁটি ও সুগন্ধি মসলার স্বাদ", SPICES_CAT_ID, moslaProducts)}
-
-      {/* সবজি সেকশন */}
-      {renderCategoryProductSection("vegetables", "সবজি", "প্রতিদিনের টাটকা সবজি", VEGETABLES_CAT_ID, vegProducts)}
-
-      {/* তেল ও ঘি সেকশন */}
-      {renderCategoryProductSection("oil", "তেল ও ঘি", "বিশুদ্ধ তেল ও ঘি", OIL_GHEE_CAT_ID, oilProducts)}
 
       {/* জনপ্রিয় ব্র্যান্ড (fallback — শুধু যদি অ্যাডমিনে ব্র্যান্ড সেকশন যোগ করা না থাকে) */}
       {!prodLoading && brands.length > 0 && !homeSections.some((s) => s.type === "brand") && (

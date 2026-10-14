@@ -57,6 +57,9 @@ function SettingsPage() {
       rows[0] = { key: "tracking", value: publicTracking };
       rows.push({ key: "tracking_secret", value: { meta_capi_token: meta_capi_token ?? "" } });
     }
+    if (tab === "home_sections") {
+      rows.push({ key: "home_sections_migration_v1", value: true });
+    }
     const { error } = await (supabase as any)
       .from("site_settings")
       .upsert(rows, { onConflict: "key" });
