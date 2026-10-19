@@ -152,11 +152,12 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   const activeTab = tabs[active];
   const catId = activeTab?.category_id ?? "";
   const subcategoryId = activeTab?.subcategory_id ?? "";
-  const filtered = subcategoryId
+  const filtered = (subcategoryId
     ? products.filter((p) => p.subcategory_id === subcategoryId)
     : catId
       ? products.filter((p) => p.category_id === catId)
-      : products;
+      : products
+  ).slice().sort(compareAdminProductOrder);
   const items = filtered.slice(0, sec.limit || 12);
   if (items.length === 0) return null;
   const left = (sec.side_position ?? "left") === "left";
@@ -372,8 +373,18 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
-  sort_order?: number;
+  sort_order?: number | null; created_at?: string;
 };
+function compareAdminProductOrder(
+  a: Pick<DBProduct, "sort_order" | "created_at">,
+  b: Pick<DBProduct, "sort_order" | "created_at">,
+) {
+  const orderDifference = Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0);
+  if (orderDifference !== 0) return orderDifference;
+  if (a.sort_order == null && b.sort_order != null) return 1;
+  if (b.sort_order == null && a.sort_order != null) return -1;
+  return String(b.created_at ?? "").localeCompare(String(a.created_at ?? ""));
+}
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 const PRODUCT_COLUMNS =
@@ -625,7 +636,7 @@ function Index() {
   const products = useMemo(() => {
     const byId = new Map<string, DBProduct>();
     for (const product of [...baseProducts, ...configuredProducts]) byId.set(product.id, product);
-    return [...byId.values()];
+    return [...byId.values()].sort(compareAdminProductOrder);
   }, [baseProducts, configuredProducts]);
   const prodLoading = baseProductsLoading || configuredProductsLoading;
   const { data: hotProducts = [] } = useHotProducts();
@@ -1235,7 +1246,7 @@ function Index() {
             (brandIds.length === 0 || (p.brand_id && brandIds.includes(p.brand_id)))));
         if (mode !== "pick" && sec.only_discount) pool = pool.filter((p) => p.old_price && Number(p.old_price) > Number(p.price));
         const sortMode = sec.sort ?? "newest";
-        const presorted = (arr: typeof pool) => sortMode === "manual" ? [...arr].sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0))
+        const presorted = (arr: typeof pool) => sortMode === "manual" ? [...arr].sort(compareAdminProductOrder)
           : sortMode === "price_asc" ? [...arr].sort((a, b) => Number(a.price) - Number(b.price))
           : sortMode === "price_desc" ? [...arr].sort((a, b) => Number(b.price) - Number(a.price))
           : sortMode === "discount" ? [...arr].sort((a, b) => (Number(b.old_price ?? b.price) - Number(b.price)) - (Number(a.old_price ?? a.price) - Number(a.price)))
@@ -1254,19 +1265,12 @@ function Index() {
         }
         if (fixed) pool = fixed;
         else
-        if (sortMode === "manual") pool = [...pool].sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0));
+        if (sortMode === "manual" || sortMode === "newest") pool = [...pool].sort(compareAdminProductOrder);
         else if (sortMode === "price_asc") pool = [...pool].sort((a, b) => Number(a.price) - Number(b.price));
         else if (sortMode === "price_desc") pool = [...pool].sort((a, b) => Number(b.price) - Number(a.price));
         else if (sortMode === "discount") pool = [...pool].sort((a, b) => (Number(b.old_price ?? b.price) - Number(b.price)) - (Number(a.old_price ?? a.price) - Number(a.price)));
         else if (sortMode === "popular") pool = [...pool].sort((a, b) => Number(b.reviews_count ?? 0) - Number(a.reviews_count ?? 0));
         else if (sortMode === "random") pool = [...pool].sort((a, b) => (a.id < b.id ? -1 : 1)).sort((a, b) => ((a.id.charCodeAt(3) * 7) % 13) - ((b.id.charCodeAt(3) * 7) % 13));
-        else if (catIds.length !== 1 && brandIds.length === 0) {
-          const byCat: Record<string, typeof pool> = {};
-          for (const p of pool) (byCat[p.category_id ?? "__none"] ||= []).push(p);
-          const ks = Object.keys(byCat); const mixed: typeof pool = []; let pos = 0, more = true;
-          while (more) { more = false; for (const k of ks) { if (pos < byCat[k].length) { mixed.push(byCat[k][pos]); more = true; } } pos++; }
-          pool = mixed;
-        }
         const secRows = Math.max(1, sec.rows ?? 1);
         const secCols = Math.max(1, sec.columns ?? 5);
         const items = fixed ? pool : pool.slice(0, sec.display === "grid" ? Math.max(sec.limit, secRows * secCols) : sec.limit);
