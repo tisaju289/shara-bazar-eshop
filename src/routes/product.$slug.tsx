@@ -5,6 +5,9 @@ import { useCart } from "@/hooks/useCart";
 import { thumb } from "@/lib/img";
 import { Loader2, Plus, Minus, ShoppingCart, Star, ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { ProductCard } from "@/components/ProductCard";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Route = createFileRoute("/product/$slug")({
   head: () => ({ meta: [{ title: "পণ্যের বিস্তারিত — তাজা বাজার" }] }),
@@ -13,7 +16,7 @@ export const Route = createFileRoute("/product/$slug")({
 
 type Product = {
   id: string; slug: string; name_bn: string; unit: string; price: number; old_price: number | null;
-  image_url: string | null; tag: string | null; stock: number; category_id: string | null;
+  image_url: string | null; tag: string | null; stock: number; category_id: string | null; subcategory_id: string | null;
   brand_id: string | null; keywords: string | null; reviews_rating: number | null;
   reviews_count: number | null; offer_badge: string | null;
 };
@@ -23,23 +26,52 @@ function ProductDetailPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const [cart, setCart] = useCart();
+  const { data: settings } = useSiteSettings();
   const { data, isLoading, error } = useQuery({
     queryKey: ["product", "slug", slug],
     queryFn: async (): Promise<{ product: Product; category: Named | null; brand: Named | null }> => {
-      const { data: product, error: productError } = await supabase
+      const { data: product, error: productError } = await (supabase as any)
         .from("products").select("*").eq("slug", slug).eq("is_active", true).maybeSingle();
       if (productError) throw productError;
       if (!product) throw new Error("পণ্যটি পাওয়া যায়নি");
       const [categoryResult, brandResult] = await Promise.all([
-        product.category_id ? supabase.from("categories").select("id,name_bn").eq("id", product.category_id).maybeSingle() : Promise.resolve({ data: null }),
-        product.brand_id ? supabase.from("brands").select("id,name_bn").eq("id", product.brand_id).maybeSingle() : Promise.resolve({ data: null }),
+        product.category_id ? (supabase as any).from("categories").select("id,name_bn").eq("id", product.category_id).maybeSingle() : Promise.resolve({ data: null }),
+        product.brand_id ? (supabase as any).from("brands").select("id,name_bn").eq("id", product.brand_id).maybeSingle() : Promise.resolve({ data: null }),
       ]);
-      return { product: product as Product, category: categoryResult.data as Named | null, brand: brandResult.data as Named | null };
+      return {
+        product: product as Product,
+        category: categoryResult.data as Named | null,
+        brand: brandResult.data as Named | null,
+      };
     },
     enabled: !!slug,
   });
   const product = data?.product;
+  const { data: relatedProducts = [], isLoading: relatedLoading, error: relatedError } = useQuery({
+    queryKey: ["product", "related", product?.id, product?.category_id],
+    queryFn: async (): Promise<Product[]> => {
+      if (!product?.category_id) return [];
+      const { data: related, error: relatedQueryError } = await (supabase as any)
+        .from("products")
+        .select("id,slug,name_bn,unit,price,old_price,image_url,tag,category_id,subcategory_id,brand_id,reviews_rating,reviews_count,offer_badge,stock,keywords")
+        .eq("is_active", true)
+        .eq("category_id", product.category_id)
+        .neq("id", product.id)
+        .order("sort_order", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (relatedQueryError) throw relatedQueryError;
+      return (related ?? []) as Product[];
+    },
+    enabled: !!product?.id && !!product.category_id,
+  });
   const qty = product ? (cart[product.id] ?? 0) : 0;
+  const addToCart = (id: string) => setCart((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }));
+  const removeFromCart = (id: string) => setCart((current) => {
+    const currentQty = current[id] ?? 0;
+    if (currentQty <= 1) return Object.fromEntries(Object.entries(current).filter(([cartId]) => cartId !== id));
+    return { ...current, [id]: currentQty - 1 };
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,7 +130,42 @@ function ProductDetailPage() {
             </div>
           </article>
         )}
+        {product && (relatedLoading || relatedProducts.length > 0 || relatedError) && (
+          <section className="mx-auto max-w-5xl mt-10 md:mt-14">
+            <div className="mb-4">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">সম্পর্কিত পণ্য</h2>
+              <p className="mt-1 text-sm text-muted-foreground">এই ক্যাটাগরির আরও কিছু পণ্য</p>
+            </div>
+            {relatedLoading ? (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4" aria-label="সম্পর্কিত পণ্য লোড হচ্ছে">
+                {[0, 1, 2, 3].map((item) => <div key={item} className="aspect-[3/4] animate-pulse rounded-lg bg-secondary" />)}
+              </div>
+            ) : relatedError ? (
+              <p className="text-sm text-muted-foreground">সম্পর্কিত পণ্যগুলো এখন দেখানো যাচ্ছে না।</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+                {relatedProducts.map((relatedProduct) => (
+                  <ProductCard
+                    key={relatedProduct.id}
+                    product={relatedProduct}
+                    categoryName={data?.category?.name_bn ?? ""}
+                    brandName=""
+                    qty={cart[relatedProduct.id] ?? 0}
+                    add={addToCart}
+                    sub={removeFromCart}
+                    onBuyNow={() => {
+                      if (!cart[relatedProduct.id]) addToCart(relatedProduct.id);
+                      navigate({ to: "/products" });
+                    }}
+                    settings={settings?.product_card}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </main>
+      <SiteFooter />
     </div>
   );
 }
