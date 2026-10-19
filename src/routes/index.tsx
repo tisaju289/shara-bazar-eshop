@@ -149,9 +149,15 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   }, [sec.end_at, sec.daily_reset, sec.countdown_enabled]);
   const cd = useCountdown(target);
 
-  const catId = tabs[active]?.category_id ?? "";
-  const filtered = catId ? products.filter((p) => p.category_id === catId) : products;
-  const items = (filtered.length ? filtered : products).slice(0, sec.limit || 12);
+  const activeTab = tabs[active];
+  const catId = activeTab?.category_id ?? "";
+  const subcategoryId = activeTab?.subcategory_id ?? "";
+  const filtered = subcategoryId
+    ? products.filter((p) => p.subcategory_id === subcategoryId)
+    : catId
+      ? products.filter((p) => p.category_id === catId)
+      : products;
+  const items = filtered.slice(0, sec.limit || 12);
   if (items.length === 0) return null;
   const left = (sec.side_position ?? "left") === "left";
 
@@ -464,7 +470,18 @@ function useConfiguredSectionProducts(sections: HomeSection[]) {
     });
   };
   for (const section of sections) {
-    if (section.type !== "product" || !section.enabled) continue;
+    if (!section.enabled) continue;
+    if (section.type === "deal") {
+      for (const tab of section.tabs ?? []) {
+        if (tab.subcategory_id) {
+          requestSource("subcategory", tab.subcategory_id, section.limit, "newest", false);
+        } else if (tab.category_id) {
+          requestSource("category", tab.category_id, section.limit, "newest", false);
+        }
+      }
+      continue;
+    }
+    if (section.type !== "product") continue;
     const sort = section.sort ?? "newest";
     const onlyDiscount = !!section.only_discount;
     if (section.source_mode === "mix") {

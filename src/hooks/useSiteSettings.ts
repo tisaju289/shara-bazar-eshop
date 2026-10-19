@@ -147,7 +147,11 @@ export type ProductSection = Base & {
   sources?: { kind: "category" | "subcategory"; id: string; count: number }[];
   product_ids?: string[];
 };
-export type DealTab = { label_bn: string; category_id: string };
+export type DealTab = {
+  label_bn: string;
+  category_id: string;
+  subcategory_id?: string;
+};
 export type DealSection = Base & {
   type: "deal";
   title_bn: string;

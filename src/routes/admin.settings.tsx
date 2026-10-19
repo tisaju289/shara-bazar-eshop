@@ -1206,7 +1206,7 @@ function SectionEditor({ section: s, setItem, cats, subcategories = [], brands =
       <Section
         title="ডিল সেকশন সেটিং"
         right={
-          <button type="button" onClick={() => setTabs([...tabs, { label_bn: "", category_id: "" }])}
+          <button type="button" onClick={() => setTabs([...tabs, { label_bn: "", category_id: "", subcategory_id: "" }])}
             className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-secondary text-xs font-semibold">
             <Plus className="size-3.5" /> ট্যাব
           </button>
@@ -1257,11 +1257,34 @@ function SectionEditor({ section: s, setItem, cats, subcategories = [], brands =
                 </div>
                 <input className={inputCls} placeholder="ট্যাব নাম" value={t.label_bn}
                   onChange={(e) => setTabs(tabs.map((x, j) => (j === i ? { ...x, label_bn: e.target.value } : x)))} />
-                <select className={inputCls} value={t.category_id}
-                  onChange={(e) => setTabs(tabs.map((x, j) => (j === i ? { ...x, category_id: e.target.value } : x)))}>
-                  <option value="">— সব ক্যাটাগরি —</option>
-                  {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
-                </select>
+                <Field label="ক্যাটাগরি">
+                  <select className={inputCls} value={t.category_id ?? ""}
+                    onChange={(e) => setTabs(tabs.map((x, j) => (j === i
+                      ? { ...x, category_id: e.target.value, subcategory_id: "" }
+                      : x)))}>
+                    <option value="">— সব ক্যাটাগরি —</option>
+                    {cats.map((c) => <option key={c.id} value={c.id}>{c.name_bn}</option>)}
+                  </select>
+                </Field>
+                <Field label="সাব-ক্যাটাগরি (ঐচ্ছিক)" hint="সাব-ক্যাটাগরি বাছলে শুধু ওই সাব-ক্যাটাগরির পণ্য দেখাবে">
+                  <select className={inputCls} value={t.subcategory_id ?? ""}
+                    onChange={(e) => {
+                      const subcategory_id = e.target.value;
+                      const parentCategoryId = subcategories.find((sub) => sub.id === subcategory_id)?.category_id;
+                      setTabs(tabs.map((x, j) => (j === i
+                        ? {
+                            ...x,
+                            subcategory_id,
+                            ...(parentCategoryId ? { category_id: parentCategoryId } : {}),
+                          }
+                        : x)));
+                    }}>
+                    <option value="">— সব সাব-ক্যাটাগরি —</option>
+                    {subcategories
+                      .filter((sub) => !t.category_id || sub.category_id === t.category_id)
+                      .map((sub) => <option key={sub.id} value={sub.id}>{sub.name_bn}</option>)}
+                  </select>
+                </Field>
               </div>
             ))}
           </div>
