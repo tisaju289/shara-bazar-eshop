@@ -119,7 +119,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
         )}
         {s.show_offer_badge && p.offer_badge && <OfferBadge text={p.offer_badge} settings={s} />}
       </div>
-      <div className="p-2.5 md:p-3 space-y-1 text-left flex flex-col flex-1 border-t border-border">
+      <div className="p-2.5 md:p-3 space-y-1 text-center flex flex-col flex-1 border-t border-border">
         <div className="text-[10px] md:text-[11px] italic text-muted-foreground">ডেলিভারি ১-২ ঘণ্টা</div>
         {s.show_name && (
           <h3 className="font-semibold text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.3rem]">
@@ -130,7 +130,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
         )}
         {meta && <div className="text-[10px] md:text-[11px] text-muted-foreground line-clamp-1">{meta}</div>}
         {s.show_reviews && reviewCount > 0 && (
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
             <div className="flex">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star key={i} className={`size-3 ${i <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
@@ -140,7 +140,7 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
           </div>
         )}
         {s.show_price && (
-          <div className="flex items-baseline gap-1.5 pt-0.5">
+          <div className="flex items-baseline justify-center gap-1.5 pt-0.5">
             <span className="text-base md:text-lg font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
             {s.show_old_price && p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
           </div>
