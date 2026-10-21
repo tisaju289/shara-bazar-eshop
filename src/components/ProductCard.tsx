@@ -1,4 +1,4 @@
-import { Plus, Minus, Heart, Star, Eye } from "lucide-react";
+import { Plus, Minus, Heart, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
 import { ProductImage } from "@/components/ProductImage";
@@ -166,15 +166,6 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
               </button>
             )}
           </div>
-        )}
-        {p.slug && (
-          <Link
-            to="/product/$slug"
-            params={{ slug: p.slug }}
-            className="h-8 rounded-md bg-secondary text-secondary-foreground text-xs font-bold inline-flex items-center justify-center gap-1.5 hover:bg-primary/10 transition"
-          >
-            <Eye className="size-3.5" /> বিস্তারিত দেখুন
-          </Link>
         )}
       </div>
     </article>
