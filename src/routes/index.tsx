@@ -290,13 +290,13 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
 
   const update = () => {
     const el = ref.current;
-    if (!el) return;
+      <div className="w-full md:w-[240px] lg:w-[280px] shrink-0">
     setCanPrev(el.scrollLeft > 4);
-    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  };
+          <a href={sec.side_link} className="block h-full rounded-2xl overflow-hidden">
+            <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="block w-full h-full object-cover" loading="lazy" />
 
   useEffect(() => {
-    update();
+          <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="block w-full h-full rounded-2xl object-cover" loading="lazy" />
     const el = ref.current;
     if (!el) return;
     el.addEventListener("scroll", update, { passive: true });
@@ -304,54 +304,55 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
     return () => {
       el.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
-    };
-  }, [categories.length]);
-
-  // Auto slide
-  useEffect(() => {
-    if (categories.length <= 4) return;
-    const t = setInterval(() => {
-      const el = ref.current;
-      if (!el) return;
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
-      else el.scrollBy({ left: el.clientWidth * 0.8, behavior: "smooth" });
-    }, 3500);
-    return () => clearInterval(t);
-  }, [categories.length]);
-
-  const scroll = (dir: -1 | 1) => {
-    const el = ref.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
-  };
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => scroll(-1)}
-        disabled={!canPrev}
-        aria-label="prev"
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+            {left && banner}
+            <div className="min-w-0 flex-1 rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
+              <div className="flex flex-col items-center text-center gap-2 mb-4">
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                  {cd && (
+                    <div className="flex items-end gap-1.5">
+                      <CountdownBox value={cd.hours} label="HRS" />
+                      <CountdownBox value={cd.minutes} label="MIN" />
+                      <CountdownBox value={cd.seconds} label="SEC" />
+                    </div>
+                  )}
+                </div>
+                {tabs.length > 0 && (
+                  <div className="w-full flex justify-center">
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-full">
+                      {tabs.map((t, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setActive(i)}
+                          className={`h-8 px-3 rounded-full text-xs font-semibold whitespace-nowrap border transition ${
+                            i === active
+                              ? "bg-primary text-primary-foreground border-transparent"
+                              : "bg-background text-foreground border-border hover:border-primary"
+                          }`}
+                        >
+                          {t.label_bn}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <ProductSlider
+                products={items}
+                categories={categories}
+                brands={brands}
+                cart={cart}
+                add={add}
+                sub={sub}
+                onBuyNow={onBuyNow}
+                settings={cardSettings}
+                display="slider"
+              />
+            </div>
+            {!left && banner}
         className="grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 md:-translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        <ChevronLeft className="size-5" />
-      </button>
-      <button
-        type="button"
-        onClick={() => scroll(1)}
-        disabled={!canNext}
-        aria-label="next"
-        className="grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/3 md:translate-x-1/2 z-10 size-9 md:size-10 rounded-full bg-white shadow-[var(--shadow-pop)] border border-border place-items-center hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        <ChevronRight className="size-5" />
-      </button>
-      <div
-        ref={ref}
-        className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {categories.map((c) => (
-          <Link
             key={c.id}
             to="/cat/$catId"
             params={{ catId: c.id }}
