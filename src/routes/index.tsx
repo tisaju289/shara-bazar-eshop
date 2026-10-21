@@ -178,56 +178,54 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   return (
     <section className="py-2 md:py-4">
       <div className="container mx-auto px-4">
-        <div className="rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
-          <div className="flex flex-col items-center text-center gap-2 mb-4">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
-              {cd && (
-                <div className="flex items-end gap-1.5">
-                  <CountdownBox value={cd.hours} label="HRS" />
-                  <CountdownBox value={cd.minutes} label="MIN" />
-                  <CountdownBox value={cd.seconds} label="SEC" />
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+          {left && banner}
+          <div className="min-w-0 flex-1 rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
+            <div className="flex flex-col items-center text-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)]">{sec.title_bn}</h2>
+                {cd && (
+                  <div className="flex items-end gap-1.5">
+                    <CountdownBox value={cd.hours} label="HRS" />
+                    <CountdownBox value={cd.minutes} label="MIN" />
+                    <CountdownBox value={cd.seconds} label="SEC" />
+                  </div>
+                )}
+              </div>
+              {tabs.length > 0 && (
+                <div className="w-full flex justify-center">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-full">
+                    {tabs.map((t, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setActive(i)}
+                        className={`h-8 px-3 rounded-full text-xs font-semibold whitespace-nowrap border transition ${
+                          i === active
+                            ? "bg-primary text-primary-foreground border-transparent"
+                            : "bg-background text-foreground border-border hover:border-primary"
+                        }`}
+                      >
+                        {t.label_bn}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-            {tabs.length > 0 && (
-              <div className="w-full flex justify-center">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-full">
-                  {tabs.map((t, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setActive(i)}
-                    className={`h-8 px-3 rounded-full text-xs font-semibold whitespace-nowrap border transition ${
-                      i === active
-                        ? "bg-primary text-primary-foreground border-transparent"
-                        : "bg-background text-foreground border-border hover:border-primary"
-                    }`}
-                  >
-                    {t.label_bn}
-                  </button>
-                ))}
-                </div>
-              </div>
-            )}
+            <ProductSlider
+              products={items}
+              categories={categories}
+              brands={brands}
+              cart={cart}
+              add={add}
+              sub={sub}
+              onBuyNow={onBuyNow}
+              settings={cardSettings}
+              display="slider"
+            />
           </div>
-          <div className="flex flex-col md:flex-row gap-4">
-            {left && banner}
-            <div className="min-w-0 flex-1">
-              <ProductSlider
-                products={items}
-                categories={categories}
-                brands={brands}
-                cart={cart}
-                add={add}
-                sub={sub}
-                onBuyNow={onBuyNow}
-                settings={cardSettings}
-                display="slider"
-              />
-            </div>
-            {!left && banner}
-          </div>
+          {!left && banner}
         </div>
       </div>
     </section>
