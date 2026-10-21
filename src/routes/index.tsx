@@ -164,13 +164,13 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   const left = (sec.side_position ?? "left") === "left";
 
   const banner = sec.side_image_url ? (
-    <div className="md:w-[240px] lg:w-[280px] shrink-0">
+    <div className="shrink-0 md:flex md:flex-col md:self-stretch md:w-[240px] lg:w-[280px]">
       {sec.side_link ? (
-        <a href={sec.side_link} className="block rounded-2xl overflow-hidden">
-          <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="w-full h-full object-cover" loading="lazy" />
+        <a href={sec.side_link} className="block rounded-2xl overflow-hidden md:h-full">
+          <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="w-full h-auto object-cover md:h-full" loading="lazy" />
         </a>
       ) : (
-        <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="w-full rounded-2xl object-cover" loading="lazy" />
+        <img src={thumb(sec.side_image_url, 800)} alt={sec.title_bn || ""} className="w-full h-auto rounded-2xl object-cover md:h-full" loading="lazy" />
       )}
     </div>
   ) : null;
@@ -178,7 +178,7 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   return (
     <section className="py-2 md:py-4">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+        <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-4">
           {left && banner}
           <div className="min-w-0 flex-1 rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
             <div className="flex flex-col items-center text-center gap-2 mb-4">
