@@ -176,7 +176,7 @@ function DealBlock({ sec, products, categories, brands, cart, add, sub, onBuyNow
   ) : null;
 
   return (
-    <section className="py-6 md:py-10">
+    <section className="py-4 md:py-6">
       <div className="container mx-auto px-4">
         <div className="rounded-3xl p-4 md:p-6" style={{ background: sec.bg_color || "var(--secondary)" }}>
           <div className="flex flex-col items-center text-center gap-2 mb-4">
@@ -918,7 +918,7 @@ function Index() {
           {/* Default sections if no admin config */}
           {homeSections.length === 0 && !settings && (
             <>
-              <section className="py-6 md:py-10">
+              <section className="py-4 md:py-6">
                 <div className="container mx-auto px-4">
                   <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">আজকের তাজা পণ্য</h2>
                   <ProductSlider
@@ -934,7 +934,7 @@ function Index() {
                   />
                 </div>
               </section>
-              <section className="py-6 md:py-10">
+              <section className="py-4 md:py-6">
                 <div className="container mx-auto px-4">
                   <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">নিত্য প্রয়োজনীয় পণ্য</h2>
                   <ProductSlider
@@ -950,7 +950,7 @@ function Index() {
                   />
                 </div>
               </section>
-              <section className="py-6 md:py-10">
+              <section className="py-4 md:py-6">
                 <div className="container mx-auto px-4">
                   <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">তাজা সবজি</h2>
                   <ProductSlider
@@ -966,7 +966,7 @@ function Index() {
                   />
                 </div>
               </section>
-              <section className="py-6 md:py-10">
+              <section className="py-4 md:py-6">
                 <div className="container mx-auto px-4">
                   <h2 className="text-xl md:text-2xl font-extrabold text-[var(--leaf-deep)] mb-4 text-center">মসলা ও ঝাল</h2>
                   <ProductSlider
@@ -1081,7 +1081,7 @@ function Index() {
         }
         if (sec.type === "category") {
           return (
-            <section key={sec.id} id="categories" className="py-10 md:py-14">
+            <section key={sec.id} id="categories" className="py-4 md:py-6">
               <div className="container mx-auto px-4">
                 <div className="flex flex-col items-center text-center gap-2 mb-4">
                   <div className="min-w-0">
@@ -1101,7 +1101,7 @@ function Index() {
         }
         if (sec.type === "offer") {
           return (
-            <section key={sec.id} className="py-6 md:py-10">
+            <section key={sec.id} className="py-4 md:py-6">
               <div className="container mx-auto px-4">
                 <div className="rounded-3xl p-6 md:p-10 relative overflow-hidden text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
                   <div className="absolute -right-10 -top-10 size-48 rounded-full bg-white/10 blur-2xl" />
@@ -1133,7 +1133,7 @@ function Index() {
             </div>
           );
           return (
-            <section key={sec.id} className="py-6 md:py-10">
+            <section key={sec.id} className="py-4 md:py-6">
               <div className="container mx-auto px-4">
                 {sec.link ? <a href={sec.link}>{img}</a> : img}
               </div>
@@ -1172,7 +1172,7 @@ function Index() {
           const items = (sec.items ?? []).filter((f) => f.title_bn || f.image_url);
           if (items.length === 0) return null;
           return (
-            <section key={sec.id} className="py-4 md:py-8">
+            <section key={sec.id} className="py-4 md:py-6">
               <div className="container mx-auto px-4">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   {items.map((f, i) => (
@@ -1198,7 +1198,7 @@ function Index() {
         if (sec.type === "brand") {
           if (brands.length === 0) return null;
           return (
-            <section key={sec.id} className="py-6 md:py-10">
+            <section key={sec.id} className="py-4 md:py-6">
               <div className="container mx-auto px-4 space-y-4">
                 <div className="flex flex-col items-center text-center gap-2">
                   <div className="min-w-0">
@@ -1276,7 +1276,7 @@ function Index() {
         const items = fixed ? pool : pool.slice(0, sec.display === "grid" ? Math.max(sec.limit, secRows * secCols) : sec.limit);
         if (items.length === 0) return null;
         return (
-          <section key={sec.id} id="shop" className="py-6 md:py-10">
+          <section key={sec.id} id="shop" className="py-4 md:py-6">
             <div className="container mx-auto px-4 space-y-4">
               {sec.banner_image_url && (
                 sec.banner_link ? (
@@ -1324,7 +1324,7 @@ function Index() {
 
       {/* জনপ্রিয় ব্র্যান্ড (fallback — শুধু যদি অ্যাডমিনে ব্র্যান্ড সেকশন যোগ করা না থাকে) */}
       {!prodLoading && brands.length > 0 && !homeSections.some((s) => s.type === "brand") && (
-        <section className="py-8 md:py-12">
+        <section className="py-4 md:py-6">
           <div className="container mx-auto px-4 space-y-6">
             <div className="flex flex-col items-center text-center">
               <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--leaf-deep)]">জনপ্রিয় ব্র্যান্ড</h2>
