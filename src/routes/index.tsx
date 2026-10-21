@@ -1090,11 +1090,6 @@ function Index() {
                   </div>
                 </div>
                 <CategoryMarquee categories={categories} catCounts={catCounts} />
-                <div className="mt-5 flex justify-center">
-                  <Link to="/categories" className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
-                    সব দেখুন <ChevronRight className="size-4" />
-                  </Link>
-                </div>
               </div>
             </section>
           );
@@ -1207,13 +1202,6 @@ function Index() {
                   </div>
                 </div>
                 <BrandMarquee brands={brands} brandCounts={brandCounts} />
-                {sec.show_all_link !== false && (
-                  <div className="flex justify-center">
-                    <Link to="/brands" className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
-                      সব দেখুন <ChevronRight className="size-4" />
-                    </Link>
-                  </div>
-                )}
               </div>
             </section>
           );
@@ -1306,15 +1294,6 @@ function Index() {
                 rows={secRows}
                 columns={secCols}
               />
-              <div className="flex justify-center">
-                <Link
-                  to="/products"
-                  search={(catIds.length === 1 ? { cat: catIds[0] } : {}) as any}
-                  className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95"
-                >
-                  সব দেখুন <ChevronRight className="size-4" />
-                </Link>
-              </div>
             </div>
           </section>
         );
@@ -1331,11 +1310,6 @@ function Index() {
               <p className="text-muted-foreground text-sm mt-1">আপনার পছন্দের ব্র্যান্ড বেছে নিন</p>
             </div>
             <BrandMarquee brands={brands} brandCounts={brandCounts} />
-            <div className="text-center">
-              <Link to="/brands" className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-pop)] hover:opacity-95">
-                সব ব্র্যান্ড <ChevronRight className="size-4" />
-              </Link>
-            </div>
           </div>
         </section>
       )}
