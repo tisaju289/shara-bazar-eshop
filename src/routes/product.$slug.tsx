@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { type ProductVariant } from "@/lib/productVariants";
 
 export const Route = createFileRoute("/product/$slug")({
   head: () => ({ meta: [{ title: "পণ্যের বিস্তারিত — তাজা বাজার" }] }),
@@ -19,6 +20,7 @@ type Product = {
   image_url: string | null; tag: string | null; stock: number; category_id: string | null; subcategory_id: string | null;
   brand_id: string | null; keywords: string | null; reviews_rating: number | null;
   reviews_count: number | null; offer_badge: string | null;
+  variants?: ProductVariant[] | null;
 };
 type Named = { id: string; name_bn: string };
 
@@ -53,7 +55,7 @@ function ProductDetailPage() {
       if (!product?.category_id) return [];
       const { data: related, error: relatedQueryError } = await (supabase as any)
         .from("products")
-        .select("id,slug,name_bn,unit,price,old_price,image_url,tag,category_id,subcategory_id,brand_id,reviews_rating,reviews_count,offer_badge,stock,keywords")
+        .select("*")
         .eq("is_active", true)
         .eq("category_id", product.category_id)
         .neq("id", product.id)
@@ -151,10 +153,11 @@ function ProductDetailPage() {
                     categoryName={data?.category?.name_bn ?? ""}
                     brandName=""
                     qty={cart[relatedProduct.id] ?? 0}
+                    cart={cart}
                     add={addToCart}
                     sub={removeFromCart}
-                    onBuyNow={() => {
-                      if (!cart[relatedProduct.id]) addToCart(relatedProduct.id);
+                    onBuyNow={(cartKey) => {
+                      if (!cart[cartKey]) addToCart(cartKey);
                       navigate({ to: "/products" });
                     }}
                     settings={settings?.product_card}

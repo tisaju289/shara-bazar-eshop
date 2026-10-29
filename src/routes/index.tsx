@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { thumb, thumbSrcSet } from "@/lib/img";
 import { ProductImage } from "@/components/ProductImage";
 import { useEffect, useMemo, useState } from "react";
@@ -15,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings, type HomeSection, type ProductSection } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
+import { findProductForCartKey, resolveProductCartLine, splitProductCartKey } from "@/lib/productVariants";
+import { placeOrder as placeOrderFn } from "@/lib/orders.functions";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryMarquee } from "@/components/CategoryMarquee";
@@ -371,6 +374,7 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
+  variants?: import("@/lib/productVariants").ProductVariant[] | null;
   sort_order?: number | null; created_at?: string;
 };
 function compareAdminProductOrder(
@@ -386,7 +390,7 @@ function compareAdminProductOrder(
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 const PRODUCT_COLUMNS =
-  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,sort_order,created_at";
+  "*";
 const MAX_PUBLIC_PRODUCTS = 200;
 
 // হোম পেজের এক্সট্রা সেকশনগুলোর ক্যাটাগরি আইডি
@@ -658,6 +662,7 @@ function Index() {
   }, [products, hotProducts, extraCatProducts]);
 
   const [cart, setCart] = useCart();
+  const submitOrder = useServerFn(placeOrderFn);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -679,17 +684,21 @@ function Index() {
   const deliveryCharge = deliveryOptions[deliveryIdx]?.charge ?? 0;
   const deliveryLabel = deliveryOptions[deliveryIdx]?.label_bn ?? "";
 
+  const getCartLine = (cartKey: string) => {
+    const product = findProductForCartKey(allProducts, cartKey);
+    return product ? { product, ...resolveProductCartLine(product, cartKey) } : null;
+  };
   const add = (id: string) => {
     setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
-    const p = allProducts.find((x) => x.id === id);
-    if (p) {
+    const line = getCartLine(id);
+    if (line?.isValid) {
       trackEvent("AddToCart", {
-        value: p.price,
+        value: line.price ?? 0,
         currency: "BDT",
-        content_ids: [id],
-        content_name: p.name_bn,
+        content_ids: [line.productId],
+        content_name: `${line.product.name_bn} ${line.unit}`,
         content_type: "product",
-        contents: [{ id, quantity: 1, item_price: p.price }],
+        contents: [{ id: line.productId, quantity: 1, item_price: line.price ?? 0 }],
       });
     }
   };
@@ -706,19 +715,19 @@ function Index() {
     setOrderError(null);
     setCheckoutOpen(true);
     const ids = Object.keys(items);
-    const total = ids.reduce((s, id) => s + (allProducts.find((p) => p.id === id)?.price ?? 0) * items[id], 0);
+    const total = ids.reduce((s, id) => s + (getCartLine(id)?.price ?? 0) * items[id], 0);
     trackEvent("InitiateCheckout", {
       value: total,
       currency: "BDT",
-      content_ids: ids,
+      content_ids: ids.map((id) => splitProductCartKey(id).productId),
       content_type: "product",
       num_items: Object.values(items).reduce((a, b) => a + b, 0),
-      contents: ids.map((id) => ({ id, quantity: items[id], item_price: allProducts.find((p) => p.id === id)?.price })),
+      contents: ids.map((id) => ({ id: splitProductCartKey(id).productId, quantity: items[id], item_price: getCartLine(id)?.price ?? undefined })),
     });
   };
 
   const checkoutTotal = useMemo(
-    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (allProducts.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
   const grandTotal = checkoutTotal + deliveryCharge;
@@ -730,25 +739,33 @@ function Index() {
       return;
     }
     setPlacing(true);
-    const items = Object.entries(checkoutItems).map(([id, q]) => {
-      const p = allProducts.find((x) => x.id === id);
-      return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
-    });
-    const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
-      .from("orders")
-      .insert({
-        customer_name: orderForm.name.trim(),
-        phone: orderForm.phone.trim(),
-        address: orderForm.address.trim(),
-        items,
-        total: grandTotal,
-        payment_method: "cod",
-      });
-    setPlacing(false);
-    if (error) {
-      setOrderError(error.message);
+    const items = Object.entries(checkoutItems).map(([cartKey, qty]) => {
+      const line = getCartLine(cartKey);
+      if (!line?.isValid) return null;
+      return { id: line.productId, variant_id: line.variantId, qty };
+    }).filter(Boolean);
+    if (items.length !== Object.keys(checkoutItems).length) {
+      setPlacing(false);
+      setOrderError("কার্টের একটি variant আর পাওয়া যাচ্ছে না। সেটি সরিয়ে আবার চেষ্টা করুন।");
       return;
     }
+    let orderResult: Awaited<ReturnType<typeof submitOrder>>;
+    try {
+      orderResult = await submitOrder({
+        data: {
+          name: orderForm.name.trim(),
+          phone: orderForm.phone.trim(),
+          address: orderForm.address.trim(),
+          items: items as { id: string; variant_id: string | null; qty: number }[],
+          delivery_index: deliveryIdx,
+        },
+      });
+    } catch (error) {
+      setPlacing(false);
+      setOrderError(error instanceof Error ? error.message : "অর্ডার করা যায়নি");
+      return;
+    }
+    setPlacing(false);
     // clear ordered items from main cart
     setCart((c) => {
       const next = { ...c };
@@ -758,13 +775,13 @@ function Index() {
     setOrderForm({ name: "", phone: "", address: "" });
     setOrderDone(true);
     trackEvent("Purchase", {
-      value: grandTotal,
+      value: orderResult.total,
       currency: "BDT",
-      content_ids: Object.keys(checkoutItems),
+      content_ids: Object.keys(checkoutItems).map((id) => splitProductCartKey(id).productId),
       content_type: "product",
       num_items: Object.values(checkoutItems).reduce((a, b) => a + b, 0),
       contents: Object.entries(checkoutItems).map(([id, q]) => ({
-        id, quantity: q, item_price: allProducts.find((p) => p.id === id)?.price,
+        id: splitProductCartKey(id).productId, quantity: q, item_price: getCartLine(id)?.price ?? undefined,
       })),
       phone: orderForm.phone.trim(),
       external_id: orderForm.phone.trim(),
@@ -773,7 +790,7 @@ function Index() {
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotal = useMemo(
-    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (allProducts.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [cart, products],
   );
 
@@ -1327,8 +1344,9 @@ function Index() {
             <div className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4 space-y-3">
               {cartCount === 0 && <p className="text-center text-muted-foreground mt-10 text-sm">আপনার কার্ট খালি 🛒</p>}
               {Object.entries(cart).map(([id, q]) => {
-                const p = allProducts.find((x) => x.id === id);
-                if (!p) return null;
+                const line = getCartLine(id);
+                if (!line) return null;
+                const { product: p } = line;
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     <ProductImage
@@ -1340,7 +1358,8 @@ function Index() {
                     />
                     <div className="flex-1 text-sm">
                       <div className="font-semibold leading-tight">{p.name_bn}</div>
-                      <div className="text-xs text-muted-foreground">৳{p.price} × {q}</div>
+                      <div className="text-xs text-muted-foreground">{line.unit} · ৳{line.price ?? "—"} × {q}</div>
+                      {!line.isValid && <div className="text-xs text-destructive">এই variant আর নেই; কমিয়ে সরিয়ে দিন।</div>}
                     </div>
                     <div className="flex items-center gap-1 bg-secondary rounded-lg">
                       <button onClick={() => sub(id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
@@ -1392,8 +1411,9 @@ function Index() {
                 <div className="p-4 space-y-4">
                   <div className="bg-secondary/50 rounded-2xl p-3 space-y-3">
                     {Object.entries(checkoutItems).map(([id, q]) => {
-                      const p = allProducts.find((x) => x.id === id);
-                      if (!p) return null;
+                      const line = getCartLine(id);
+                      if (!line) return null;
+                      const { product: p } = line;
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                             <ProductImage
@@ -1405,7 +1425,7 @@ function Index() {
                             />
                           <div className="flex-1 min-w-0 text-sm">
                             <div className="font-semibold leading-tight truncate">{p.name_bn}</div>
-                            <div className="text-xs text-muted-foreground">৳{p.price} · ৳{p.price * q}</div>
+                            <div className="text-xs text-muted-foreground">{line.unit} · ৳{line.price ?? "—"} · ৳{(line.price ?? 0) * q}</div>
                           </div>
                           <div className="flex items-center gap-1 bg-secondary rounded-lg shrink-0">
                             <button

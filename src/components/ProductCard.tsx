@@ -2,6 +2,8 @@ import { Plus, Minus, Heart, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { ProductCard as ProductCardSettings } from "@/hooks/useSiteSettings";
 import { ProductImage } from "@/components/ProductImage";
+import { useState } from "react";
+import { productCartKey, type ProductVariant } from "@/lib/productVariants";
 
 export type ProductCardData = {
   id: string;
@@ -17,6 +19,7 @@ export type ProductCardData = {
   reviews_rating?: number | null;
   reviews_count?: number | null;
   offer_badge?: string | null;
+  variants?: ProductVariant[] | null;
 };
 
 
@@ -24,10 +27,11 @@ type Props = {
   product: ProductCardData;
   categoryName?: string;
   brandName?: string;
-  qty: number;
+  qty?: number;
+  cart?: Record<string, number>;
   add: (id: string) => void;
   sub: (id: string) => void;
-  onBuyNow: () => void;
+  onBuyNow: (cartKey: string) => void;
   settings?: ProductCardSettings;
   priority?: boolean;
 };
@@ -77,9 +81,15 @@ export function OfferBadge({ text, settings }: { text: string; settings: Product
   );
 }
 
-export function ProductCard({ product: p, categoryName, brandName, qty, add, sub, onBuyNow, settings, priority = false }: Props) {
+export function ProductCard({ product: p, categoryName, brandName, qty = 0, cart, add, sub, onBuyNow, settings, priority = false }: Props) {
   const s = { ...DEFAULTS, ...(settings ?? {}) };
-  const meta = [s.show_brand && brandName, s.show_category && categoryName, s.show_unit && p.unit]
+  const [selectedVariantId, setSelectedVariantId] = useState("");
+  const baseOption = { id: "", label: p.unit, price: p.price, old_price: p.old_price };
+  const selectedVariant = p.variants?.find((variant) => variant.id === selectedVariantId);
+  const selectedOption = selectedVariant ?? baseOption;
+  const cartKey = productCartKey(p.id, selectedVariant?.id);
+  const selectedQty = cart ? (cart[cartKey] ?? 0) : qty;
+  const meta = [s.show_brand && brandName, s.show_category && categoryName, s.show_unit && selectedOption.label]
     .filter(Boolean).join(" · ");
   const rating = Number(p.reviews_rating ?? 0);
   const reviewCount = Number(p.reviews_count ?? 0);
@@ -129,6 +139,24 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
           </h3>
         )}
         {meta && <div className="text-[10px] md:text-[11px] text-muted-foreground line-clamp-1">{meta}</div>}
+        {!!p.variants?.length && (
+          <label className="block pt-1 text-left">
+            <span className="sr-only">পণ্যের ভ্যারিয়েন্ট বেছে নিন</span>
+            <select
+              value={selectedVariant?.id ?? ""}
+              onChange={(event) => setSelectedVariantId(event.target.value)}
+              className="w-full h-8 px-2 rounded-md border border-border bg-background text-xs text-foreground"
+              aria-label={`${p.name_bn} — ভ্যারিয়েন্ট`}
+            >
+              <option value="">{s.show_price ? `${baseOption.label} — ৳${baseOption.price}` : baseOption.label}</option>
+              {p.variants.map((variant) => (
+                <option key={variant.id} value={variant.id}>
+                  {s.show_price ? `${variant.label} — ৳${variant.price}` : variant.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {s.show_reviews && reviewCount > 0 && (
           <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
             <div className="flex">
@@ -141,27 +169,27 @@ export function ProductCard({ product: p, categoryName, brandName, qty, add, sub
         )}
         {s.show_price && (
           <div className="flex items-baseline justify-center gap-1.5 pt-0.5">
-            <span className="text-base md:text-lg font-extrabold text-[var(--leaf-deep)]">৳{p.price}</span>
-            {s.show_old_price && p.old_price && <span className="text-xs text-muted-foreground line-through">৳{p.old_price}</span>}
+            <span className="text-base md:text-lg font-extrabold text-[var(--leaf-deep)]">৳{selectedOption.price}</span>
+            {s.show_old_price && selectedOption.old_price && <span className="text-xs text-muted-foreground line-through">৳{selectedOption.old_price}</span>}
           </div>
         )}
         {(s.show_add_to_cart || s.show_buy_now) && (
           <div className={`grid ${s.show_add_to_cart && s.show_buy_now ? "grid-cols-2" : "grid-cols-1"} gap-1.5 pt-1.5 mt-auto`}>
             {s.show_add_to_cart && (
-              qty === 0 ? (
-                <button onClick={() => add(p.id)} className="h-8 rounded-md border border-primary bg-transparent text-primary text-xs font-bold inline-flex items-center justify-center gap-1 hover:bg-primary hover:text-primary-foreground transition">
+              selectedQty === 0 ? (
+                <button onClick={() => add(cartKey)} className="h-8 rounded-md border border-primary bg-transparent text-primary text-xs font-bold inline-flex items-center justify-center gap-1 hover:bg-primary hover:text-primary-foreground transition">
                   <Plus className="size-3.5" /> {s.add_to_cart_text_bn}
                 </button>
               ) : (
                 <div className="flex items-center justify-between border border-primary text-primary rounded-md h-8 px-1">
-                  <button onClick={() => sub(p.id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
-                  <span className="text-xs font-bold">{qty}</span>
-                  <button onClick={() => add(p.id)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
+                  <button onClick={() => sub(cartKey)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
+                  <span className="text-xs font-bold">{selectedQty}</span>
+                  <button onClick={() => add(cartKey)} className="size-7 grid place-items-center"><Plus className="size-3.5" /></button>
                 </div>
               )
             )}
             {s.show_buy_now && (
-              <button onClick={onBuyNow} className="h-8 rounded-md bg-accent text-accent-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90">
+              <button onClick={() => onBuyNow(cartKey)} className="h-8 rounded-md bg-accent text-accent-foreground text-xs font-bold inline-flex items-center justify-center hover:opacity-90">
                 {s.buy_now_text_bn}
               </button>
             )}

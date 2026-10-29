@@ -5,7 +5,7 @@ type PlaceOrderInput = {
   name: string;
   phone: string;
   address: string;
-  items: { id: string; qty: number }[];
+  items: { id: string; qty: number; variant_id?: string | null }[];
   delivery_index?: number;
 };
 
@@ -23,7 +23,11 @@ export const placeOrder = createServerFn({ method: "POST" })
     const phone = String(input?.phone ?? "").trim();
     const address = String(input?.address ?? "").trim();
     const items = (input?.items ?? [])
-      .map((i) => ({ id: String(i.id), qty: Math.max(1, Math.min(999, Math.floor(Number(i.qty) || 0))) }))
+      .map((i) => ({
+        id: String(i.id),
+        qty: Math.max(1, Math.min(999, Math.floor(Number(i.qty) || 0))),
+        variant_id: i.variant_id ? String(i.variant_id) : null,
+      }))
       .filter((i) => i.id);
     if (!name || !phone || !address) throw new Error("সব তথ্য পূরণ করুন");
     if (items.length === 0) throw new Error("কার্ট খালি");
@@ -43,18 +47,32 @@ export const placeOrder = createServerFn({ method: "POST" })
     const ids = [...new Set(data.items.map((i) => i.id))];
     const { data: products, error: pErr } = await sb
       .from("products")
-      .select("id,name_bn,unit,price,is_active")
+      .select("*")
       .in("id", ids)
       .eq("is_active", true);
     if (pErr) throw new Error(pErr.message);
 
     const byId = new Map((products ?? []).map((p: any) => [p.id, p]));
-    const items = data.items
-      .filter((i) => byId.has(i.id))
-      .map((i) => {
-        const p: any = byId.get(i.id);
-        return { id: p.id, name_bn: p.name_bn, price: Number(p.price), unit: p.unit, qty: i.qty };
-      });
+    const items = data.items.map((i) => {
+      const p: any = byId.get(i.id);
+      if (!p) throw new Error("পণ্যটি আর পাওয়া যাচ্ছে না");
+
+      const variants = Array.isArray(p.variants) ? p.variants : [];
+      const variant = i.variant_id
+        ? variants.find((item: any) => item?.id === i.variant_id && typeof item?.label === "string")
+        : null;
+      if (i.variant_id && !variant) throw new Error("নির্বাচিত variantটি আর পাওয়া যাচ্ছে না");
+
+      return {
+        id: p.id,
+        name_bn: p.name_bn,
+        variant_id: variant?.id ?? null,
+        variant_label: variant?.label ?? null,
+        price: Number(variant?.price ?? p.price),
+        unit: variant?.label ?? p.unit,
+        qty: i.qty,
+      };
+    });
     if (items.length === 0) throw new Error("পণ্য পাওয়া যায়নি");
 
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);

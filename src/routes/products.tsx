@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { ProductImage } from "@/components/ProductImage";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +10,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
+import { findProductForCartKey, resolveProductCartLine, splitProductCartKey } from "@/lib/productVariants";
+import { placeOrder as placeOrderFn } from "@/lib/orders.functions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
@@ -35,12 +38,13 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null; keywords: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
+  variants?: import("@/lib/productVariants").ProductVariant[] | null;
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null; keywords: string | null };
 type DBBrand = { id: string; name_bn: string };
 
 const PRODUCT_COLUMNS =
-  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,keywords,reviews_rating,reviews_count,offer_badge,created_at";
+  "*";
 const MAX_PUBLIC_PRODUCTS = 5000;
 
 function useCategories() {
@@ -97,6 +101,7 @@ function ProductsPage() {
 
   // Cart state
   const [cart, setCart] = useCart();
+  const submitOrder = useServerFn(placeOrderFn);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<Record<string, number>>({});
@@ -119,17 +124,21 @@ function ProductsPage() {
     }
   }, [q]);
 
+  const getCartLine = (cartKey: string) => {
+    const product = findProductForCartKey(products, cartKey);
+    return product ? { product, ...resolveProductCartLine(product, cartKey) } : null;
+  };
   const add = (id: string) => {
     setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
-    const p = products.find((x) => x.id === id);
-    if (p) {
+    const line = getCartLine(id);
+    if (line?.isValid) {
       trackEvent("AddToCart", {
-        value: p.price,
+        value: line.price ?? 0,
         currency: "BDT",
-        content_ids: [id],
-        content_name: p.name_bn,
+        content_ids: [line.productId],
+        content_name: `${line.product.name_bn} ${line.unit}`,
         content_type: "product",
-        contents: [{ id, quantity: 1, item_price: p.price }],
+        contents: [{ id: line.productId, quantity: 1, item_price: line.price ?? 0 }],
       });
     }
   };
@@ -147,19 +156,19 @@ function ProductsPage() {
     setOrderError(null);
     setCheckoutOpen(true);
     const ids = Object.keys(items);
-    const total = ids.reduce((s, id) => s + (products.find((p) => p.id === id)?.price ?? 0) * items[id], 0);
+    const total = ids.reduce((s, id) => s + (getCartLine(id)?.price ?? 0) * items[id], 0);
     trackEvent("InitiateCheckout", {
       value: total,
       currency: "BDT",
-      content_ids: ids,
+      content_ids: ids.map((id) => splitProductCartKey(id).productId),
       content_type: "product",
       num_items: Object.values(items).reduce((a, b) => a + b, 0),
-      contents: ids.map((id) => ({ id, quantity: items[id], item_price: products.find((p) => p.id === id)?.price })),
+      contents: ids.map((id) => ({ id: splitProductCartKey(id).productId, quantity: items[id], item_price: getCartLine(id)?.price ?? undefined })),
     });
   };
 
   const checkoutTotal = useMemo(
-    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
   const grandTotal = checkoutTotal + deliveryCharge;
@@ -171,25 +180,32 @@ function ProductsPage() {
       return;
     }
     setPlacing(true);
-    const items = Object.entries(checkoutItems).map(([id, q]) => {
-      const p = products.find((x) => x.id === id);
-      return { id, name_bn: p?.name_bn, price: p?.price, unit: p?.unit, qty: q };
+    const items = Object.entries(checkoutItems).flatMap(([cartKey, qty]) => {
+      const line = getCartLine(cartKey);
+      return line?.isValid ? [{ id: line.productId, variant_id: line.variantId, qty }] : [];
     });
-    const { error } = await (supabase as unknown as { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } })
-      .from("orders")
-      .insert({
-        customer_name: orderForm.name.trim(),
-        phone: orderForm.phone.trim(),
-        address: orderForm.address.trim(),
-        items,
-        total: grandTotal,
-        payment_method: "cod",
-      });
-    setPlacing(false);
-    if (error) {
-      setOrderError(error.message);
+    if (items.length !== Object.keys(checkoutItems).length) {
+      setPlacing(false);
+      setOrderError("কার্টের একটি variant আর পাওয়া যাচ্ছে না। সেটি সরিয়ে আবার চেষ্টা করুন।");
       return;
     }
+    let orderResult: Awaited<ReturnType<typeof submitOrder>>;
+    try {
+      orderResult = await submitOrder({
+        data: {
+          name: orderForm.name.trim(),
+          phone: orderForm.phone.trim(),
+          address: orderForm.address.trim(),
+          items,
+          delivery_index: deliveryIdx,
+        },
+      });
+    } catch (error) {
+      setPlacing(false);
+      setOrderError(error instanceof Error ? error.message : "অর্ডার করা যায়নি");
+      return;
+    }
+    setPlacing(false);
     setCart((c) => {
       const next = { ...c };
       for (const id of Object.keys(checkoutItems)) delete next[id];
@@ -198,13 +214,13 @@ function ProductsPage() {
     setOrderForm({ name: "", phone: "", address: "" });
     setOrderDone(true);
     trackEvent("Purchase", {
-      value: grandTotal,
+      value: orderResult.total,
       currency: "BDT",
-      content_ids: Object.keys(checkoutItems),
+      content_ids: Object.keys(checkoutItems).map((id) => splitProductCartKey(id).productId),
       content_type: "product",
       num_items: Object.values(checkoutItems).reduce((a, b) => a + b, 0),
       contents: Object.entries(checkoutItems).map(([id, q]) => ({
-        id, quantity: q, item_price: products.find((p) => p.id === id)?.price,
+        id: splitProductCartKey(id).productId, quantity: q, item_price: getCartLine(id)?.price ?? undefined,
       })),
       phone: orderForm.phone.trim(),
       external_id: orderForm.phone.trim(),
@@ -213,7 +229,7 @@ function ProductsPage() {
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotal = useMemo(
-    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [cart, products],
   );
 
@@ -368,9 +384,10 @@ function ProductsPage() {
                             categoryName={cat?.name_bn ?? ""}
                             brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
                             qty={cart[p.id] ?? 0}
+                            cart={cart}
                             add={add}
                             sub={sub}
-                            onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
+                            onBuyNow={(cartKey) => openCheckout({ [cartKey]: Math.max(cart[cartKey] ?? 0, 1) })}
                             settings={settings?.product_card}
                           />
                         ))}
@@ -390,9 +407,10 @@ function ProductsPage() {
                         categoryName={catName}
                         brandName={brandName}
                         qty={cart[p.id] ?? 0}
+                        cart={cart}
                         add={add}
                         sub={sub}
-                        onBuyNow={() => openCheckout({ [p.id]: Math.max(cart[p.id] ?? 0, 1) })}
+                        onBuyNow={(cartKey) => openCheckout({ [cartKey]: Math.max(cart[cartKey] ?? 0, 1) })}
                         settings={settings?.product_card}
                       />
                     );
@@ -419,8 +437,9 @@ function ProductsPage() {
             <div className="flex-1 overflow-y-auto p-4 pb-24 md:pb-4 space-y-3">
               {cartCount === 0 && <p className="text-center text-muted-foreground mt-10 text-sm">আপনার কার্ট খালি 🛒</p>}
               {Object.entries(cart).map(([id, q]) => {
-                const p = products.find((x) => x.id === id);
-                if (!p) return null;
+                const line = getCartLine(id);
+                if (!line) return null;
+                const { product: p } = line;
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     <ProductImage
@@ -432,7 +451,8 @@ function ProductsPage() {
                     />
                     <div className="flex-1 text-sm">
                       <div className="font-semibold leading-tight">{p.name_bn}</div>
-                      <div className="text-xs text-muted-foreground">৳{p.price} × {q}</div>
+                      <div className="text-xs text-muted-foreground">{line.unit} · ৳{line.price ?? "—"} × {q}</div>
+                      {!line.isValid && <div className="text-xs text-destructive">এই variant আর নেই; কমিয়ে সরিয়ে দিন।</div>}
                     </div>
                     <div className="flex items-center gap-1 bg-secondary rounded-lg">
                       <button onClick={() => sub(id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
@@ -484,8 +504,9 @@ function ProductsPage() {
                 <div className="p-4 space-y-4">
                   <div className="bg-secondary/50 rounded-2xl p-3 space-y-3">
                     {Object.entries(checkoutItems).map(([id, q]) => {
-                      const p = products.find((x) => x.id === id);
-                      if (!p) return null;
+                      const line = getCartLine(id);
+                      if (!line) return null;
+                      const { product: p } = line;
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                             <ProductImage
@@ -497,7 +518,7 @@ function ProductsPage() {
                             />
                           <div className="flex-1 min-w-0 text-sm">
                             <div className="font-semibold leading-tight truncate">{p.name_bn}</div>
-                            <div className="text-xs text-muted-foreground">৳{p.price} · ৳{p.price * q}</div>
+                            <div className="text-xs text-muted-foreground">{line.unit} · ৳{line.price ?? "—"} · ৳{(line.price ?? 0) * q}</div>
                           </div>
                           <div className="flex items-center gap-1 bg-secondary rounded-lg shrink-0">
                             <button

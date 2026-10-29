@@ -97,9 +97,10 @@ function SliderRow({
             categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
             brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
             qty={cart[p.id] ?? 0}
+            cart={cart}
             add={add}
             sub={sub}
-            onBuyNow={() => onBuyNow(p.id)}
+            onBuyNow={onBuyNow}
             settings={settings}
             priority={index < 6}
           />
@@ -121,9 +122,10 @@ function SliderRow({
                 categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
                 brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
                 qty={cart[p.id] ?? 0}
+                cart={cart}
                 add={add}
                 sub={sub}
-                onBuyNow={() => onBuyNow(p.id)}
+                onBuyNow={onBuyNow}
                 settings={settings}
               />
             </div>
@@ -164,9 +166,10 @@ function SliderRow({
               categoryName={categories.find((c) => c.id === p.category_id)?.name_bn ?? ""}
               brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
               qty={cart[p.id] ?? 0}
+              cart={cart}
               add={add}
               sub={sub}
-              onBuyNow={() => onBuyNow(p.id)}
+              onBuyNow={onBuyNow}
               settings={settings}
               priority={index < 4}
             />

@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, X, Loader2, Search, Image as ImageIcon, Copy, Upl
 import { ImageInput } from "@/components/ImageInput";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { type ProductVariant } from "@/lib/productVariants";
 
 export const Route = createFileRoute("/admin/products")({
   head: () => ({
@@ -39,6 +40,7 @@ type Product = {
   reviews_rating: number | null;
   reviews_count: number | null;
   offer_badge: string | null;
+  variants?: ProductVariant[] | null;
 };
 type Category = { id: string; name_bn: string };
 type Brand = { id: string; name_bn: string };
@@ -48,6 +50,7 @@ const emptyForm: Omit<Product, "id"> = {
   name_bn: "", slug: "", category_id: null, subcategory_id: null, brand_id: null, unit: "১ কেজি", price: 0, old_price: null,
   image_url: "", tag: "", stock: 0, is_active: true, keywords: "",
   reviews_rating: 0, reviews_count: 0, offer_badge: "",
+  variants: [],
 };
 
 function AdminProducts() {
@@ -102,6 +105,7 @@ function AdminProducts() {
       reviews_rating: p.reviews_rating ?? 0,
       reviews_count: p.reviews_count ?? 0,
       offer_badge: p.offer_badge ?? "",
+      variants: Array.isArray(p.variants) ? p.variants : [],
     });
     setOpen(true);
   };
@@ -110,8 +114,39 @@ function AdminProducts() {
     ? subCats.filter((s) => s.category_id === form.category_id)
     : [];
 
+  const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
+    setForm((current) => ({
+      ...current,
+      variants: (current.variants ?? []).map((variant) => variant.id === id ? { ...variant, ...patch } : variant),
+    }));
+  };
+  const addVariant = () => {
+    setForm((current) => ({
+      ...current,
+      variants: [
+        ...(current.variants ?? []),
+        { id: crypto.randomUUID(), label: "", price: 0, old_price: null },
+      ],
+    }));
+  };
+  const removeVariant = (id: string) => {
+    setForm((current) => ({
+      ...current,
+      variants: (current.variants ?? []).filter((variant) => variant.id !== id),
+    }));
+  };
+
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    const variants = (form.variants ?? []).map((variant) => ({
+      ...variant,
+      label: variant.label.trim(),
+      price: Number(variant.price),
+      old_price: variant.old_price ? Number(variant.old_price) : null,
+    }));
+    if (variants.some((variant) => !variant.label || !Number.isFinite(variant.price) || variant.price < 0)) {
+      return toast.error("প্রতিটি variant-এর নাম ও সঠিক দাম লিখুন");
+    }
     setSaving(true);
     const slugValue = form.slug?.trim();
     const { slug: _formSlug, ...rest } = form;
@@ -121,6 +156,7 @@ function AdminProducts() {
       price: Number(form.price),
       old_price: form.old_price ? Number(form.old_price) : null,
       stock: Number(form.stock),
+      variants,
       tag: form.tag || null,
       image_url: form.image_url || null,
       keywords: form.keywords?.trim() || null,
@@ -621,6 +657,44 @@ function AdminProducts() {
               <div className="grid grid-cols-2 gap-3">
                 <Field label="একক"><input required value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} className="input" /></Field>
                 <Field label="স্টক"><input required type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} className="input" /></Field>
+              </div>
+              <div className="rounded-xl border border-border p-3 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-semibold">পণ্যের variant</h3>
+                    <p className="text-xs text-muted-foreground mt-1">মূল একক/দাম থাকবে উপরের ঘরে; variant-এর stock মূল পণ্যের stock-এর সঙ্গে shared।</p>
+                  </div>
+                  <button type="button" onClick={addVariant} className="shrink-0 h-9 px-3 rounded-lg bg-secondary text-sm font-semibold inline-flex items-center gap-1">
+                    <Plus className="size-4" /> যোগ করুন
+                  </button>
+                </div>
+                {(form.variants ?? []).length === 0 ? (
+                  <p className="text-xs text-muted-foreground">কোনো variant যোগ করা হয়নি—সাইটে variant selector দেখাবে না।</p>
+                ) : (
+                  <div className="space-y-2">
+                    {(form.variants ?? []).map((variant, index) => (
+                      <div key={variant.id} className="rounded-lg bg-secondary/40 p-2.5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold">Variant {index + 1}</span>
+                          <button type="button" onClick={() => removeVariant(variant.id)} aria-label={`Variant ${index + 1} মুছুন`} className="size-8 rounded-lg text-destructive hover:bg-destructive/10 grid place-items-center">
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Field label="নাম / একক">
+                            <input required value={variant.label} onChange={(e) => updateVariant(variant.id, { label: e.target.value })} placeholder="যেমন: ৫ কেজি" className="input" />
+                          </Field>
+                          <Field label="দাম (৳)">
+                            <input required type="number" min="0" step="0.01" value={variant.price} onChange={(e) => updateVariant(variant.id, { price: Number(e.target.value) })} className="input" />
+                          </Field>
+                        </div>
+                        <Field label="পুরানো দাম (ঐচ্ছিক)">
+                          <input type="number" min="0" step="0.01" value={variant.old_price ?? ""} onChange={(e) => updateVariant(variant.id, { old_price: e.target.value ? Number(e.target.value) : null })} className="input" />
+                        </Field>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <Field label="পণ্যের ছবি">
                 <ImageInput value={form.image_url ?? ""} onChange={(url) => setForm({ ...form, image_url: url })} folder="products" />

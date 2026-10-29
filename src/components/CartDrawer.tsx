@@ -9,12 +9,15 @@ import { useCart } from "@/hooks/useCart";
 import { useCartDrawerController } from "@/hooks/useCartDrawer";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { trackEvent } from "@/lib/tracking";
+import { findProductForCartKey, resolveProductCartLine, splitProductCartKey, type ProductVariant } from "@/lib/productVariants";
 
 type DBProduct = {
   id: string;
   name_bn: string;
   unit: string;
   price: number;
+  old_price: number | null;
+  variants?: ProductVariant[] | null;
   image_url: string | null;
   is_active: boolean;
 };
@@ -25,10 +28,10 @@ function useProductsForCart() {
     queryFn: async (): Promise<DBProduct[]> => {
       const { data, error } = await supabase
         .from("products")
-        .select("id,name_bn,unit,price,image_url,is_active")
+        .select("*")
         .eq("is_active", true);
       if (error) throw error;
-      return data ?? [];
+      return (data as unknown as DBProduct[]) ?? [];
     },
   });
 }
@@ -71,6 +74,10 @@ export function CartDrawer() {
     successMsg: c?.success_message_bn ?? "আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
     successClose: c?.success_close_bn ?? "বন্ধ করুন",
   };
+  const getCartLine = (cartKey: string) => {
+    const product = findProductForCartKey(products, cartKey);
+    return product ? { product, ...resolveProductCartLine(product, cartKey) } : null;
+  };
 
   const add = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
   const sub = (id: string) =>
@@ -82,11 +89,11 @@ export function CartDrawer() {
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotal = useMemo(
-    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [cart, products],
   );
   const checkoutTotal = useMemo(
-    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (products.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(checkoutItems).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [checkoutItems, products],
   );
   const grandTotal = checkoutTotal + deliveryCharge;
@@ -98,12 +105,12 @@ export function CartDrawer() {
     setCheckoutOpen(true);
     const ids = Object.keys(items);
     trackEvent("InitiateCheckout", {
-      value: ids.reduce((s, id) => s + (products.find((p) => p.id === id)?.price ?? 0) * items[id], 0),
+      value: ids.reduce((s, id) => s + (getCartLine(id)?.price ?? 0) * items[id], 0),
       currency: "BDT",
-      content_ids: ids,
+      content_ids: ids.map((id) => splitProductCartKey(id).productId),
       content_type: "product",
       num_items: Object.values(items).reduce((a, b) => a + b, 0),
-      contents: ids.map((id) => ({ id, quantity: items[id], item_price: products.find((p) => p.id === id)?.price })),
+      contents: ids.map((id) => ({ id: splitProductCartKey(id).productId, quantity: items[id], item_price: getCartLine(id)?.price ?? undefined })),
     });
   };
 
@@ -134,7 +141,10 @@ export function CartDrawer() {
           name: orderForm.name.trim(),
           phone: orderForm.phone.trim(),
           address: fullAddress,
-          items: Object.entries(checkoutItems).map(([id, q]) => ({ id, qty: q })),
+          items: Object.entries(checkoutItems).map(([cartKey, qty]) => {
+            const { productId, variantId } = splitProductCartKey(cartKey);
+            return { id: productId, variant_id: variantId, qty };
+          }),
           delivery_index: deliveryIdx,
         },
       });
@@ -155,13 +165,13 @@ export function CartDrawer() {
     trackEvent("Purchase", {
       value: grandTotal,
       currency: "BDT",
-      content_ids: Object.keys(checkoutItems),
+      content_ids: Object.keys(checkoutItems).map((id) => splitProductCartKey(id).productId),
       content_type: "product",
       num_items: Object.values(checkoutItems).reduce((a, b) => a + b, 0),
       contents: Object.entries(checkoutItems).map(([id, q]) => ({
-        id,
+        id: splitProductCartKey(id).productId,
         quantity: q,
-        item_price: products.find((p) => p.id === id)?.price,
+        item_price: getCartLine(id)?.price ?? undefined,
       })),
       phone: orderForm.phone.trim(),
       external_id: orderForm.phone.trim(),
@@ -181,8 +191,9 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto p-4 pb-24 md:pb-4 space-y-3">
               {cartCount === 0 && <p className="text-center text-muted-foreground mt-10 text-sm">আপনার কার্ট খালি 🛒</p>}
               {Object.entries(cart).map(([id, q]) => {
-                const p = products.find((x) => x.id === id);
-                if (!p) return null;
+                const line = getCartLine(id);
+                if (!line) return null;
+                const { product: p } = line;
                 return (
                   <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                     <ProductImage
@@ -194,7 +205,8 @@ export function CartDrawer() {
                     />
                     <div className="flex-1 text-sm">
                       <div className="font-semibold leading-tight">{p.name_bn}</div>
-                      <div className="text-xs text-muted-foreground">৳{p.price} × {q}</div>
+                      <div className="text-xs text-muted-foreground">{line.unit} · ৳{line.price ?? "—"} × {q}</div>
+                      {!line.isValid && <div className="text-xs text-destructive">এই variant আর নেই; কমিয়ে সরিয়ে দিন।</div>}
                     </div>
                     <div className="flex items-center gap-1 bg-secondary rounded-lg">
                       <button onClick={() => sub(id)} className="size-7 grid place-items-center"><Minus className="size-3.5" /></button>
@@ -245,8 +257,9 @@ export function CartDrawer() {
                 <div className="p-4 space-y-4">
                   <div className="bg-secondary/50 rounded-2xl p-3 space-y-3">
                     {Object.entries(checkoutItems).map(([id, q]) => {
-                      const p = products.find((x) => x.id === id);
-                      if (!p) return null;
+                      const line = getCartLine(id);
+                      if (!line) return null;
+                      const { product: p } = line;
                       return (
                         <div key={id} className="flex gap-3 items-center bg-card border border-border rounded-2xl p-2">
                             <ProductImage
@@ -258,7 +271,7 @@ export function CartDrawer() {
                             />
                           <div className="flex-1 min-w-0 text-sm">
                             <div className="font-semibold leading-tight truncate">{p.name_bn}</div>
-                            <div className="text-xs text-muted-foreground">৳{p.price} · ৳{p.price * q}</div>
+                            <div className="text-xs text-muted-foreground">{line.unit} · ৳{line.price ?? "—"} · ৳{(line.price ?? 0) * q}</div>
                           </div>
                           <div className="flex items-center gap-1 bg-secondary rounded-lg shrink-0">
                             <button

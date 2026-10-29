@@ -11,6 +11,7 @@ import { useCart } from "@/hooks/useCart";
 import { openCartDrawer } from "@/hooks/useCartDrawer";
 import { trackEvent } from "@/lib/tracking";
 import { SlidersHorizontal, ChevronRight, Home, LayoutGrid, X, Layers } from "lucide-react";
+import { findProductForCartKey, resolveProductCartLine, type ProductVariant } from "@/lib/productVariants";
 
 export const Route = createFileRoute("/cat/$catId")({
   head: () => ({ meta: [{ title: "ক্যাটাগরি — FreshFeni" }] }),
@@ -22,6 +23,7 @@ type DBProduct = {
   image_url: string | null; tag: string | null; stock: number; is_active: boolean;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
+  variants?: ProductVariant[] | null;
 };
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 type DBBrand = { id: string; name_bn: string };
@@ -105,14 +107,18 @@ function CategoryPage() {
   const hasSubcats = !subLoading && subCats.length > 0;
 
   const [cart, setCart] = useCart();
+  const getCartLine = (cartKey: string) => {
+    const product = findProductForCartKey(allProducts, cartKey);
+    return product ? { product, ...resolveProductCartLine(product, cartKey) } : null;
+  };
   const add = (id: string) => {
     setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
-    const p = allProducts.find((x) => x.id === id);
-    if (p) {
+    const line = getCartLine(id);
+    if (line?.isValid) {
       trackEvent("AddToCart", {
-        value: p.price, currency: "BDT", content_ids: [id],
-        content_name: p.name_bn, content_type: "product",
-        contents: [{ id, quantity: 1, item_price: p.price }],
+        value: line.price ?? 0, currency: "BDT", content_ids: [line.productId],
+        content_name: `${line.product.name_bn} ${line.unit}`, content_type: "product",
+        contents: [{ id: line.productId, quantity: 1, item_price: line.price ?? 0 }],
       });
     }
   };
@@ -147,7 +153,7 @@ function CategoryPage() {
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotal = useMemo(
-    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (allProducts.find((p) => p.id === id)?.price ?? 0) * q, 0),
+    () => Object.entries(cart).reduce((sum, [id, q]) => sum + (getCartLine(id)?.price ?? 0) * q, 0),
     [cart, allProducts],
   );
 
@@ -341,7 +347,8 @@ function CategoryPage() {
                           categoryName={currentCategory?.name_bn ?? ""}
                           brandName={brands.find((b) => b.id === p.brand_id)?.name_bn ?? ""}
                           qty={cart[p.id] ?? 0} add={add} sub={sub}
-                          onBuyNow={() => { add(p.id); openCartDrawer(); }}
+                          cart={cart}
+                          onBuyNow={(cartKey) => { add(cartKey); openCartDrawer(); }}
                           settings={settings?.product_card} />
                       ))}
                     </div>
