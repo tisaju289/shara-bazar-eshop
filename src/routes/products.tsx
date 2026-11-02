@@ -12,16 +12,40 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { findProductForCartKey, resolveProductCartLine, splitProductCartKey } from "@/lib/productVariants";
 import { placeOrder as placeOrderFn } from "@/lib/orders.functions";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { siteSettingsQueryOptions, useSiteSettings } from "@/hooks/useSiteSettings";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/ProductCard";
 import { ShoppingCart } from "lucide-react";
 
 export const Route = createFileRoute("/products")({
+  // SSR-এই সব ক্যাটালগ ডেটা আগেই এনে ক্যাশ ডিহাইড্রেট করে পাঠানো হয় —
+  // ব্রাউজার সাথে সাথে পূর্ণ পেজ দেখে, আলাদা ফেচের অপেক্ষা করে না।
+  loader: async ({ context }) => {
+    const { queryClient } = context;
+    try {
+      await Promise.all([
+        queryClient.ensureQueryData(siteSettingsQueryOptions),
+        queryClient.ensureQueryData(categoriesQueryOptions),
+        queryClient.ensureQueryData(brandsQueryOptions),
+        queryClient.ensureQueryData(productsQueryOptions),
+      ]);
+    } catch {
+      // ব্যর্থ হলে ব্রাউজার নিজেই ফেচ করবে
+    }
+    return {
+      dehydratedState: dehydrate(queryClient, { shouldDehydrateQuery: (q) => q.state.status === "success" }),
+    };
+  },
   head: () => ({
     meta: [
       { title: "সব পণ্য — FreshFeni" },
       { name: "description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
+      { property: "og:title", content: "সব পণ্য — FreshFeni" },
+      { property: "og:description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "সব পণ্য — FreshFeni" },
+      { name: "twitter:description", content: "সব ক্যাটাগরির সব পণ্য এক জায়গায় দেখুন।" },
     ],
   }),
   validateSearch: (s: Record<string, unknown>): { q?: string; cat?: string } => {
@@ -44,7 +68,7 @@ type DBCategory = { id: string; name_bn: string; slug: string; sort_order: numbe
 type DBBrand = { id: string; name_bn: string };
 
 const PRODUCT_COLUMNS =
-  "*";
+  "id,slug,name_bn,unit,price,old_price,image_url,tag,stock,is_active,category_id,brand_id,subcategory_id,keywords,reviews_rating,reviews_count,offer_badge,variants,sort_order,created_at";
 const MAX_PUBLIC_PRODUCTS = 5000;
 
 function useCategories() {
