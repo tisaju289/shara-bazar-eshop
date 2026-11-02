@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, dehydrate, hydrate, type DehydratedState } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -6,39 +6,16 @@ import {
   lazyRouteComponent,
   HeadContent,
   Scripts,
+  useMatches,
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { siteSettingsQueryOptions, useSiteSettings, type SiteSettings } from "@/hooks/useSiteSettings";
 import { TrackingScripts } from "@/components/TrackingScripts";
 import { useEffect } from "react";
 import { CartDrawer } from "@/components/CartDrawer";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
-import { supabase } from "@/integrations/supabase/client";
-
-async function loadSeo() {
-  try {
-    const { data } = await (supabase as any)
-      .from("site_settings")
-      .select("key,value")
-      .in("key", ["seo", "brand"]);
-    const map: any = {};
-    for (const row of (data ?? []) as { key: string; value: any }[]) {
-      map[row.key] = row.value;
-    }
-    return {
-      title: map.seo?.title || map.brand?.name_bn || "",
-      description: map.seo?.description || map.brand?.tagline_bn || "",
-      keywords: map.seo?.keywords || "",
-      og_image: map.seo?.og_image || "",
-      favicon_url: map.seo?.favicon_url || "",
-      logo_url: map.brand?.logo_url || "",
-    };
-  } catch {
-    return { title: "", description: "", keywords: "", og_image: "", favicon_url: "", logo_url: "" };
-  }
-}
 
 /** Square PNG rendition used for favicon / apple-touch-icon. */
 function iconUrl(url: string, size: number): string {
@@ -77,7 +54,22 @@ function NotFoundComponent() {
 
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: () => loadSeo(),
+  loader: async ({ context }) => {
+    let settings: SiteSettings | undefined;
+    try {
+      settings = await context.queryClient.ensureQueryData(siteSettingsQueryOptions);
+    } catch {
+      // SSR-এ সেটিংস না এলে ডিফল্ট মান দিয়েই চলবে; ব্রাউজারে আবার ফেচ হবে।
+    }
+    return {
+      title: settings?.seo?.title || settings?.brand?.name_bn || "",
+      description: settings?.seo?.description || settings?.brand?.tagline_bn || "",
+      keywords: settings?.seo?.keywords || "",
+      og_image: settings?.seo?.og_image || "",
+      favicon_url: settings?.seo?.favicon_url || "",
+      logo_url: settings?.brand?.logo_url || "",
+    };
+  },
   head: ({ loaderData }) => {
     const d = loaderData ?? { title: "", description: "", keywords: "", og_image: "", favicon_url: "", logo_url: "" };
     const title = d.title || "FreshFeni";
@@ -144,8 +136,29 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// হোম/পণ্য পেজের loader SSR-এ কোয়েরি ক্যাশ প্রাইম করে ডিহাইড্রেট করে পাঠায়;
+// ব্রাউজারে প্রথম রেন্ডারের আগেই সেটা ক্যাশে বসানো হয় — ফলে স্কেলিটন বা
+// দ্বিতীয় ফেচ ছাড়াই সম্পূর্ণ পেজ সাথে সাথে দেখা যায়।
+let hydratedOnClient = false;
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const matches = useMatches();
+
+  if (typeof window !== "undefined" && !hydratedOnClient) {
+    for (const match of matches) {
+      const state = (match.loaderData as { dehydratedState?: DehydratedState } | undefined)?.dehydratedState;
+      if (state) {
+        hydratedOnClient = true;
+        try {
+          hydrate(queryClient, state);
+        } catch {
+          /* হাইড্রেশন ব্যর্থ হলে ব্রাউজার নিজেই ডেটা ফেচ করবে */
+        }
+        break;
+      }
+    }
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Brand = { name_bn: string; tagline_bn: string; logo_url: string };
@@ -363,30 +363,32 @@ const DEFAULTS: SiteSettings = {
   },
 };
 
+export const siteSettingsQueryOptions = queryOptions({
+  queryKey: ["site_settings"],
+  queryFn: async (): Promise<SiteSettings> => {
+    const { data, error } = await (supabase as any).from("site_settings").select("key,value");
+    if (error) throw error;
+    const map: any = { ...DEFAULTS };
+    for (const row of (data ?? []) as { key: string; value: any }[]) {
+      map[row.key] = row.value;
+    }
+    // The Meta CAPI token lives in a private row that only admins can read.
+    if (map.tracking_secret?.meta_capi_token) {
+      map.tracking = { ...map.tracking, meta_capi_token: map.tracking_secret.meta_capi_token };
+    }
+    delete map.tracking_secret;
+    const settings = map as SiteSettings;
+    settings.home_sections = normalizeHomeSections(
+      settings.home_sections,
+      settings,
+    );
+    return settings;
+  },
+  staleTime: 60_000,
+});
+
 export function useSiteSettings() {
-  return useQuery({
-    queryKey: ["site_settings"],
-    queryFn: async (): Promise<SiteSettings> => {
-      const { data, error } = await (supabase as any).from("site_settings").select("key,value");
-      if (error) throw error;
-      const map: any = { ...DEFAULTS };
-      for (const row of (data ?? []) as { key: string; value: any }[]) {
-        map[row.key] = row.value;
-      }
-      // The Meta CAPI token lives in a private row that only admins can read.
-      if (map.tracking_secret?.meta_capi_token) {
-        map.tracking = { ...map.tracking, meta_capi_token: map.tracking_secret.meta_capi_token };
-      }
-      delete map.tracking_secret;
-      const settings = map as SiteSettings;
-      settings.home_sections = normalizeHomeSections(
-        settings.home_sections,
-        settings,
-      );
-      return settings;
-    },
-    staleTime: 60_000,
-  });
+  return useQuery(siteSettingsQueryOptions);
 }
 
 const LEGACY_HOME_PRODUCT_SECTIONS: ProductSection[] = [

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ProductImage } from "@/components/ProductImage";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { dehydrate, queryOptions, useQuery } from "@tanstack/react-query";
 import {
   Loader2, Plus, Minus, X, CheckCircle2,
   Home, LayoutGrid, Package, SlidersHorizontal,
