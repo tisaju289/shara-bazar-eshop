@@ -1,9 +1,14 @@
-import { supabase } from "@/integrations/supabase/client";
-async function p1() { return supabase.from("brands").select("*").order("sort_order"); }
-async function p2() { return supabase.from("products").select("*").eq("is_active", true); }
-async function p3() { return supabase.from("brands").update({ name_bn: "x" }).eq("id", "x"); }
-async function p4() { return supabase.from("user_roles").select("role").eq("user_id", "x").eq("role", "admin"); }
-async function p5() { return supabase.from("brands").insert({ name_bn: "x", slug: "x" }); }
-async function p6() { return supabase.from("products").select("*, categories(name_bn)").limit(1); }
-export type D1 = Awaited<ReturnType<typeof p1>>["data"];
-export type D6 = Awaited<ReturnType<typeof p6>>["data"];
+import type { Database } from "@/integrations/supabase/types";
+type S = Omit<Database, "__InternalSupabase">["public"];
+type Rel = { foreignKeyName: string; columns: string[]; isOneToOne?: boolean; referencedRelation: string; referencedColumns: string[] };
+type GT = { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown>; Relationships: Rel[] };
+type GV = { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown>; Relationships: Rel[] };
+type GF = { Args: Record<string, unknown> | never; Returns: unknown; SetofOptions?: { isSetofReturn?: boolean; isOneToOne?: boolean; isNotNullable?: boolean; to: string; from: string } };
+export type TTables = S["Tables"] extends Record<string, GT> ? 1 : 0;
+export type TViews = S["Views"] extends Record<string, GV> ? 1 : 0;
+export type TFuncs = S["Functions"] extends Record<string, GF> ? 1 : 0;
+export type TSchema = S extends { Tables: Record<string, GT>; Views: Record<string, GV>; Functions: Record<string, GF> } ? 1 : 0;
+export type TBrand = S["Tables"]["brands"] extends GT ? 1 : 0;
+export type TProd = S["Tables"]["products"] extends GT ? 1 : 0;
+export type TRoles = S["Tables"]["user_roles"] extends GT ? 1 : 0;
+export type THasRole = S["Functions"]["has_role"] extends GF ? 1 : 0;
