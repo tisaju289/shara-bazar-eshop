@@ -1,5 +1,5 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["../src/integrations/supabase/types.ts", "./probe.ts"],
+  "include": ["../src/integrations/supabase/types.ts", "./probe.ts", "./check.ts"],
   "compilerOptions": { "types": [], "paths": { "@/*": ["../src/*"] } }
 }
