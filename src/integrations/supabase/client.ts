@@ -57,7 +57,7 @@ function smartFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Respo
   return fetch(input, init);
 }
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database, { PostgrestVersion: "14.5" }>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   global: { fetch: smartFetch },
   auth: {
     storage: typeof window !== "undefined" ? window.localStorage : undefined,
