@@ -1,7 +1,13 @@
-import { supabase } from "@/integrations/supabase/client";
-async function a() { return supabase.from("brands").select("*").eq("id", "x"); }
-async function b() { return supabase.from("products").eq("is_active", true); }
-async function c() { return supabase.from("products").select("*").order("sort_order"); }
-async function d() { return supabase.from("products").select().eq("is_active", true); }
-async function e() { return supabase.from("brands").update({ name_bn: "x" }); }
-async function f() { return supabase.from("brands").select("*").eq("is_active", true); }
+import type { Database } from "@/integrations/supabase/types";
+type S = Omit<Database, "__InternalSupabase">["public"];
+type Rel = { foreignKeyName: string; columns: string[]; isOneToOne?: boolean; referencedRelation: string; referencedColumns: string[] };
+type GT = { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown>; Relationships: Rel[] };
+type GF = { Args: Record<string, unknown> | never; Returns: unknown; SetofOptions?: { isSetofReturn?: boolean; isOneToOne?: boolean; isNotNullable?: boolean; to: string; from: string } };
+export type TTables = S["Tables"] extends Record<string, GT> ? 1 : 0;
+export type TViews = S["Views"] extends Record<string, GT> ? 1 : 0;
+export type TFuncs = S["Functions"] extends Record<string, GF> ? 1 : 0;
+export type TSchema = S extends { Tables: Record<string, GT>; Views: Record<string, GT>; Functions: Record<string, GF> } ? 1 : 0;
+export type TBrand = S["Tables"]["brands"] extends GT ? 1 : 0;
+export type TProd = S["Tables"]["products"] extends GT ? 1 : 0;
+export type TRoles = S["Tables"]["user_roles"] extends GT ? 1 : 0;
+export type THasRole = S["Functions"]["has_role"] extends GF ? 1 : 0;
