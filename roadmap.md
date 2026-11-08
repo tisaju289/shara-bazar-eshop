@@ -1,0 +1,3 @@
+- [ ] Complete the remaining page-speed improvements while preserving current image dimensions.
+- [ ] Leave existing preview/type errors untouched, as requested.
+- [ ] Verify the changed user-facing paths without running builds or typechecks.

@@ -5,7 +5,7 @@ import { ProductImage } from "@/components/ProductImage";
 import { useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
 import { ProductSlider } from "@/components/ProductSlider";
-import { useQuery } from "@tanstack/react-query";
+import { dehydrate, queryOptions, useQuery } from "@tanstack/react-query";
 import {
   Search, ShoppingCart, MapPin, Phone, X, Plus, Minus, ChevronLeft,
   Truck, ShieldCheck, Clock, Leaf, Star, ChevronRight, Loader2,
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import heroImg from "@/assets/hero-grocery.jpg";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings, type HomeSection, type ProductSection } from "@/hooks/useSiteSettings";
+import { siteSettingsQueryOptions, useSiteSettings, type HomeSection, type ProductSection } from "@/hooks/useSiteSettings";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trackEvent } from "@/lib/tracking";
 import { findProductForCartKey, resolveProductCartLine, splitProductCartKey } from "@/lib/productVariants";
@@ -27,6 +27,38 @@ import { ProductSkeleton } from "@/components/ProductSkeleton";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export const Route = createFileRoute("/")({
+  loader: async ({ context }) => {
+    const { queryClient } = context;
+    try {
+      await Promise.all([
+        queryClient.ensureQueryData(siteSettingsQueryOptions),
+        queryClient.ensureQueryData(homeCategoriesQueryOptions),
+        queryClient.ensureQueryData(homeBrandsQueryOptions),
+        queryClient.ensureQueryData(homeProductsQueryOptions),
+        queryClient.ensureQueryData(hotProductsQueryOptions),
+        queryClient.ensureQueryData(extraCategoryProductsQueryOptions),
+      ]);
+    } catch {
+      // If the catalog is temporarily unavailable, render with client-side retries.
+    }
+    return {
+      dehydratedState: dehydrate(queryClient, {
+        shouldDehydrateQuery: (query) => query.state.status === "success",
+      }),
+    };
+  },
+  head: () => ({
+    meta: [
+      { title: "FreshFeni — তাজা বাজার অনলাইনে" },
+      { name: "description", content: "FreshFeni-তে তাজা বাজার ও নিত্যপ্রয়োজনীয় পণ্য অনলাইনে অর্ডার করুন।" },
+      { property: "og:title", content: "FreshFeni — তাজা বাজার অনলাইনে" },
+      { property: "og:description", content: "তাজা বাজার ও নিত্যপ্রয়োজনীয় পণ্য অনলাইনে অর্ডার করুন।" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "FreshFeni — তাজা বাজার অনলাইনে" },
+      { name: "twitter:description", content: "তাজা বাজার ও নিত্যপ্রয়োজনীয় পণ্য অনলাইনে অর্ডার করুন।" },
+    ],
+  }),
   component: Index,
 });
 
@@ -371,7 +403,7 @@ function CategorySlider({ categories, catCounts }: { categories: DBCategory[]; c
 
 type DBProduct = {
   id: string; slug?: string; name_bn: string; unit: string; price: number; old_price: number | null;
-  image_url: string | null; tag: string | null; stock: number; is_active: boolean;
+  image_url: string | null; tag: string | null;
   category_id: string | null; brand_id: string | null;
   reviews_rating: number | null; reviews_count: number | null; offer_badge: string | null;
   variants?: import("@/lib/productVariants").ProductVariant[] | null;
@@ -390,7 +422,7 @@ function compareAdminProductOrder(
 type DBCategory = { id: string; name_bn: string; slug: string; sort_order: number; image_url: string | null };
 
 const PRODUCT_COLUMNS =
-  "*";
+  "id,slug,name_bn,unit,price,old_price,image_url,tag,category_id,brand_id,subcategory_id,reviews_rating,reviews_count,offer_badge,variants,sort_order,created_at";
 const MAX_PUBLIC_PRODUCTS = 200;
 
 // হোম পেজের এক্সট্রা সেকশনগুলোর ক্যাটাগরি আইডি
@@ -398,54 +430,94 @@ const SPICES_CAT_ID = "ab590c50-a6d8-4230-bf0a-4b48804db41e"; // মসলা �
 const VEGETABLES_CAT_ID = "31cbc984-4369-4866-acfd-7927466c254f"; // সবজি
 const OIL_GHEE_CAT_ID = "5f212542-453a-4e64-a539-7da5a89e4107"; // তেল ও ঘি
 
+const homeCategoriesQueryOptions = queryOptions({
+  queryKey: ["categories", "public", "home"],
+  queryFn: async (): Promise<DBCategory[]> => {
+    const { data, error } = await (supabase as any)
+      .from("categories")
+      .select("id,name_bn,slug,sort_order,image_url")
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) throw error;
+    return (data ?? []) as DBCategory[];
+  },
+  staleTime: 10 * 60 * 1000,
+  gcTime: 15 * 60 * 1000,
+});
+
+const homeBrandsQueryOptions = queryOptions({
+  queryKey: ["brands", "public", "home"],
+  queryFn: async () => {
+    const { data, error } = await (supabase as any)
+      .from("brands")
+      .select("id,name_bn,image_url,slug")
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) throw error;
+    return (data ?? []) as { id: string; name_bn: string; image_url: string | null; slug: string }[];
+  },
+  staleTime: 10 * 60 * 1000,
+  gcTime: 15 * 60 * 1000,
+});
+
+const homeProductsQueryOptions = queryOptions({
+  queryKey: ["products", "home", "public"],
+  queryFn: async (): Promise<DBProduct[]> => {
+    const { data, error } = await (supabase as any)
+      .from("products")
+      .select(PRODUCT_COLUMNS)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .range(0, MAX_PUBLIC_PRODUCTS - 1);
+    if (error) throw error;
+    return (data ?? []) as DBProduct[];
+  },
+  staleTime: 2 * 60 * 1000,
+  gcTime: 5 * 60 * 1000,
+});
+
+const hotProductsQueryOptions = queryOptions({
+  queryKey: ["products", "hot"],
+  queryFn: async (): Promise<DBProduct[]> => {
+    const { data, error } = await (supabase as any)
+      .from("products")
+      .select(PRODUCT_COLUMNS)
+      .eq("is_active", true)
+      .order("reviews_count", { ascending: false, nullsFirst: false })
+      .limit(12);
+    if (error) throw error;
+    return (data ?? []) as DBProduct[];
+  },
+  staleTime: 5 * 60 * 1000,
+  gcTime: 10 * 60 * 1000,
+});
+
+const extraCategoryProductsQueryOptions = queryOptions({
+  queryKey: ["products", "extra-cats", [SPICES_CAT_ID, VEGETABLES_CAT_ID, OIL_GHEE_CAT_ID].join(",")],
+  queryFn: async (): Promise<DBProduct[]> => {
+    const { data, error } = await (supabase as any)
+      .from("products")
+      .select(PRODUCT_COLUMNS)
+      .eq("is_active", true)
+      .in("category_id", [SPICES_CAT_ID, VEGETABLES_CAT_ID, OIL_GHEE_CAT_ID])
+      .order("reviews_count", { ascending: false, nullsFirst: false })
+      .limit(60);
+    if (error) throw error;
+    return (data ?? []) as DBProduct[];
+  },
+  staleTime: 5 * 60 * 1000,
+  gcTime: 10 * 60 * 1000,
+});
+
 function useCategories() {
-  return useQuery({
-    queryKey: ["categories", "public"],
-    queryFn: async (): Promise<DBCategory[]> => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id,name_bn,slug,sort_order,image_url")
-        .eq("is_active", true)
-        .order("sort_order");
-      if (error) throw error;
-      return data ?? [];
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
-  });
+  return useQuery(homeCategoriesQueryOptions);
 }
 function useBrands() {
-  return useQuery({
-    queryKey: ["brands", "public"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("brands")
-        .select("id,name_bn,image_url,slug")
-        .eq("is_active", true).order("sort_order");
-      if (error) throw error;
-      return (data as { id: string; name_bn: string; image_url: string | null; slug: string }[]) ?? [];
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
-  });
+  return useQuery(homeBrandsQueryOptions);
 }
 function useProducts() {
-  return useQuery({
-    queryKey: ["products", "public"],
-    queryFn: async (): Promise<DBProduct[]> => {
-      const { data, error } = await supabase
-        .from("products")
-        .select(PRODUCT_COLUMNS)
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: false })
-        .range(0, MAX_PUBLIC_PRODUCTS - 1);
-      if (error) throw error;
-      return (data as unknown as DBProduct[]) ?? [];
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-  });
+  return useQuery(homeProductsQueryOptions);
 }
 
 function useConfiguredSectionProducts(sections: HomeSection[]) {
@@ -592,25 +664,14 @@ function useConfiguredSectionProducts(sections: HomeSection[]) {
 
 // হট প্রোডাক্ট সেকশন — সবচেয়ে জনপ্রিয় ১২টি পণ্য (সবচেয়ে বেশি রিভিউ)
 function useHotProducts() {
-  return useQuery({
-    queryKey: ["products", "hot"],
-    queryFn: async (): Promise<DBProduct[]> => {
-      const { data, error } = await supabase
-        .from("products")
-        .select(PRODUCT_COLUMNS)
-        .eq("is_active", true)
-        .order("reviews_count", { ascending: false, nullsFirst: false })
-        .limit(12);
-      if (error) throw error;
-      return (data as unknown as DBProduct[]) ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
+  return useQuery(hotProductsQueryOptions);
 }
 
 // মসলা / সবজি / তেল সেকশনের পণ্য — ক্যাটাগরি ধরে সরাসরি আনা হয়
 function useExtraCategoryProducts(catIds: string[]) {
+  if (catIds.join(",") === [SPICES_CAT_ID, VEGETABLES_CAT_ID, OIL_GHEE_CAT_ID].join(",")) {
+    return useQuery(extraCategoryProductsQueryOptions);
+  }
   return useQuery({
     queryKey: ["products", "extra-cats", catIds.join(",")],
     queryFn: async (): Promise<DBProduct[]> => {
